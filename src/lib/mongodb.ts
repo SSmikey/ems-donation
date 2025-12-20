@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = 'mongodb+srv://webnextdatabase:webnext123@webnext.5wtvsao.mongodb.net/?appName=webnext';
-const DB_NAME = 'ems-donation';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const DB_NAME = process.env.MONGODB_DB || 'ems-donation';
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: any = null;
