@@ -1,0 +1,88 @@
+.card {
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: rgba(22, 33, 62, 0.95);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.valueSection {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.percentage {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.percentage.up {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+}
+
+.percentage.down {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.15);
+}
+
+.progressBar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card.cyan .progressBar {
+  background: #00d4ff;
+  width: 100%;
+}
+
+.card.purple .progressBar {
+  background: #c084fc;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+  }
+
+  .value {
+    font-size: 24px;
+  }
+}
