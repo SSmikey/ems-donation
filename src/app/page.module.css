@@ -1,141 +1,307 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
+/* Container and Background */
+.container {
   min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
 }
 
-.main {
-  display: flex;
-  min-height: 100vh;
+/* Decorative Background Elements */
+.decoration {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+
+.decorationTL {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #00d4ff, transparent);
+  top: -100px;
+  left: -100px;
+}
+
+.decorationBL {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #c084fc, transparent);
+  bottom: -50px;
+  left: -50px;
+}
+
+.decorationBR {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, #00d4ff, transparent);
+  bottom: -100px;
+  right: -100px;
+}
+
+.decorationDot {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.dotTR {
+  width: 20px;
+  height: 20px;
+  background: #00d4ff;
+  top: 50px;
+  right: 80px;
+}
+
+.dotML {
+  width: 15px;
+  height: 15px;
+  background: #00d4ff;
+  top: 50%;
+  left: 50px;
+}
+
+/* Card Styling */
+.card {
+  background: rgba(22, 33, 62, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 60px 50px;
   width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+/* Logo Section */
+.logoSection {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
+.logoIcon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.appName {
+  font-size: 28px;
   font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
+/* Form Styling */
+.form {
   width: 100%;
-  max-width: 440px;
-  gap: 16px;
+}
+
+.loginTitle {
+  font-size: 24px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 30px 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Input Group */
+.inputGroup {
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+}
+
+/* Options Row (Remember Me & Forgot Password) */
+.optionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 25px 0 30px 0;
+  font-size: 13px;
+}
+
+.rememberCheckbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.rememberCheckbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: rgba(255, 255, 255, 0.6);
+}
+
+.rememberCheckbox:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.forgotLink {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.forgotLink:hover {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+/* Login Button */
+.loginButton {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #00e5ff 0%, #00aadd 100%);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Sign Up Section */
+.signupSection {
+  text-align: center;
+  margin-top: 25px;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
 }
 
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+.signupLink {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  margin-left: 5px;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.signupLink:hover {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
-}
-
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    padding: 40px 30px;
+    max-width: 90%;
   }
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
+  .appName {
+    font-size: 24px;
   }
 
-  .intro {
-    gap: 16px;
+  .loginTitle {
+    font-size: 20px;
+    margin-bottom: 25px;
   }
 
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
+  .input {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .optionsRow {
+    font-size: 12px;
+    margin: 20px 0 25px 0;
+  }
+
+  .loginButton {
+    padding: 12px;
+    font-size: 15px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+@media (max-width: 480px) {
+  .card {
+    padding: 30px 20px;
+    border-radius: 15px;
   }
 
-  .page {
-    --background: #000;
-    --foreground: #000;
+  .logoIcon {
+    font-size: 36px;
+  }
 
-    --text-primary: #ededed;
-    --text-secondary: #999;
+  .appName {
+    font-size: 20px;
+  }
 
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .loginTitle {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .input {
+    padding: 11px 12px;
+    font-size: 12px;
+  }
+
+  .inputGroup {
+    margin-bottom: 15px;
+  }
+
+  .optionsRow {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .forgotLink {
+    display: block;
+  }
+
+  .decorationTL,
+  .decorationBL,
+  .decorationBR {
+    display: none;
   }
 }

@@ -1,66 +1,93 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import styles from './page.module.css';
+
+export default function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // TODO: Implement login logic
+    console.log('Login attempt:', { username, password, rememberMe });
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className={styles.container}>
+      {/* Decorative elements */}
+      <div className={styles.decoration + ' ' + styles.decorationTL}></div>
+      <div className={styles.decoration + ' ' + styles.decorationBL}></div>
+      <div className={styles.decoration + ' ' + styles.decorationBR}></div>
+      <div className={styles.decorationDot + ' ' + styles.dotTR}></div>
+      <div className={styles.decorationDot + ' ' + styles.dotML}></div>
+
+      {/* Login Card */}
+      <div className={styles.card}>
+        {/* Logo Section */}
+        <div className={styles.logoSection}>
+          <div className={styles.logoIcon}>📊</div>
+          <h1 className={styles.appName}>EMS Donation</h1>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className={styles.form}>
+          <h2 className={styles.loginTitle}>Login</h2>
+
+          {/* Username Input */}
+          <div className={styles.inputGroup}>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={styles.input}
+              required
             />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+          </div>
+
+          {/* Password Input */}
+          <div className={styles.inputGroup}>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={styles.input}
+              required
+            />
+          </div>
+
+          {/* Remember Me & Forgot Password */}
+          <div className={styles.optionsRow}>
+            <label className={styles.rememberCheckbox}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span>Remember me?</span>
+            </label>
+            <a href="#" className={styles.forgotLink}>
+              Forgot Password?
+            </a>
+          </div>
+
+          {/* Login Button */}
+          <button type="submit" className={styles.loginButton}>
+            Login
+          </button>
+        </form>
+
+        {/* Sign Up Link */}
+        <div className={styles.signupSection}>
+          <span>Don't have an Account? </span>
+          <a href="#" className={styles.signupLink}>
+            Create Account
           </a>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
