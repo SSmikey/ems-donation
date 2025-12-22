@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import styles from './Header.module.css';
 
 interface HeaderProps {
@@ -20,19 +21,6 @@ const SunIcon = () => (
   </svg>
 );
 
-const SettingsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24" />
-  </svg>
-);
-
-const MessageIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
 const UserIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -47,7 +35,32 @@ const SearchIcon = () => (
   </svg>
 );
 
+const LogoutIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </svg>
+);
+
 export default function Header({ onMenuClick }: HeaderProps) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const savedUser = sessionStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Failed to parse user from session');
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    window.location.href = '/';
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -74,9 +87,41 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <button className={styles.iconButtonLarge}>
           <SunIcon />
         </button>
-        <button className={styles.iconButtonLarge}>
-          <UserIcon />
-        </button>
+
+        <div className={styles.userProfileWrapper}>
+          <button
+            className={styles.iconButtonLarge}
+            onClick={() => setProfileOpen(!profileOpen)}
+          >
+            <UserIcon />
+          </button>
+
+          {profileOpen && (
+            <div className={styles.profileDropdown}>
+              <div className={styles.profileHeader}>
+                <div className={styles.avatar}>
+                  👤
+                </div>
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>
+                    {user ? `${user.firstName} ${user.lastName}` : 'Guest User'}
+                  </span>
+                  <span className={styles.userEmail}>
+                    {user ? user.username : 'guest'}@ems-donation.io
+                  </span>
+                </div>
+              </div>
+              <div className={styles.profileBody}>
+                <button className={styles.logoutButton} onClick={handleLogout}>
+                  <span className={styles.logoutIcon}>
+                    <LogoutIcon />
+                  </span>
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

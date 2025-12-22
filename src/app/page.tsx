@@ -8,10 +8,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log('Login attempt:', { username, password, rememberMe });
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Save user to sessionStorage for basic persistence
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/dashboard';
+      } else {
+        setError(data.error || 'การเข้าสู่ระบบล้มเหลว');
+      }
+    } catch (err) {
+      setError('ไม่สามารถเชื่อมต่อกับระบบได้');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,6 +59,12 @@ export default function LoginPage() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className={styles.form}>
           <h2 className={styles.loginTitle}>Login</h2>
+
+          {error && (
+            <div style={{ color: '#f87171', background: 'rgba(248, 113, 113, 0.1)', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '14px', textAlign: 'center' }}>
+              {error}
+            </div>
+          )}
 
           {/* Username Input */}
           <div className={styles.inputGroup}>
@@ -75,8 +106,8 @@ export default function LoginPage() {
           </div>
 
           {/* Login Button */}
-          <button type="submit" className={styles.loginButton}>
-            Login
+          <button type="submit" className={styles.loginButton} disabled={loading}>
+            {loading ? 'กำลังเข้าสู่ระบบ...' : 'Login'}
           </button>
         </form>
 

@@ -4,13 +4,13 @@ import clientPromise from '@/lib/mongodb';
 export async function GET() {
     try {
         const client = await clientPromise;
-        const db = client.db();
+        // Explicitly use 'ems-donation' database
+        const db = client.db('ems-donation');
 
-        // The user specified the collection name is 'OperationCenters'
         const collectionName = 'OperationCenters';
         const shelters = await db.collection(collectionName).find({}).toArray();
 
-        console.log(`Successfully fetched ${shelters.length} centers from ${collectionName}`);
+        console.log(`Successfully fetched ${shelters.length} centers from ${collectionName} in ems-donation DB`);
 
         return NextResponse.json({
             collection: collectionName,
