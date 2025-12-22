@@ -58,35 +58,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </ul>
         </div>
 
-        <div className={styles.navSection}>
-          <h3 className={styles.navTitle}>PAGES</h3>
-          <ul className={styles.navList}>
-            <li className={styles.navItem}>
-              <a href="/" className={styles.navLink}>
-                <span className={styles.icon}>🔐</span>
-                <span>Login</span>
-              </a>
-            </li>
-            <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
-                <span className={styles.icon}>👤</span>
-                <span>Register</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div className={styles.navSection}>
-          <h3 className={styles.navTitle}>การถอดบทเรียน (Sample)</h3>
-          <ul className={styles.navList}>
-            <li className={styles.navItem}>
-              <a href="/sample" className={styles.navLink}>
-                <span className={styles.icon}>📄</span>
-                <span>หน้าตัวอย่าง</span>
-              </a>
-            </li>
-          </ul>
-        </div>
       </nav>
     </aside>
   );
