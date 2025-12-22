@@ -1,56 +1,58 @@
 import styles from './RecentUsersCard.module.css';
 
-interface User {
+interface DonationActivity {
   id: number;
-  name: string;
-  description: string;
+  donorName: string;
+  item: string;
   time: string;
-  status: 'approve' | 'reject';
+  status: 'อนุมัติ' | 'ตรวจสอบ';
 }
 
-const recentUsers: User[] = [
+const recentActivities: DonationActivity[] = [
   {
     id: 1,
-    name: 'Isabella Christensen',
-    description: 'Lorem Ipsum is simply dummy text of...',
-    time: '11 MAY 12:56',
-    status: 'approve',
+    donorName: 'สุขรอม มีศธร',
+    item: 'บริจาคข้าวสาร 500 กก.',
+    time: '22 ธ.ค. 14:30',
+    status: 'อนุมัติ',
   },
   {
     id: 2,
-    name: 'Mathilde Andersen',
-    description: 'Lorem Ipsum is simply dummy text of...',
-    time: '11 MAY 10:35',
-    status: 'reject',
+    donorName: 'คาเหบ บัญลาองค์',
+    item: 'บริจาคคชุดเวชภัณฑ์ 100 กล่อง',
+    time: '22 ธ.ค. 13:15',
+    status: 'ตรวจสอบ',
+  },
+  {
+    id: 3,
+    donorName: 'ลายอัด เต็มลึก',
+    item: 'บริจาคน้ำดื่ม 1,000 แพ็ค',
+    time: '22 ธ.ค. 12:45',
+    status: 'อนุมัติ',
   },
 ];
 
 export default function RecentUsersCard() {
   return (
     <div className={styles.card}>
-      <h3 className={styles.title}>Recent Users</h3>
+      <h3 className={styles.title}>กิจกรรมการบริจาคล่าสุด</h3>
       <div className={styles.usersList}>
-        {recentUsers.map((user) => (
-          <div key={user.id} className={styles.userItem}>
+        {recentActivities.map((activity) => (
+          <div key={activity.id} className={styles.userItem}>
             <div className={styles.userInfo}>
-              <div className={styles.avatar}>👤</div>
+              <div className={styles.avatar}>📦</div>
               <div className={styles.details}>
-                <p className={styles.name}>{user.name}</p>
-                <p className={styles.description}>{user.description}</p>
+                <p className={styles.name}>{activity.donorName}</p>
+                <p className={styles.description}>{activity.item}</p>
               </div>
             </div>
             <div className={styles.userActions}>
-              <span className={styles.time}>{user.time}</span>
+              <span className={styles.time}>{activity.time}</span>
               <div className={styles.buttonGroup}>
                 <button
-                  className={`${styles.actionBtn} ${styles.reject}`}
+                  className={`${styles.actionBtn} ${activity.status === 'อนุมัติ' ? styles.approve : styles.reject}`}
                 >
-                  Reject
-                </button>
-                <button
-                  className={`${styles.actionBtn} ${styles.approve}`}
-                >
-                  Approve
+                  {activity.status}
                 </button>
               </div>
             </div>

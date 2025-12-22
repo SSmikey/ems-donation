@@ -17,36 +17,42 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       {/* Navigation */}
       <nav className={styles.nav}>
         <div className={styles.navSection}>
-          <h3 className={styles.navTitle}>NAVIGATION</h3>
+          <h3 className={styles.navTitle}>การจัดการหลัก</h3>
           <ul className={styles.navList}>
             <li className={styles.navItem}>
-              <a href="#" className={`${styles.navLink} ${styles.active}`}>
+              <a href="/dashboard" className={`${styles.navLink} ${styles.active}`}>
+                <span className={styles.icon}>📊</span>
+                <span>แผงควบคุม (Dashboard)</span>
+              </a>
+            </li>
+            <li className={styles.navItem}>
+              <a href="/centers" className={styles.navLink}>
                 <span className={styles.icon}>🏠</span>
-                <span>Dashboard</span>
+                <span>จัดการศูนย์พักพิง</span>
               </a>
             </li>
           </ul>
         </div>
 
         <div className={styles.navSection}>
-          <h3 className={styles.navTitle}>UI COMPONENTS</h3>
+          <h3 className={styles.navTitle}>จัดการทรัพยากร</h3>
           <ul className={styles.navList}>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
-                <span className={styles.icon}>🎨</span>
-                <span>Color</span>
+              <a href="/warehouse" className={styles.navLink}>
+                <span className={styles.icon}>📦</span>
+                <span>คลังสินค้าส่วนกลาง</span>
               </a>
             </li>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
-                <span className={styles.icon}>✏️</span>
-                <span>Typography</span>
+              <a href="/distribution" className={styles.navLink}>
+                <span className={styles.icon}>🚚</span>
+                <span>การร้องขอและกระจายของ</span>
               </a>
             </li>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
-                <span className={styles.icon}>⭐</span>
-                <span>Icons</span>
+              <a href="/quick-donation" className={styles.navLink}>
+                <span className={styles.icon}>⚡</span>
+                <span>บันทึกของเข้าด่วน</span>
               </a>
             </li>
           </ul>
@@ -71,18 +77,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>
 
         <div className={styles.navSection}>
-          <h3 className={styles.navTitle}>OTHER</h3>
+          <h3 className={styles.navTitle}>การถอดบทเรียน (Sample)</h3>
           <ul className={styles.navList}>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
-                <span className={styles.icon}>≡</span>
-                <span>Menu levels</span>
-              </a>
-            </li>
-            <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>
+              <a href="/sample" className={styles.navLink}>
                 <span className={styles.icon}>📄</span>
-                <span>Sample page</span>
+                <span>หน้าตัวอย่าง</span>
               </a>
             </li>
           </ul>

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
-import SocialCard from '@/components/SocialCard';
 import RecentUsersCard from '@/components/RecentUsersCard';
 import RatingCard from '@/components/RatingCard';
 import styles from './dashboard.module.css';
@@ -21,73 +20,78 @@ export default function Dashboard() {
         <div className={styles.contentArea}>
           {/* Page Title */}
           <div className={styles.pageHeader}>
-            <h1>Default</h1>
+            <h1>แผงควบคุมหลัก (Donation Dashboard)</h1>
             <div className={styles.breadcrumb}>
-              <span>Home</span>
+              <span>หน้าหลัก</span>
               <span className={styles.separator}>&gt;</span>
-              <span>Dashboard</span>
-              <span className={styles.separator}>&gt;</span>
-              <span>Default</span>
+              <span>แผงควบคุม</span>
             </div>
           </div>
 
           {/* Statistics Row */}
           <div className={styles.statsGrid}>
             <StatCard
-              title="Daily Sales"
-              value="$249.95"
-              percentage={67}
+              title="จำนวนศูนย์พักพิงทั้งหมด"
+              value="524"
+              percentage={12}
               trend="up"
               color="cyan"
             />
             <StatCard
-              title="Monthly Sales"
-              value="$2,942.32"
-              percentage={36}
-              trend="down"
+              title="อาสาสมัครที่ลงทะเบียน"
+              value="1,240"
+              percentage={5}
+              trend="up"
               color="purple"
             />
             <StatCard
-              title="Yearly Sales"
-              value="$8,638.32"
-              percentage={80}
+              title="จำนวนคำร้องขอวันนี้"
+              value="85"
+              percentage={18}
               trend="up"
               color="cyan"
             />
           </div>
 
-          {/* Social Stats and Details Row */}
+          {/* Resource Status and Map Section */}
           <div className={styles.socialGrid}>
-            <SocialCard
-              platform="facebook"
-              icon="f"
-              likes={12281}
-              percentage={7.2}
-              target={35098}
-              duration={350}
-            />
-            <SocialCard
-              platform="twitter"
-              icon="𝕏"
-              likes={11200}
-              percentage={6.2}
-              target={34185}
-              duration={800}
-            />
-            <SocialCard
-              platform="google"
-              icon="G+"
-              likes={10500}
-              percentage={5.9}
-              target={25998}
-              duration={900}
-            />
-          </div>
-
-          {/* Bottom Section */}
-          <div className={styles.bottomSection}>
-            <RatingCard />
-            <RecentUsersCard />
+            <div className={styles.customCard}>
+              <h3 className={styles.cardTitle}>สถานะทรัพยากรในศูนย์ต่างๆ</h3>
+              <div className={styles.resourceStatusList}>
+                <div className={styles.statusItem}>
+                  <div className={`${styles.circle} ${styles.green}`}>70%</div>
+                  <p>ปกติ (Normal)</p>
+                </div>
+                <div className={styles.statusItem}>
+                  <div className={`${styles.circle} ${styles.yellow}`}>20%</div>
+                  <p>เตือน (Warning)</p>
+                </div>
+                <div className={styles.statusItem}>
+                  <div className={`${styles.circle} ${styles.red}`}>10%</div>
+                  <p>วิกฤต (Critical)</p>
+                </div>
+              </div>
+            </div>
+            <div className={styles.customCard}>
+              <h3 className={styles.cardTitle}>สิ่งที่ต้องการเร่งด่วน</h3>
+              <div className={styles.neededItems}>
+                <div className={styles.itemRow}>
+                  <span>อาหาร</span>
+                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '80%', backgroundColor: '#4ade80' }}></div></div>
+                  <span>80%</span>
+                </div>
+                <div className={styles.itemRow}>
+                  <span>ยาและเวชภัณฑ์</span>
+                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '45%', backgroundColor: '#fbbf24' }}></div></div>
+                  <span>45%</span>
+                </div>
+                <div className={styles.itemRow}>
+                  <span>น้ำดื่ม</span>
+                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '30%', backgroundColor: '#60a5fa' }}></div></div>
+                  <span>30%</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
