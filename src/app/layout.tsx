@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EMS Donation - Login",
-  description: "EMS Donation System - User Login",
+  title: "ems-donation",
+  description: "ems-donation System",
 };
 
 export default function RootLayout({

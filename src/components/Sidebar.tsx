@@ -11,8 +11,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
       {/* Logo */}
       <div className={styles.logo}>
-        <div className={styles.logoIcon}>📊</div>
-        <span className={styles.logoText}>Data Able</span>
+        <span className={styles.logoText}>ems-donation</span>
       </div>
 
       {/* Navigation */}

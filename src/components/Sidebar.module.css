@@ -20,16 +20,9 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 0 20px;
   margin-bottom: 30px;
   cursor: pointer;
-}
-
-.logoIcon {
-  font-size: 28px;
-  display: flex;
-  align-items: center;
 }
 
 .logoText {

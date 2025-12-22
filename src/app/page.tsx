@@ -27,8 +27,8 @@ export default function LoginPage() {
       <div className={styles.card}>
         {/* Logo Section */}
         <div className={styles.logoSection}>
-          <div className={styles.logoIcon}>📊</div>
-          <h1 className={styles.appName}>EMS Donation</h1>
+          <div className={styles.logoIcon}>🎯</div>
+          <h1 className={styles.appName}>ems-donation</h1>
         </div>
 
         {/* Login Form */}
