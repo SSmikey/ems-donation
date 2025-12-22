@@ -1,15 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
-import RecentUsersCard from '@/components/RecentUsersCard';
-import RatingCard from '@/components/RatingCard';
 import styles from './dashboard.module.css';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [shelterCount, setShelterCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchShelters() {
+      try {
+        const res = await fetch('/api/shelters');
+        const result = await res.json();
+        if (result.data && Array.isArray(result.data)) {
+          setShelterCount(result.count || result.data.length);
+        } else if (Array.isArray(result)) {
+          setShelterCount(result.length);
+        }
+      } catch (error) {
+        console.error('Error fetching shelters:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchShelters();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -32,8 +51,8 @@ export default function Dashboard() {
           <div className={styles.statsGrid}>
             <StatCard
               title="จำนวนศูนย์พักพิงทั้งหมด"
-              value="524"
-              percentage={12}
+              value={loading ? '...' : shelterCount.toLocaleString()}
+              percentage={shelterCount > 0 ? 100 : 0}
               trend="up"
               color="cyan"
             />
@@ -53,7 +72,7 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Resource Status and Map Section */}
+          {/* Resource Status and Items Section */}
           <div className={styles.socialGrid}>
             <div className={styles.customCard}>
               <h3 className={styles.cardTitle}>สถานะทรัพยากรในศูนย์ต่างๆ</h3>

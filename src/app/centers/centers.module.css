@@ -1,0 +1,131 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #ffffff;
+}
+
+.mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.contentArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 40px;
+}
+
+.pageHeader {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageHeader h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.searchSection {
+    margin-bottom: 25px;
+    display: flex;
+    gap: 15px;
+}
+
+.searchInput {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4ade80;
+}
+
+.filterSelect {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 15px;
+    border-radius: 12px;
+    color: #fff;
+    outline: none;
+}
+
+.centersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.centerCard {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.centerCard:hover {
+    transform: translateY(-5px);
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.statusNormal {
+    background: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+}
+
+.statusWarn {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+.statusCritical {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+}
+
+.centerName {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.centerLocation {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 15px;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.label {
+    color: rgba(255, 255, 255, 0.5);
+}
