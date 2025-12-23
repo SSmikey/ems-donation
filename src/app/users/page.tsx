@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import styles from './users.module.css';
 import Toast from '@/components/Toast';
 import CreateUserModal from './CreateUserModal';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface User {
     id: string;
@@ -17,9 +18,10 @@ interface User {
 
 export default function UsersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+    const [confirmDialog, setConfirmDialog] = useState<{ userId: string; username: string } | null>(null);
+
     // Mock Data สำหรับผู้ใช้งาน
     const [users, setUsers] = useState<User[]>([
         { id: '1', username: 'admin@ems.com', fullName: 'Admin User', role: 'admin', status: 'active' },
@@ -27,11 +29,15 @@ export default function UsersPage() {
         { id: '3', username: 'staff2@ems.com', fullName: 'Somsri Volunteer', role: 'staff', status: 'inactive' },
     ]);
 
-    const handleDelete = (id: string) => {
-        if (confirm('คุณต้องการลบผู้ใช้งานนี้ใช่หรือไม่?')) {
-            setUsers(users.filter(u => u.id !== id));
-            setToast({ message: 'ลบผู้ใช้งานสำเร็จ', type: 'success' });
-        }
+    const handleDelete = (id: string, username: string) => {
+        setConfirmDialog({ userId: id, username });
+    };
+
+    const confirmDelete = () => {
+        if (!confirmDialog) return;
+        setUsers(users.filter(u => u.id !== confirmDialog.userId));
+        setToast({ message: 'ลบผู้ใช้งานสำเร็จ', type: 'success' });
+        setConfirmDialog(null);
     };
 
     const handleCreateUser = (newUser: any) => {
@@ -76,7 +82,7 @@ export default function UsersPage() {
                                         <td>{user.fullName}</td>
                                         <td>{user.username}</td>
                                         <td>
-                                            <span className={styles.roleBadge} style={{ 
+                                            <span className={styles.roleBadge} style={{
                                                 backgroundColor: user.role === 'admin' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
                                                 color: user.role === 'admin' ? '#f472b6' : '#60a5fa'
                                             }}>
@@ -89,8 +95,8 @@ export default function UsersPage() {
                                             </span>
                                         </td>
                                         <td>
-                                            <button 
-                                                onClick={() => handleDelete(user.id)}
+                                            <button
+                                                onClick={() => handleDelete(user.id, user.username)}
                                                 style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}
                                             >
                                                 ลบ
@@ -105,17 +111,29 @@ export default function UsersPage() {
             </div>
 
             {isModalOpen && (
-                <CreateUserModal 
+                <CreateUserModal
                     onClose={() => setIsModalOpen(false)}
                     onSuccess={handleCreateUser}
                 />
             )}
 
+            {confirmDialog && (
+                <ConfirmDialog
+                    title="ยืนยันการลบผู้ใช้งาน"
+                    message={`คุณต้องการลบผู้ใช้งาน "${confirmDialog.username}" ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนคืนได้`}
+                    confirmText="ลบผู้ใช้งาน"
+                    cancelText="ยกเลิก"
+                    onConfirm={confirmDelete}
+                    onCancel={() => setConfirmDialog(null)}
+                    isDangerous={true}
+                />
+            )}
+
             {toast && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={() => setToast(null)} 
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
                 />
             )}
         </div>
