@@ -1,55 +1,77 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './warehouse.module.css';
+import Toast from '@/components/Toast';
+import InventoryModal from './InventoryModal';
 
 interface InventoryItem {
-    id: string;
-    name: string;
+    _id: string;
+    itemName: string;
     category: string;
     quantity: number;
     unit: string;
-    status: 'พอเพียง' | 'เหลือน้อย' | 'ขาดแคลน';
+    lastUpdated?: string;
 }
-
-const MOCK_INVENTORY: InventoryItem[] = [
-    { id: '1', name: 'ข้าวสาร (5กก.)', category: 'อาหาร', quantity: 500, unit: 'ถุง', status: 'พอเพียง' },
-    { id: '2', name: 'น้ำดื่ม (1.5ลิตร)', category: 'น้ำดื่ม', quantity: 1200, unit: 'แพ็ค', status: 'พอเพียง' },
-    { id: '3', name: 'หน้ากากอนามัย', category: 'ยาและเวชภัณฑ์', quantity: 50, unit: 'กล่อง', status: 'ขาดแคลน' },
-    { id: '4', name: 'ปลากระป๋อง', category: 'อาหาร', quantity: 300, unit: 'แพ็ค', status: 'เหลือน้อย' },
-    { id: '5', name: 'ยาพาราเซตามอล', category: 'ยาและเวชภัณฑ์', quantity: 150, unit: 'กระปุก', status: 'พอเพียง' },
-    { id: '6', name: 'ผ้าห่มคงทน', category: 'เครื่องนิ่งห่ม', quantity: 80, unit: 'ผืน', status: 'ขาดแคลน' },
-];
 
 export default function WarehousePage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [inventory, setInventory] = useState<InventoryItem[]>(MOCK_INVENTORY);
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+
+    const fetchInventory = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/inventory');
+            const data = await res.json();
+            if (data.success) {
+                setInventory(data.data);
+            }
+        } catch (error) {
+            console.error('Fetch inventory error:', error);
+            setToast({ message: 'ไม่สามารถโหลดข้อมูลสินค้าได้', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchInventory();
+    }, []);
 
     const filteredItems = inventory.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = item.itemName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
         return matchesSearch && matchesCategory;
     });
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'พอเพียง': return '#4ade80';
-            case 'เหลือน้อย': return '#fbbf24';
-            case 'ขาดแคลน': return '#f87171';
-            default: return '#ccc';
-        }
+    const getStatusInfo = (quantity: number) => {
+        if (quantity >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
+        if (quantity >= 20) return { label: 'เหลือน้อย', color: '#fbbf24', percent: '40%' };
+        return { label: 'ขาดแคลน', color: '#f87171', percent: '15%' };
     };
 
-    const getStockPercentage = (status: string) => {
-        switch (status) {
-            case 'พอเพียง': return '85%';
-            case 'เหลือน้อย': return '40%';
-            case 'ขาดแคลน': return '15%';
-            default: return '0%';
+    const handleDelete = async (id: string, name: string) => {
+        if (!confirm(`ยืนยันการลบรายการ: ${name}?`)) return;
+
+        try {
+            const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setToast({ message: 'ลบรายการสำเร็จ', type: 'success' });
+                fetchInventory();
+            } else {
+                const data = await res.json();
+                setToast({ message: data.error || 'ลบไม่สำเร็จ', type: 'error' });
+            }
+        } catch (error) {
+            setToast({ message: 'เกิดข้อผิดพลาดในการลบ', type: 'error' });
         }
     };
 
@@ -66,7 +88,15 @@ export default function WarehousePage() {
                             <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>จัดการสต็อกสิ่งของบริจาคและทรัพยากรทั้งหมด</p>
                         </div>
                         <div className={styles.actionButtons}>
-                            <button className={styles.primaryButton}>+ เพิ่มรายการสินค้าใหม่</button>
+                            <button
+                                className={styles.primaryButton}
+                                onClick={() => {
+                                    setEditingItem(null);
+                                    setIsModalOpen(true);
+                                }}
+                            >
+                                + เพิ่มรายการสินค้าใหม่
+                            </button>
                         </div>
                     </div>
 
@@ -97,56 +127,100 @@ export default function WarehousePage() {
                         </div>
                     </div>
 
-                    <table className={styles.inventoryTable}>
-                        <thead>
-                            <tr>
-                                <th>ชื่อสินค้า</th>
-                                <th>หมวดหมู่</th>
-                                <th>จำนวนคงเหลือ</th>
-                                <th>หน่วย</th>
-                                <th>สถานะสต็อก</th>
-                                <th>จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredItems.map(item => (
-                                <tr key={item.id}>
-                                    <td style={{ fontWeight: '500' }}>{item.name}</td>
-                                    <td><span className={styles.categoryTag}>{item.category}</span></td>
-                                    <td style={{ color: getStatusColor(item.status), fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
-                                    <td>{item.unit}</td>
-                                    <td>
-                                        <div className={styles.stockLevel}>
-                                            <div className={styles.levelBar}>
-                                                <div
-                                                    className={styles.levelFill}
-                                                    style={{
-                                                        width: getStockPercentage(item.status),
-                                                        backgroundColor: getStatusColor(item.status)
-                                                    }}
-                                                ></div>
-                                            </div>
-                                            <span style={{ fontSize: '12px' }}>{item.status}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className={styles.actions}>
-                                            <button className={styles.editBtn} title="แก้ไข">✏️</button>
-                                            <button className={styles.deleteBtn} title="ลบ">🗑️</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-
-                    {filteredItems.length === 0 && (
+                    {loading ? (
                         <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
-                            <p>ไม่พบรายการสินค้าที่ต้องการ</p>
+                            <p>กำลังโหลดข้อมูลคลังสินค้า...</p>
                         </div>
+                    ) : (
+                        <>
+                            <table className={styles.inventoryTable}>
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อสินค้า</th>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนคงเหลือ</th>
+                                        <th>หน่วย</th>
+                                        <th>สถานะสต็อก</th>
+                                        <th>จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredItems.map(item => {
+                                        const status = getStatusInfo(item.quantity);
+                                        return (
+                                            <tr key={item._id}>
+                                                <td style={{ fontWeight: '500' }}>{item.itemName}</td>
+                                                <td><span className={styles.categoryTag}>{item.category}</span></td>
+                                                <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
+                                                <td>{item.unit}</td>
+                                                <td>
+                                                    <div className={styles.stockLevel}>
+                                                        <div className={styles.levelBar}>
+                                                            <div
+                                                                className={styles.levelFill}
+                                                                style={{
+                                                                    width: status.percent,
+                                                                    backgroundColor: status.color
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                        <span style={{ fontSize: '12px' }}>{status.label}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className={styles.actions}>
+                                                        <button
+                                                            className={styles.editBtn}
+                                                            title="แก้ไข"
+                                                            onClick={() => {
+                                                                setEditingItem(item);
+                                                                setIsModalOpen(true);
+                                                            }}
+                                                        >
+                                                            ✏️
+                                                        </button>
+                                                        <button
+                                                            className={styles.deleteBtn}
+                                                            title="ลบ"
+                                                            onClick={() => handleDelete(item._id, item.itemName)}
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+
+                            {filteredItems.length === 0 && (
+                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
+                                    <p>ไม่พบรายการสินค้าที่ต้องการ</p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
+            {isModalOpen && (
+                <InventoryModal
+                    item={editingItem}
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={() => {
+                        setIsModalOpen(false);
+                        setToast({ message: editingItem ? 'แก้ไขข้อมูลสำเร็จ' : 'เพิ่มสินค้าใหม่สำเร็จ', type: 'success' });
+                        fetchInventory();
+                    }}
+                />
+            )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 }

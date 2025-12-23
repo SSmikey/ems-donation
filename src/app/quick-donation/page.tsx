@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './quick-donation.module.css';
+import Toast from '@/components/Toast';
 
 export default function QuickDonationPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -11,14 +12,38 @@ export default function QuickDonationPage() {
     const [itemName, setItemName] = useState('');
     const [quantity, setQuantity] = useState('');
     const [unit, setUnit] = useState('ชิ้น');
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     const categories = ['อาหาร', 'น้ำดื่ม', 'ยาและเวชภัณฑ์', 'เครื่องนุ่งห่ม', 'อื่นๆ'];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert(`บันทึกสำเร็จ: ${itemName} (${category}) จำนวน ${quantity} ${unit}`);
-        setItemName('');
-        setQuantity('');
+
+        try {
+            const res = await fetch('/api/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    itemName,
+                    category,
+                    quantity: Number(quantity),
+                    unit
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setToast({ message: `บันทึกสำเร็จ: ${itemName}`, type: 'success' });
+                setItemName('');
+                setQuantity('');
+            } else {
+                setToast({ message: data.error || 'เกิดข้อผิดพลาดในการบันทึก', type: 'error' });
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            setToast({ message: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', type: 'error' });
+        }
     };
 
     return (
@@ -98,6 +123,13 @@ export default function QuickDonationPage() {
                     </div>
                 </div>
             </div>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 }

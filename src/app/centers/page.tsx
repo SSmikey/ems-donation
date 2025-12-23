@@ -5,6 +5,8 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './centers.module.css';
 import { Shelter } from '@/lib/models/shelter';
+import ShelterModal from './ShelterModal';
+import Toast from '@/components/Toast';
 
 export default function CentersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -13,31 +15,36 @@ export default function CentersPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingShelter, setEditingShelter] = useState<Shelter | null>(null);
 
     const [errorInfo, setErrorInfo] = useState<any>(null);
 
-    useEffect(() => {
-        async function fetchShelters() {
-            try {
-                const res = await fetch('/api/shelters');
-                const result = await res.json();
+    const fetchShelters = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/shelters');
+            const result = await res.json();
 
-                if (result.data && Array.isArray(result.data)) {
-                    setShelters(result.data);
-                    setFilteredShelters(result.data);
-                } else if (Array.isArray(result)) {
-                    setShelters(result);
-                    setFilteredShelters(result);
-                } else if (result.error) {
-                    setErrorInfo(result);
-                }
-            } catch (error) {
-                console.error('Error fetching shelters:', error);
-                setErrorInfo({ error: 'Failed to connect to API', details: String(error) });
-            } finally {
-                setLoading(false);
+            if (result.data && Array.isArray(result.data)) {
+                setShelters(result.data);
+                setFilteredShelters(result.data);
+            } else if (Array.isArray(result)) {
+                setShelters(result);
+                setFilteredShelters(result);
+            } else if (result.error) {
+                setErrorInfo(result);
             }
+        } catch (error) {
+            console.error('Error fetching shelters:', error);
+            setErrorInfo({ error: 'Failed to connect to API', details: String(error) });
+        } finally {
+            setLoading(false);
         }
+    }
+
+    useEffect(() => {
         fetchShelters();
     }, []);
 
@@ -51,6 +58,28 @@ export default function CentersPage() {
         });
         setFilteredShelters(results);
     }, [searchTerm, filterStatus, shelters]);
+
+    const handleDelete = async (id: string, name: string) => {
+        if (!confirm(`ยืนยันการลบศูนย์พักพิง: ${name}?`)) return;
+
+        try {
+            const res = await fetch(`/api/shelters`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ _id: id })
+            });
+
+            if (res.ok) {
+                setToast({ message: 'ลบศูนย์พักพิงสำเร็จ', type: 'success' });
+                fetchShelters();
+            } else {
+                const data = await res.json();
+                setToast({ message: data.error || 'ลบไม่สำเร็จ', type: 'error' });
+            }
+        } catch (error) {
+            setToast({ message: 'เกิดข้อผิดพลาดในการลบ', type: 'error' });
+        }
+    };
 
     const getStatusClass = (status: string) => {
         switch (status) {
@@ -70,6 +99,23 @@ export default function CentersPage() {
                 <div className={styles.contentArea}>
                     <div className={styles.pageHeader}>
                         <h1>จัดการศูนย์พักพิง ({shelters.length} แห่ง)</h1>
+                        <button
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                setEditingShelter(null);
+                                setIsModalOpen(true);
+                            }}
+                        >
+                            + เพิ่มศูนย์พักพิงใหม่
+                        </button>
                     </div>
 
                     <div className={styles.searchSection}>
@@ -98,9 +144,30 @@ export default function CentersPage() {
                         <div className={styles.centersGrid}>
                             {filteredShelters.map((s) => (
                                 <div key={s._id} className={styles.centerCard}>
-                                    <span className={`${styles.statusBadge} ${getStatusClass(s.capacityStatus)}`}>
-                                        {s.capacityStatus || 'ปกติ'}
-                                    </span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <span className={`${styles.statusBadge} ${getStatusClass(s.capacityStatus)}`}>
+                                            {s.capacityStatus || 'ปกติ'}
+                                        </span>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                                title="แก้ไข"
+                                                onClick={() => {
+                                                    setEditingShelter(s);
+                                                    setIsModalOpen(true);
+                                                }}
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                                title="ลบ"
+                                                onClick={() => s._id && handleDelete(s._id, s.name)}
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
                                     <h3 className={styles.centerName}>{s.name}</h3>
                                     <p className={styles.centerLocation}>📍 ต.{s.subdistrict} อ.{s.district}</p>
 
@@ -140,6 +207,24 @@ export default function CentersPage() {
                     )}
                 </div>
             </div>
+            {isModalOpen && (
+                <ShelterModal
+                    shelter={editingShelter}
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={() => {
+                        setIsModalOpen(false);
+                        setToast({ message: editingShelter ? 'แก้ไขข้อมูลสำเร็จ' : 'เพิ่มศูนย์พักพิงสำเร็จ', type: 'success' });
+                        fetchShelters();
+                    }}
+                />
+            )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 }
