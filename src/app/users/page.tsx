@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './users.module.css';
+import Toast from '@/components/Toast';
+import CreateUserModal from './CreateUserModal';
 
 interface User {
     id: string;
@@ -15,6 +17,8 @@ interface User {
 
 export default function UsersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     
     // Mock Data สำหรับผู้ใช้งาน
     const [users, setUsers] = useState<User[]>([
@@ -26,7 +30,14 @@ export default function UsersPage() {
     const handleDelete = (id: string) => {
         if (confirm('คุณต้องการลบผู้ใช้งานนี้ใช่หรือไม่?')) {
             setUsers(users.filter(u => u.id !== id));
+            setToast({ message: 'ลบผู้ใช้งานสำเร็จ', type: 'success' });
         }
+    };
+
+    const handleCreateUser = (newUser: any) => {
+        setUsers([...users, newUser]);
+        setIsModalOpen(false);
+        setToast({ message: 'เพิ่มผู้ใช้งานสำเร็จ', type: 'success' });
     };
 
     return (
@@ -43,7 +54,7 @@ export default function UsersPage() {
                                 ดูแลจัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง
                             </p>
                         </div>
-                        <button className={styles.addButton} onClick={() => alert('ฟีเจอร์เพิ่มผู้ใช้จะมาในเร็วๆ นี้')}>
+                        <button className={styles.addButton} onClick={() => setIsModalOpen(true)}>
                             + เพิ่มผู้ใช้งาน
                         </button>
                     </div>
@@ -92,6 +103,21 @@ export default function UsersPage() {
                     </div>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <CreateUserModal 
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={handleCreateUser}
+                />
+            )}
+
+            {toast && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast(null)} 
+                />
+            )}
         </div>
     );
 }

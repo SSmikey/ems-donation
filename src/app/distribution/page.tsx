@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './distribution.module.css';
 import CreateRequestModal from './CreateRequestModal';
+import Toast from '@/components/Toast';
 
 interface Request {
     _id: string;
@@ -22,6 +23,7 @@ export default function DistributionPage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterUrgency, setFilterUrgency] = useState('all');
+    const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
     const fetchRequests = async () => {
         try {
@@ -67,13 +69,13 @@ export default function DistributionPage() {
             });
             
             if (res.ok) {
-                alert('อนุมัติสำเร็จ');
+                setToast({ message: 'อนุมัติคำขอสำเร็จ', type: 'success' });
                 fetchRequests();
             } else if (res.status === 404) {
-                alert('อนุมัติสำเร็จ (จำลอง - API ยังไม่พร้อม)');
+                setToast({ message: 'อนุมัติสำเร็จ (จำลอง - API ยังไม่พร้อม)', type: 'success' });
                 fetchRequests();
             } else {
-                alert('ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ หรือเกิดข้อผิดพลาด)');
+                setToast({ message: 'ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ)', type: 'error' });
             }
         } catch (error) {
             console.error('Error approving:', error);
@@ -195,6 +197,14 @@ export default function DistributionPage() {
                         setIsModalOpen(false);
                         fetchRequests();
                     }} 
+                />
+            )}
+
+            {toast && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast(null)} 
                 />
             )}
         </div>
