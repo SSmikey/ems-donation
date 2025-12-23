@@ -58,6 +58,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </ul>
         </div>
 
+        <div className={styles.navSection}>
+          <h3 className={styles.navTitle}>ผู้ดูแลระบบ</h3>
+          <ul className={styles.navList}>
+            <li className={styles.navItem}>
+              <a href="/users" className={styles.navLink}>
+                <span className={styles.icon}>👥</span>
+                <span>จัดการผู้ใช้งาน</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
       </nav>
     </aside>
   );

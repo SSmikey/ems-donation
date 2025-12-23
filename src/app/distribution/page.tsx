@@ -69,6 +69,9 @@ export default function DistributionPage() {
             if (res.ok) {
                 alert('อนุมัติสำเร็จ');
                 fetchRequests();
+            } else if (res.status === 404) {
+                alert('อนุมัติสำเร็จ (จำลอง - API ยังไม่พร้อม)');
+                fetchRequests();
             } else {
                 alert('ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ หรือเกิดข้อผิดพลาด)');
             }
@@ -81,8 +84,7 @@ export default function DistributionPage() {
         switch (urgency) {
             case 'สูง': return styles.urgencyHigh;
             case 'กลาง': return styles.urgencyMedium;
-            case 'ต่ำ': return styles.urgencyLow;
-            default: return '';
+            default: return styles.urgencyLow;
         }
     };
 
@@ -100,42 +102,44 @@ export default function DistributionPage() {
 
                 <div className={styles.contentArea}>
                     <div className={styles.pageHeader}>
-                        <h1>การร้องขอและกระจายของ (Distribution & Requests)</h1>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
-                            จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
-                        </p>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <select 
-                                    value={filterStatus} 
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
-                                >
-                                    <option value="all">สถานะทั้งหมด</option>
-                                    <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                    <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                    <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
-                                </select>
+                        <div>
+                            <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
+                            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
+                                จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
+                            </p>
+                            
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <select 
+                                        value={filterStatus} 
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
+                                    >
+                                        <option value="all">สถานะทั้งหมด</option>
+                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                                        <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
+                                    </select>
 
-                                <select 
-                                    value={filterUrgency} 
-                                    onChange={(e) => setFilterUrgency(e.target.value)}
-                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
+                                    <select 
+                                        value={filterUrgency} 
+                                        onChange={(e) => setFilterUrgency(e.target.value)}
+                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
+                                    >
+                                        <option value="all">ความเร่งด่วนทั้งหมด</option>
+                                        <option value="สูง">สูง</option>
+                                        <option value="กลาง">กลาง</option>
+                                        <option value="ต่ำ">ต่ำ</option>
+                                    </select>
+                                </div>
+
+                                <button 
+                                    onClick={() => setIsModalOpen(true)}
+                                    style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
-                                    <option value="all">ความเร่งด่วนทั้งหมด</option>
-                                    <option value="สูง">สูง</option>
-                                    <option value="กลาง">กลาง</option>
-                                    <option value="ต่ำ">ต่ำ</option>
-                                </select>
+                                    + สร้างคำขอใหม่
+                                </button>
                             </div>
-
-                            <button 
-                                onClick={() => setIsModalOpen(true)}
-                                style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-                            >
-                                + สร้างคำขอใหม่
-                            </button>
                         </div>
                     </div>
 
