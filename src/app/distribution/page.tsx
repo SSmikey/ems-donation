@@ -1,57 +1,79 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './distribution.module.css';
+import CreateRequestModal from './CreateRequestModal';
 
 interface Request {
-    id: string;
+    _id: string;
     shelterName: string;
-    items: { name: string; quantity: number }[];
+    items: { itemName: string; quantity: number }[];
     status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'จัดส่งแล้ว';
     urgency: 'สูง' | 'กลาง' | 'ต่ำ';
-    requestDate: string;
+    createdAt: string;
 }
-
-const MOCK_REQUESTS: Request[] = [
-    {
-        id: 'R001',
-        shelterName: 'ศูนย์พักพิงเทศบาลสวนหลวง',
-        items: [{ name: 'ข้าวสาร', quantity: 20 }, { name: 'น้ำดื่ม', quantity: 50 }],
-        status: 'รอดำเนินการ',
-        urgency: 'สูง',
-        requestDate: '2025-12-22 10:30',
-    },
-    {
-        id: 'R002',
-        shelterName: 'ศูนย์วัดหนองป่าพง',
-        items: [{ name: 'ยาแก้ปวด', quantity: 10 }, { name: 'ผ้าห่ม', quantity: 20 }],
-        status: 'รอดำเนินการ',
-        urgency: 'กลาง',
-        requestDate: '2025-12-22 11:15',
-    },
-    {
-        id: 'R003',
-        shelterName: 'โรงเรียนสาธิตมหาวิทยาลัย',
-        items: [{ name: 'นมผงเด็ก', quantity: 15 }],
-        status: 'อนุมัติแล้ว',
-        urgency: 'สูง',
-        requestDate: '2025-12-22 09:00',
-    },
-    {
-        id: 'R004',
-        shelterName: 'ศูนย์พักพิง อบต.บางม่วง',
-        items: [{ name: 'บะหมี่กึ่งสำเร็จรูป', quantity: 100 }],
-        status: 'จัดส่งแล้ว',
-        urgency: 'ต่ำ',
-        requestDate: '2025-12-21 15:45',
-    },
-];
 
 export default function DistributionPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [requests, setRequests] = useState<Request[]>(MOCK_REQUESTS);
+    const [requests, setRequests] = useState<Request[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const fetchRequests = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/distribution-requests');
+            
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                if (data.success) {
+                    setRequests(data.data);
+                }
+            } else {
+                console.warn("API not ready, using mock data");
+                setRequests([
+                    {
+                        _id: 'MOCK-001',
+                        shelterName: 'ศูนย์พักพิงเทศบาล (Mock)',
+                        items: [{ itemName: 'ข้าวสาร', quantity: 20 }, { itemName: 'น้ำดื่ม', quantity: 50 }],
+                        status: 'รอดำเนินการ',
+                        urgency: 'สูง',
+                        createdAt: new Date().toISOString()
+                    }
+                ]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch requests', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
+
+    const handleApprove = async (id: string) => {
+        if (!confirm('ยืนยันการอนุมัติ? สต็อกสินค้าจะถูกตัดทันที')) return;
+        
+        try {
+            const res = await fetch(`/api/distribution-requests/${id}/approve`, {
+                method: 'PUT'
+            });
+            
+            if (res.ok) {
+                alert('อนุมัติสำเร็จ');
+                fetchRequests();
+            } else {
+                alert('ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ หรือเกิดข้อผิดพลาด)');
+            }
+        } catch (error) {
+            console.error('Error approving:', error);
+        }
+    };
 
     const getUrgencyClass = (urgency: string) => {
         switch (urgency) {
@@ -74,14 +96,23 @@ export default function DistributionPage() {
                         <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
                             จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
                         </p>
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            style={{ marginTop: '15px', padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            + สร้างคำขอใหม่
+                        </button>
                     </div>
 
+                    {loading ? (
+                        <div style={{ color: 'white', textAlign: 'center', padding: '20px' }}>กำลังโหลดข้อมูล...</div>
+                    ) : (
                     <div className={styles.requestGrid}>
                         {requests.map((req) => (
-                            <div key={req.id} className={styles.requestCard}>
+                            <div key={req._id} className={styles.requestCard}>
                                 <div className={styles.cardTop}>
                                     <div>
-                                        <span className={styles.statusBadge}>{req.id}</span>
+                                        <span className={styles.statusBadge}>REQ-{req._id.slice(-4)}</span>
                                         <h3 className={styles.shelterName}>{req.shelterName}</h3>
                                     </div>
                                     <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
@@ -92,7 +123,7 @@ export default function DistributionPage() {
                                 <div className={styles.itemList}>
                                     {req.items.map((item, idx) => (
                                         <div key={idx} className={styles.itemEntry}>
-                                            <span>{item.name}</span>
+                                            <span>{item.itemName}</span>
                                             <span style={{ fontWeight: '600' }}>{item.quantity} รายการ</span>
                                         </div>
                                     ))}
@@ -100,17 +131,33 @@ export default function DistributionPage() {
 
                                 <div className={styles.footer}>
                                     <span className={styles.statusText}>
-                                        สถานะ: {req.status} (เมื่อ {req.requestDate})
+                                        สถานะ: {req.status} (เมื่อ {new Date(req.createdAt).toLocaleDateString('th-TH')})
                                     </span>
                                     {req.status === 'รอดำเนินการ' && (
-                                        <button className={styles.actionBtn}>อนุมัติและจัดส่ง</button>
+                                        <button 
+                                            className={styles.actionBtn}
+                                            onClick={() => handleApprove(req._id)}
+                                        >
+                                            อนุมัติและจัดส่ง
+                                        </button>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
+                    )}
                 </div>
             </div>
+            
+            {isModalOpen && (
+                <CreateRequestModal 
+                    onClose={() => setIsModalOpen(false)} 
+                    onSuccess={() => {
+                        setIsModalOpen(false);
+                        fetchRequests();
+                    }} 
+                />
+            )}
         </div>
     );
 }

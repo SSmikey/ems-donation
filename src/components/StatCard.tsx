@@ -5,7 +5,7 @@ interface StatCardProps {
   value: string;
   percentage: number;
   trend: 'up' | 'down';
-  color: 'cyan' | 'purple';
+  color: 'cyan' | 'purple' | 'red';
 }
 
 export default function StatCard({

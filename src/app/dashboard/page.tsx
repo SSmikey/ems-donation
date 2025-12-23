@@ -5,29 +5,69 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
 import styles from './dashboard.module.css';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [shelterCount, setShelterCount] = useState<number>(0);
+  const [stats, setStats] = useState({
+    shelterCount: 0,
+    totalInventoryValue: 0,
+    pendingRequests: 0,
+    lowStockCount: 0,
+    chartData: []
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchShelters() {
+    async function fetchStats() {
       try {
-        const res = await fetch('/api/shelters');
-        const result = await res.json();
-        if (result.data && Array.isArray(result.data)) {
-          setShelterCount(result.count || result.data.length);
-        } else if (Array.isArray(result)) {
-          setShelterCount(result.length);
+        // Fetch Dashboard Stats from API
+        const res = await fetch('/api/dashboard/stats');
+        const contentType = res.headers.get("content-type");
+        
+        if (contentType && contentType.includes("application/json")) {
+          const data = await res.json();
+          if (data.success) {
+            setStats(data.data);
+            return;
+          }
         }
+        
+        throw new Error("API not ready");
       } catch (error) {
-        console.error('Error fetching shelters:', error);
+        console.warn('Error fetching stats, using fallback:', error);
+        
+        // Fallback: ถ้า API stats ยังไม่เสร็จ ให้ลองดึงแค่ shelter count ไปก่อน
+        try {
+          const shelterRes = await fetch('/api/shelters');
+          const shelterContentType = shelterRes.headers.get("content-type");
+          let count = 0;
+          
+          if (shelterContentType && shelterContentType.includes("application/json")) {
+            const shelterData = await shelterRes.json();
+            count = shelterData.data ? shelterData.data.length : 0;
+          }
+          
+          setStats(prev => ({
+              ...prev,
+              shelterCount: count,
+              // Mock data สำหรับกราฟ เพื่อให้ UI ไม่พังถ้า API ยังไม่มา
+              chartData: [
+                  { name: 'จันทร์', requests: 4 },
+                  { name: 'อังคาร', requests: 7 },
+                  { name: 'พุธ', requests: 5 },
+                  { name: 'พฤหัส', requests: 10 },
+                  { name: 'ศุกร์', requests: 6 },
+              ] as any
+          }));
+        } catch (fallbackError) {
+          console.error('Fallback error:', fallbackError);
+        }
       } finally {
         setLoading(false);
       }
     }
-    fetchShelters();
+    fetchStats();
   }, []);
 
   return (
@@ -51,44 +91,43 @@ export default function Dashboard() {
           <div className={styles.statsGrid}>
             <StatCard
               title="จำนวนศูนย์พักพิงทั้งหมด"
-              value={loading ? '...' : shelterCount.toLocaleString()}
-              percentage={shelterCount > 0 ? 100 : 0}
+              value={loading ? '...' : stats.shelterCount.toLocaleString()}
+              percentage={stats.shelterCount > 0 ? 100 : 0}
               trend="up"
               color="cyan"
             />
             <StatCard
-              title="อาสาสมัครที่ลงทะเบียน"
-              value="1,240"
-              percentage={5}
-              trend="up"
+              title="คำขอรอดำเนินการ"
+              value={loading ? '...' : stats.pendingRequests.toLocaleString()}
+              percentage={stats.pendingRequests > 5 ? 80 : 20}
+              trend={stats.pendingRequests > 5 ? "up" : "down"}
               color="purple"
             />
             <StatCard
-              title="จำนวนคำร้องขอวันนี้"
-              value="85"
-              percentage={18}
-              trend="up"
-              color="cyan"
+              title="สินค้าใกล้หมด (Low Stock)"
+              value={loading ? '...' : stats.lowStockCount.toLocaleString()}
+              percentage={stats.lowStockCount > 0 ? 100 : 0}
+              trend="down"
+              color="red"
             />
           </div>
 
           {/* Resource Status and Items Section */}
           <div className={styles.socialGrid}>
             <div className={styles.customCard}>
-              <h3 className={styles.cardTitle}>สถานะทรัพยากรในศูนย์ต่างๆ</h3>
-              <div className={styles.resourceStatusList}>
-                <div className={styles.statusItem}>
-                  <div className={`${styles.circle} ${styles.green}`}>70%</div>
-                  <p>ปกติ (Normal)</p>
-                </div>
-                <div className={styles.statusItem}>
-                  <div className={`${styles.circle} ${styles.yellow}`}>20%</div>
-                  <p>เตือน (Warning)</p>
-                </div>
-                <div className={styles.statusItem}>
-                  <div className={`${styles.circle} ${styles.red}`}>10%</div>
-                  <p>วิกฤต (Critical)</p>
-                </div>
+              <h3 className={styles.cardTitle}>สถิติการเบิกจ่ายรายวัน</h3>
+              <div style={{ width: '100%', height: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="name" stroke="#ccc" />
+                    <YAxis stroke="#ccc" />
+                    <Tooltip 
+                        contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }}
+                    />
+                    <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
             <div className={styles.customCard}>
