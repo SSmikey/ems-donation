@@ -20,6 +20,8 @@ export default function DistributionPage() {
     const [requests, setRequests] = useState<Request[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterUrgency, setFilterUrgency] = useState('all');
 
     const fetchRequests = async () => {
         try {
@@ -84,6 +86,12 @@ export default function DistributionPage() {
         }
     };
 
+    const filteredRequests = requests.filter(req => {
+        if (filterStatus !== 'all' && req.status !== filterStatus) return false;
+        if (filterUrgency !== 'all' && req.urgency !== filterUrgency) return false;
+        return true;
+    });
+
     return (
         <div className={styles.container}>
             <Sidebar isOpen={sidebarOpen} />
@@ -96,19 +104,46 @@ export default function DistributionPage() {
                         <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
                             จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
                         </p>
-                        <button 
-                            onClick={() => setIsModalOpen(true)}
-                            style={{ marginTop: '15px', padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-                        >
-                            + สร้างคำขอใหม่
-                        </button>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <select 
+                                    value={filterStatus} 
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
+                                >
+                                    <option value="all">สถานะทั้งหมด</option>
+                                    <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                    <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                                    <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
+                                </select>
+
+                                <select 
+                                    value={filterUrgency} 
+                                    onChange={(e) => setFilterUrgency(e.target.value)}
+                                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
+                                >
+                                    <option value="all">ความเร่งด่วนทั้งหมด</option>
+                                    <option value="สูง">สูง</option>
+                                    <option value="กลาง">กลาง</option>
+                                    <option value="ต่ำ">ต่ำ</option>
+                                </select>
+                            </div>
+
+                            <button 
+                                onClick={() => setIsModalOpen(true)}
+                                style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                + สร้างคำขอใหม่
+                            </button>
+                        </div>
                     </div>
 
                     {loading ? (
                         <div style={{ color: 'white', textAlign: 'center', padding: '20px' }}>กำลังโหลดข้อมูล...</div>
                     ) : (
                     <div className={styles.requestGrid}>
-                        {requests.map((req) => (
+                        {filteredRequests.map((req) => (
                             <div key={req._id} className={styles.requestCard}>
                                 <div className={styles.cardTop}>
                                     <div>

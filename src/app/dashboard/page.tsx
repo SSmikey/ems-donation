@@ -116,7 +116,12 @@ export default function Dashboard() {
           <div className={styles.socialGrid}>
             <div className={styles.customCard}>
               <h3 className={styles.cardTitle}>สถิติการเบิกจ่ายรายวัน</h3>
-              <div style={{ width: '100%', height: '300px' }}>
+              <div style={{ width: '100%', height: '300px', minWidth: 0 }}>
+                {loading ? (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                    กำลังโหลดข้อมูล...
+                  </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#444" />
@@ -128,6 +133,7 @@ export default function Dashboard() {
                     <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
                   </BarChart>
                 </ResponsiveContainer>
+                )}
               </div>
             </div>
             <div className={styles.customCard}>
