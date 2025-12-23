@@ -7,6 +7,7 @@ import styles from './centers.module.css';
 import { Shelter } from '@/lib/models/shelter';
 import ShelterModal from './ShelterModal';
 import Toast from '@/components/Toast';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function CentersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,6 +26,7 @@ export default function CentersPage() {
     const itemsPerPage = 10;
 
     const [errorInfo, setErrorInfo] = useState<any>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{ shelterName: string; shelterId: string } | null>(null);
 
     const fetchShelters = async () => {
         try {
@@ -66,13 +68,17 @@ export default function CentersPage() {
     }, [filterName, filterDistrict, filterSubdistrict, filterType, filterStatus, shelters]);
 
     const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`ยืนยันการลบศูนย์พักพิง: ${name}?`)) return;
+        setConfirmDialog({ shelterName: name, shelterId: id });
+    };
+
+    const confirmDelete = async () => {
+        if (!confirmDialog) return;
 
         try {
             const res = await fetch(`/api/shelters`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ _id: id })
+                body: JSON.stringify({ _id: confirmDialog.shelterId })
             });
 
             if (res.ok) {
@@ -84,6 +90,8 @@ export default function CentersPage() {
             }
         } catch (error) {
             setToast({ message: 'เกิดข้อผิดพลาดในการลบ', type: 'error' });
+        } finally {
+            setConfirmDialog(null);
         }
     };
 
@@ -266,6 +274,13 @@ export default function CentersPage() {
                                 <div className={styles.paginationContainer}>
                                     <button
                                         className={styles.paginationBtn}
+                                        onClick={() => setCurrentPage(1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        ⇤ หน้าแรก
+                                    </button>
+                                    <button
+                                        className={styles.paginationBtn}
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPage === 1}
                                     >
@@ -280,6 +295,13 @@ export default function CentersPage() {
                                         disabled={currentPage === totalPages}
                                     >
                                         ถัดไป →
+                                    </button>
+                                    <button
+                                        className={styles.paginationBtn}
+                                        onClick={() => setCurrentPage(totalPages)}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        หน้าสุดท้าย ⇥
                                     </button>
                                 </div>
                             )}
@@ -321,6 +343,17 @@ export default function CentersPage() {
                     message={toast.message}
                     type={toast.type}
                     onClose={() => setToast(null)}
+                />
+            )}
+            {confirmDialog && (
+                <ConfirmDialog
+                    title="ยืนยันการลบศูนย์พักพิง"
+                    message={`คุณต้องการลบศูนย์พักพิง "${confirmDialog.shelterName}" หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`}
+                    confirmText="ลบ"
+                    cancelText="ยกเลิก"
+                    isDangerous={true}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setConfirmDialog(null)}
                 />
             )}
         </div>

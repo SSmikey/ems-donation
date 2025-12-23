@@ -177,14 +177,14 @@ export default function WarehousePage() {
                                                                 setIsModalOpen(true);
                                                             }}
                                                         >
-                                                            ✏️
+                                                            แก้ไข
                                                         </button>
                                                         <button
                                                             className={styles.deleteBtn}
                                                             title="ลบ"
                                                             onClick={() => handleDelete(item._id, item.itemName)}
                                                         >
-                                                            🗑️
+                                                            ลบ
                                                         </button>
                                                     </div>
                                                 </td>
