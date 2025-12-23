@@ -23,6 +23,7 @@ export default function DistributionPage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterUrgency, setFilterUrgency] = useState('all');
+    const [filterDate, setFilterDate] = useState('');
     const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
     const fetchRequests = async () => {
@@ -93,6 +94,10 @@ export default function DistributionPage() {
     const filteredRequests = requests.filter(req => {
         if (filterStatus !== 'all' && req.status !== filterStatus) return false;
         if (filterUrgency !== 'all' && req.urgency !== filterUrgency) return false;
+        if (filterDate) {
+            const reqDate = new Date(req.createdAt).toISOString().split('T')[0];
+            return reqDate === filterDate;
+        }
         return true;
     });
 
@@ -133,6 +138,13 @@ export default function DistributionPage() {
                                         <option value="กลาง">กลาง</option>
                                         <option value="ต่ำ">ต่ำ</option>
                                     </select>
+
+                                    <input 
+                                        type="date"
+                                        value={filterDate}
+                                        onChange={(e) => setFilterDate(e.target.value)}
+                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer', colorScheme: 'dark' }}
+                                    />
                                 </div>
 
                                 <button 
