@@ -20,6 +20,9 @@
 
 .pageHeader {
     margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .pageHeader h1 {
@@ -28,36 +31,130 @@
     margin: 0;
 }
 
-.requestGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
-    margin-top: 20px;
+.filterSection {
+    margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
 }
 
-.requestCard {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.filterGroup {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 8px;
 }
 
-.cardTop {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+.filterGroup label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.shelterName {
-    font-size: 18px;
+.filterSelect {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.filterSelect:focus {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+.filterSelect:hover {
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.filterSelect option {
+    background-color: #1a1a2e;
+    color: #ffffff;
+    padding: 8px;
+}
+
+.filterSelect option:hover {
+    background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+    background-color: #16213e;
+}
+
+.filterSelect option:checked {
+    background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+    background-color: #16213e;
+}
+
+.requestsTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.requestsTable thead {
+    background: rgba(0, 212, 255, 0.1);
+    border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.requestsTable th {
+    padding: 16px;
+    text-align: left;
     font-weight: 600;
+    color: #ffffff;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.requestsTable th:not(:last-child) {
+    border-right: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.requestsTable td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.requestsTable td:last-child {
+    border-right: none;
+}
+
+.requestsTable tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.requestsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.requestId {
+    font-weight: 600;
+    color: #00d4ff;
+}
+
+.itemsList {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.itemsList div {
+    padding: 2px 0;
 }
 
 .urgencyBadge {
+    display: inline-block;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -79,51 +176,40 @@
     color: #60a5fa;
 }
 
-.itemList {
-    background: rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    border-radius: 12px;
-}
-
-.itemEntry {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.itemEntry:last-child {
-    border-bottom: none;
-}
-
-.footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.statusText {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.actionBtn {
-    background: #60a5fa;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
 .statusBadge {
     display: inline-block;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
     background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.actionsCell {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.createBtn {
+    background: none;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: #00d4ff;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    line-height: 1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.createBtn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: #00d4ff;
 }

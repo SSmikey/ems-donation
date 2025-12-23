@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import styles from './distribution.module.css';
 import CreateRequestModal from './CreateRequestModal';
 import Toast from '@/components/Toast';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface Request {
     _id: string;
@@ -25,6 +26,7 @@ export default function DistributionPage() {
     const [filterUrgency, setFilterUrgency] = useState('all');
     const [filterDate, setFilterDate] = useState('');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
 
     const fetchRequests = async () => {
         try {
@@ -61,25 +63,32 @@ export default function DistributionPage() {
         fetchRequests();
     }, []);
 
-    const handleApprove = async (id: string) => {
-        if (!confirm('ยืนยันการอนุมัติ? สต็อกสินค้าจะถูกตัดทันที')) return;
+    const handleCreateRequest = async (id: string, shelterName: string) => {
+        setConfirmDialog({ requestId: id, shelterName });
+    };
+
+    const confirmCreateRequest = async () => {
+        if (!confirmDialog) return;
 
         try {
-            const res = await fetch(`/api/distribution-requests/${id}/approve`, {
+            const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ approvedBy: 'Admin (System)' })
             });
 
             if (res.ok) {
-                setToast({ message: 'อนุมัติคำขอสำเร็จ', type: 'success' });
+                setToast({ message: 'อนุมัติคำขอสำเร็จ สต็อกสินค้าจะถูกตัดทันที', type: 'success' });
                 fetchRequests();
             } else {
                 const errorData = await res.json();
-                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ)', type: 'error' });
+                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้ (สินค้าอาจไม่พอ)', type: 'error' });
             }
         } catch (error) {
-            console.error('Error approving:', error);
+            console.error('Error approving request:', error);
+            setToast({ message: 'เกิดข้อผิดพลาดในการอนุมัติคำขอ', type: 'error' });
+        } finally {
+            setConfirmDialog(null);
         }
     };
 
@@ -109,96 +118,122 @@ export default function DistributionPage() {
 
                 <div className={styles.contentArea}>
                     <div className={styles.pageHeader}>
-                        <div>
-                            <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
-                                จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
-                            </p>
+                        <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
+                        <button
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            + สร้างคำขอใหม่
+                        </button>
+                    </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <select
-                                        value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
-                                    >
-                                        <option value="all">สถานะทั้งหมด</option>
-                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                        <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
-                                        <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
-                                    </select>
+                    <div className={styles.filterSection}>
+                        <div className={styles.filterGroup}>
+                            <label>สถานะ</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <option value="all">ทั้งหมด</option>
+                                <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                                <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
+                                <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
+                            </select>
+                        </div>
 
-                                    <select
-                                        value={filterUrgency}
-                                        onChange={(e) => setFilterUrgency(e.target.value)}
-                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
-                                    >
-                                        <option value="all">ความเร่งด่วนทั้งหมด</option>
-                                        <option value="สูง">สูง</option>
-                                        <option value="กลาง">กลาง</option>
-                                        <option value="ต่ำ">ต่ำ</option>
-                                    </select>
+                        <div className={styles.filterGroup}>
+                            <label>ความเร่งด่วน</label>
+                            <select
+                                className={styles.filterSelect}
+                                value={filterUrgency}
+                                onChange={(e) => setFilterUrgency(e.target.value)}
+                            >
+                                <option value="all">ทั้งหมด</option>
+                                <option value="สูง">สูง</option>
+                                <option value="กลาง">กลาง</option>
+                                <option value="ต่ำ">ต่ำ</option>
+                            </select>
+                        </div>
 
-                                    <input
-                                        type="date"
-                                        value={filterDate}
-                                        onChange={(e) => setFilterDate(e.target.value)}
-                                        style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer', colorScheme: 'dark' }}
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-                                >
-                                    + สร้างคำขอใหม่
-                                </button>
-                            </div>
+                        <div className={styles.filterGroup}>
+                            <label>วันที่</label>
+                            <input
+                                type="date"
+                                className={styles.filterSelect}
+                                value={filterDate}
+                                onChange={(e) => setFilterDate(e.target.value)}
+                            />
                         </div>
                     </div>
 
                     {loading ? (
-                        <div style={{ color: 'white', textAlign: 'center', padding: '20px' }}>กำลังโหลดข้อมูล...</div>
+                        <p>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
                     ) : (
-                        <div className={styles.requestGrid}>
-                            {filteredRequests.map((req) => (
-                                <div key={req._id} className={styles.requestCard}>
-                                    <div className={styles.cardTop}>
-                                        <div>
-                                            <span className={styles.statusBadge}>REQ-{req._id.slice(-4)}</span>
-                                            <h3 className={styles.shelterName}>{req.shelterName}</h3>
-                                        </div>
-                                        <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
-                                            เร่งด่วน{req.urgency}
-                                        </span>
-                                    </div>
+                        <>
+                            <table className={styles.requestsTable}>
+                                <thead>
+                                    <tr>
+                                        <th>เลขที่คำขอ</th>
+                                        <th>ศูนย์พักพิง</th>
+                                        <th>สินค้าที่ขอ</th>
+                                        <th>ความเร่งด่วน</th>
+                                        <th>สถานะ</th>
+                                        <th>วันที่สร้าง</th>
+                                        <th>จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredRequests.map((req) => (
+                                        <tr key={req._id}>
+                                            <td className={styles.requestId}>REQ-{req._id.slice(-4)}</td>
+                                            <td>{req.shelterName}</td>
+                                            <td>
+                                                <div className={styles.itemsList}>
+                                                    {req.items.map((item, idx) => (
+                                                        <div key={idx}>{item.itemName} x{item.quantity}</div>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
+                                                    {req.urgency}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={styles.statusBadge}>{req.status}</span>
+                                            </td>
+                                            <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
+                                            <td className={styles.actionsCell}>
+                                                {req.status === 'รอดำเนินการ' && (
+                                                    <button
+                                                        className={styles.createBtn}
+                                                        onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                    >
+                                                        อนุมัติคำขอ
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
 
-                                    <div className={styles.itemList}>
-                                        {req.items.map((item, idx) => (
-                                            <div key={idx} className={styles.itemEntry}>
-                                                <span>{item.itemName}</span>
-                                                <span style={{ fontWeight: '600' }}>{item.quantity} รายการ</span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className={styles.footer}>
-                                        <span className={styles.statusText}>
-                                            สถานะ: {req.status} (เมื่อ {new Date(req.createdAt).toLocaleDateString('th-TH')})
-                                        </span>
-                                        {req.status === 'รอดำเนินการ' && (
-                                            <button
-                                                className={styles.actionBtn}
-                                                onClick={() => handleApprove(req._id)}
-                                            >
-                                                อนุมัติและจัดส่ง
-                                            </button>
-                                        )}
-                                    </div>
+                            {filteredRequests.length === 0 && (
+                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                    <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -218,6 +253,17 @@ export default function DistributionPage() {
                     message={toast.message}
                     type={toast.type}
                     onClose={() => setToast(null)}
+                />
+            )}
+            {confirmDialog && (
+                <ConfirmDialog
+                    title="อนุมัติคำขอเบิกสิ่งของ"
+                    message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? สต็อกสินค้าจะถูกตัดทันที`}
+                    confirmText="อนุมัติคำขอ"
+                    cancelText="ยกเลิก"
+                    isDangerous={true}
+                    onConfirm={confirmCreateRequest}
+                    onCancel={() => setConfirmDialog(null)}
                 />
             )}
         </div>
