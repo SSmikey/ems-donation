@@ -24,8 +24,8 @@ graph TB
     
     C1[Users Collection] --> C
     C2[OperationCenters Collection] --> C
-    C3[Inventory Collection - ยังไม่ถูกใช้] --> C
-    C4[DistributionRequests Collection - ยังไม่ถูกใช้] --> C
+    C3[Inventory Collection] --> C
+    C4[DistributionRequests Collection] --> C
 ```
 
 ---
@@ -107,8 +107,13 @@ interface DistributionRequest {
 - **เชื่อมต่อ**: OperationCenters collection
 - **ขาด**: POST, PUT, DELETE methods
 
-#### 🔴 `/api/inventory` - **ยังไม่มี**
-#### 🔴 `/api/distribution-requests` - **ยังไม่มี**
+#### ✅ [/api/inventory](file:///c:/Users/asus/Documents/Programmig/ssk-ems-donation/src/app/api/inventory/route.ts)
+- **สถานะ**: ใช้งานได้สมบูรณ์ (GET, POST, PUT, DELETE)
+- **เชื่อมต่อ**: Inventory collection
+
+#### ✅ [/api/distribution-requests](file:///c:/Users/asus/Documents/Programmig/ssk-ems-donation/src/app/api/distribution-requests/route.ts)
+- **สถานะ**: ใช้งานได้สมบูรณ์ (GET, POST, PUT, DELETE, APPROVE)
+- **เชื่อมต่อ**: DistributionRequests collection
 
 ---
 

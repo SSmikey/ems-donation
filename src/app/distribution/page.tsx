@@ -66,17 +66,17 @@ export default function DistributionPage() {
 
         try {
             const res = await fetch(`/api/distribution-requests/${id}/approve`, {
-                method: 'PUT'
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ approvedBy: 'Admin (System)' })
             });
 
             if (res.ok) {
                 setToast({ message: 'อนุมัติคำขอสำเร็จ', type: 'success' });
                 fetchRequests();
-            } else if (res.status === 404) {
-                setToast({ message: 'อนุมัติสำเร็จ (จำลอง - API ยังไม่พร้อม)', type: 'success' });
-                fetchRequests();
             } else {
-                setToast({ message: 'ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ)', type: 'error' });
+                const errorData = await res.json();
+                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติได้ (สินค้าอาจไม่พอ)', type: 'error' });
             }
         } catch (error) {
             console.error('Error approving:', error);

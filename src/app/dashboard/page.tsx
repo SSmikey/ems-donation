@@ -11,58 +11,39 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [stats, setStats] = useState({
     shelterCount: 0,
-    totalInventoryValue: 0,
+    totalInventoryItems: 0,
     pendingRequests: 0,
     lowStockCount: 0,
-    chartData: []
+    chartData: [
+      { name: 'จันทร์', requests: 4 },
+      { name: 'อังคาร', requests: 7 },
+      { name: 'พุธ', requests: 5 },
+      { name: 'พฤหัส', requests: 10 },
+      { name: 'ศุกร์', requests: 6 },
+    ]
   });
+  const [categories, setCategories] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        // Fetch Dashboard Stats from API
         const res = await fetch('/api/dashboard/stats');
-        const contentType = res.headers.get("content-type");
-        
-        if (contentType && contentType.includes("application/json")) {
-          const data = await res.json();
-          if (data.success) {
-            setStats(data.data);
-            return;
-          }
-        }
-        
-        throw new Error("API not ready");
-      } catch (error) {
-        console.warn('Error fetching stats, using fallback:', error);
-        
-        // Fallback: ถ้า API stats ยังไม่เสร็จ ให้ลองดึงแค่ shelter count ไปก่อน
-        try {
-          const shelterRes = await fetch('/api/shelters');
-          const shelterContentType = shelterRes.headers.get("content-type");
-          let count = 0;
-          
-          if (shelterContentType && shelterContentType.includes("application/json")) {
-            const shelterData = await shelterRes.json();
-            count = shelterData.data ? shelterData.data.length : 0;
-          }
-          
+        const data = await res.json();
+
+        if (data.success) {
+          const { summary, inventory } = data.data;
           setStats(prev => ({
-              ...prev,
-              shelterCount: count,
-              // Mock data สำหรับกราฟ เพื่อให้ UI ไม่พังถ้า API ยังไม่มา
-              chartData: [
-                  { name: 'จันทร์', requests: 4 },
-                  { name: 'อังคาร', requests: 7 },
-                  { name: 'พุธ', requests: 5 },
-                  { name: 'พฤหัส', requests: 10 },
-                  { name: 'ศุกร์', requests: 6 },
-              ] as any
+            ...prev,
+            shelterCount: summary.totalShelters,
+            totalInventoryItems: summary.totalInventoryItems,
+            pendingRequests: summary.pendingDistributions,
+            lowStockCount: summary.lowStockAlerts,
           }));
-        } catch (fallbackError) {
-          console.error('Fallback error:', fallbackError);
+          setCategories(inventory.byCategory || {});
         }
+      } catch (error) {
+        console.warn('Error fetching stats:', error);
       } finally {
         setLoading(false);
       }
@@ -97,9 +78,16 @@ export default function Dashboard() {
               color="cyan"
             />
             <StatCard
+              title="รายการสินค้าในคลัง"
+              value={loading ? '...' : stats.totalInventoryItems.toLocaleString()}
+              percentage={100}
+              trend="up"
+              color="cyan"
+            />
+            <StatCard
               title="คำขอรอดำเนินการ"
               value={loading ? '...' : stats.pendingRequests.toLocaleString()}
-              percentage={stats.pendingRequests > 5 ? 80 : 20}
+              percentage={stats.pendingRequests > 0 ? 100 : 0}
               trend={stats.pendingRequests > 5 ? "up" : "down"}
               color="purple"
             />
@@ -122,38 +110,42 @@ export default function Dashboard() {
                     กำลังโหลดข้อมูล...
                   </div>
                 ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                    <XAxis dataKey="name" stroke="#ccc" />
-                    <YAxis stroke="#ccc" />
-                    <Tooltip 
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats.chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                      <XAxis dataKey="name" stroke="#ccc" />
+                      <YAxis stroke="#ccc" />
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }}
-                    />
-                    <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
-                  </BarChart>
-                </ResponsiveContainer>
+                      />
+                      <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </div>
             </div>
             <div className={styles.customCard}>
-              <h3 className={styles.cardTitle}>สิ่งที่ต้องการเร่งด่วน</h3>
+              <h3 className={styles.cardTitle}>รายการพัสดุแยกตามหมวดหมู่</h3>
               <div className={styles.neededItems}>
-                <div className={styles.itemRow}>
-                  <span>อาหาร</span>
-                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '80%', backgroundColor: '#4ade80' }}></div></div>
-                  <span>80%</span>
-                </div>
-                <div className={styles.itemRow}>
-                  <span>ยาและเวชภัณฑ์</span>
-                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '45%', backgroundColor: '#fbbf24' }}></div></div>
-                  <span>45%</span>
-                </div>
-                <div className={styles.itemRow}>
-                  <span>น้ำดื่ม</span>
-                  <div className={styles.progressBase}><div className={styles.progressFill} style={{ width: '30%', backgroundColor: '#60a5fa' }}></div></div>
-                  <span>30%</span>
-                </div>
+                {Object.keys(categories).length > 0 ? (
+                  Object.entries(categories).map(([name, data]: [string, any]) => {
+                    const totalQty = data.totalQuantity;
+                    const percent = Math.min(100, (totalQty / 200) * 100);
+                    const color = totalQty < 20 ? '#ef4444' : totalQty < 50 ? '#fbbf24' : '#4ade80';
+
+                    return (
+                      <div key={name} className={styles.itemRow}>
+                        <span style={{ minWidth: '80px' }}>{name}</span>
+                        <div className={styles.progressBase}>
+                          <div className={styles.progressFill} style={{ width: `${percent}%`, backgroundColor: color }}></div>
+                        </div>
+                        <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>{totalQty}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '20px' }}>ไม่มีข้อมูลหมวดหมู่</p>
+                )}
               </div>
             </div>
           </div>
