@@ -25,6 +25,8 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
     const [subdistrict, setSubdistrict] = useState('');
     const [shelterType, setShelterType] = useState('ศูนย์พักพิงหลัก');
     const [capacityStatus, setCapacityStatus] = useState('รองรับได้');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [responsible, setResponsible] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -34,6 +36,8 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
             setSubdistrict(shelter.subdistrict);
             setShelterType(shelter.shelterType);
             setCapacityStatus(shelter.capacityStatus || 'รองรับได้');
+            setPhoneNumber(shelter.phoneNumbers?.[0] || '');
+            setResponsible(shelter.responsible?.[0] || '');
         }
     }, [shelter]);
 
@@ -47,8 +51,8 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
             subdistrict,
             shelterType,
             capacityStatus,
-            responsible: shelter?.responsible || [], // Maintain existing if editing
-            phoneNumbers: shelter?.phoneNumbers || [],
+            responsible: responsible ? [responsible] : shelter?.responsible || [],
+            phoneNumbers: phoneNumber ? [phoneNumber] : shelter?.phoneNumbers || [],
             status: 'active'
         };
 
@@ -82,25 +86,56 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
 
     const modalOverlayStyle: CSSProperties = {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
     };
 
     const modalContentStyle: CSSProperties = {
-        backgroundColor: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '500px', color: '#333'
+        backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '500px',
+        color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
     };
 
     const inputStyle: CSSProperties = {
-        width: '100%', padding: '10px', marginBottom: '16px', border: '1px solid #ddd', borderRadius: '6px'
+        width: '100%', padding: '12px', marginBottom: '16px',
+        border: '1px solid rgba(0, 212, 255, 0.3)',
+        borderRadius: '8px',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        color: '#ffffff',
+        fontSize: '0.95rem'
     };
 
     const labelStyle: CSSProperties = {
-        display: 'block', marginBottom: '6px', fontWeight: 'bold', fontSize: '0.9rem'
+        display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
+        color: 'rgba(255, 255, 255, 0.8)'
+    };
+
+    const selectStyle: CSSProperties = {
+        ...inputStyle,
+        appearance: 'none',
+        paddingRight: '32px',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 12px center',
     };
 
     return (
         <div style={modalOverlayStyle}>
             <div style={modalContentStyle}>
-                <h2 style={{ fontSize: '1.25rem', marginBottom: '20px', fontWeight: 'bold' }}>
+                <style>{`
+                    select option {
+                        background-color: #1a1a2e;
+                        color: #ffffff;
+                        padding: 8px;
+                    }
+                    select option:hover {
+                        background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+                        background-color: #16213e;
+                    }
+                    select option:checked {
+                        background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+                        background-color: #16213e;
+                    }
+                `}</style>
+                <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>
                     {shelter ? 'แก้ไขข้อมูลศูนย์พักพิง' : 'เพิ่มศูนย์พักพิงใหม่'}
                 </h2>
 
@@ -108,7 +143,7 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                     <label style={labelStyle}>ชื่อศูนย์พักพิง</label>
                     <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} required />
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ flex: 1 }}>
                             <label style={labelStyle}>อำเภอ</label>
                             <input style={inputStyle} value={district} onChange={e => setDistrict(e.target.value)} required />
@@ -120,24 +155,42 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                     </div>
 
                     <label style={labelStyle}>ประเภทศูนย์</label>
-                    <select style={inputStyle} value={shelterType} onChange={e => setShelterType(e.target.value)}>
+                    <select style={selectStyle} value={shelterType} onChange={e => setShelterType(e.target.value)}>
                         <option value="ศูนย์พักพิงหลัก">ศูนย์พักพิงหลัก</option>
                         <option value="ศูนย์พักพิงชั่วคราว">ศูนย์พักพิงชั่วคราว</option>
                         <option value="โรงพยาบาลสนาม">โรงพยาบาลสนาม</option>
                     </select>
 
                     <label style={labelStyle}>สถานะความจุ</label>
-                    <select style={inputStyle} value={capacityStatus} onChange={e => setCapacityStatus(e.target.value)}>
+                    <select style={selectStyle} value={capacityStatus} onChange={e => setCapacityStatus(e.target.value)}>
                         <option value="รองรับได้">รองรับได้</option>
                         <option value="ใกล้เต็ม">ใกล้เต็ม</option>
                         <option value="เต็มแล้ว">เต็มแล้ว</option>
                     </select>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                        <button type="button" onClick={onClose} style={{ padding: '10px 20px', border: '1px solid #ddd', borderRadius: '6px', background: 'white' }}>
+                    <label style={labelStyle}>เบอร์โทรศัพท์</label>
+                    <input
+                        style={inputStyle}
+                        type="tel"
+                        placeholder="เช่น 08-1234-5678"
+                        value={phoneNumber}
+                        onChange={e => setPhoneNumber(e.target.value)}
+                    />
+
+                    <label style={labelStyle}>ผู้ดูแล</label>
+                    <input
+                        style={inputStyle}
+                        type="text"
+                        placeholder="ชื่อผู้ดูแลศูนย์พักพิง"
+                        value={responsible}
+                        onChange={e => setResponsible(e.target.value)}
+                    />
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                        <button type="button" onClick={onClose} style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}>
                             ยกเลิก
                         </button>
-                        <button type="submit" disabled={loading} style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold' }}>
+                        <button type="submit" disabled={loading} style={{ padding: '10px 24px', background: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
                             {loading ? 'กำลังบันทึก...' : 'บันทึก'}
                         </button>
                     </div>

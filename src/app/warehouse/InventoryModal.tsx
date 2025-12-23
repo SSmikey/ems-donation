@@ -73,31 +73,56 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
     // Style constants
     const modalOverlayStyle: CSSProperties = {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
     };
 
     const modalContentStyle: CSSProperties = {
-        backgroundColor: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '500px', color: '#333',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '500px',
+        color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
     };
 
     const inputStyle: CSSProperties = {
-        width: '100%', padding: '10px 12px', marginBottom: '16px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '1rem'
+        width: '100%', padding: '12px', marginBottom: '16px',
+        border: '1px solid rgba(0, 212, 255, 0.3)',
+        borderRadius: '8px',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        color: '#ffffff',
+        fontSize: '0.95rem'
     };
 
     const labelStyle: CSSProperties = {
-        display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '0.9rem', color: '#444'
+        display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
+        color: 'rgba(255, 255, 255, 0.8)'
     };
 
-    const submitButtonStyle: CSSProperties = {
-        padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px',
-        fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s'
+    const selectStyle: CSSProperties = {
+        ...inputStyle,
+        appearance: 'none',
+        paddingRight: '32px',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 12px center',
     };
 
     return (
         <div style={modalOverlayStyle}>
             <div style={modalContentStyle}>
-                <h2 style={{ fontSize: '1.25rem', marginBottom: '20px', fontWeight: 'bold' }}>
+                <style>{`
+                    select option {
+                        background-color: #1a1a2e;
+                        color: #ffffff;
+                        padding: 8px;
+                    }
+                    select option:hover {
+                        background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+                        background-color: #16213e;
+                    }
+                    select option:checked {
+                        background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+                        background-color: #16213e;
+                    }
+                `}</style>
+                <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>
                     {item ? 'แก้ไขรายการสินค้า' : 'เพิ่มรายการสินค้าใหม่'}
                 </h2>
 
@@ -117,7 +142,7 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                     <div>
                         <label style={labelStyle}>หมวดหมู่</label>
                         <select
-                            style={inputStyle}
+                            style={selectStyle}
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                         >
@@ -140,7 +165,7 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                         <div style={{ flex: 1 }}>
                             <label style={labelStyle}>หน่วย</label>
                             <select
-                                style={inputStyle}
+                                style={selectStyle}
                                 value={unit}
                                 onChange={(e) => setUnit(e.target.value)}
                             >
@@ -154,11 +179,11 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
                         <button
                             type="button"
                             onClick={onClose}
-                            style={{ padding: '10px 20px', border: '1px solid #ddd', borderRadius: '6px', backgroundColor: 'white', cursor: 'pointer' }}
+                            style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}
                         >
                             ยกเลิก
                         </button>
@@ -166,8 +191,8 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                             type="submit"
                             disabled={loading}
                             style={{
-                                ...submitButtonStyle,
-                                backgroundColor: loading ? '#93c5fd' : '#3b82f6'
+                                padding: '10px 24px', background: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px',
+                                fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', opacity: loading ? 0.7 : 1
                             }}
                         >
                             {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}

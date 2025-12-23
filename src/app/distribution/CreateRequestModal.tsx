@@ -126,43 +126,78 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
   // Inline styles for modal
   const modalOverlayStyle: CSSProperties = {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
   };
 
   const modalContentStyle: CSSProperties = {
-    backgroundColor: 'white', padding: '20px', borderRadius: '8px', width: '90%', maxWidth: '600px', color: '#333'
+    backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '600px',
+    color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
   };
 
   const inputStyle: CSSProperties = {
-    width: '100%', padding: '8px', marginBottom: '10px', border: '1px solid #ccc', borderRadius: '4px'
+    width: '100%', padding: '12px', marginBottom: '16px',
+    border: '1px solid rgba(0, 212, 255, 0.3)',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: '#ffffff',
+    fontSize: '0.95rem'
+  };
+
+  const labelStyle: CSSProperties = {
+    display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
+    color: 'rgba(255, 255, 255, 0.8)'
+  };
+
+  const selectStyle: CSSProperties = {
+    ...inputStyle,
+    appearance: 'none',
+    paddingRight: '32px',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 12px center',
   };
 
   return (
     <div style={modalOverlayStyle}>
       <div style={modalContentStyle}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '15px', fontWeight: 'bold' }}>สร้างคำขอเบิกของใหม่</h2>
+        <style>{`
+          select option {
+            background-color: #1a1a2e;
+            color: #ffffff;
+            padding: 8px;
+          }
+          select option:hover {
+            background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+            background-color: #16213e;
+          }
+          select option:checked {
+            background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+            background-color: #16213e;
+          }
+        `}</style>
+        <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>สร้างคำขอเบิกของใหม่</h2>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label>ศูนย์พักพิง:</label>
-          <select style={inputStyle} value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={labelStyle}>ศูนย์พักพิง:</label>
+          <select style={selectStyle} value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
             <option value="">-- เลือกศูนย์พักพิง --</option>
             {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
           </select>
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label>ความเร่งด่วน:</label>
-          <select style={inputStyle} value={urgency} onChange={e => setUrgency(e.target.value)}>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={labelStyle}>ความเร่งด่วน:</label>
+          <select style={selectStyle} value={urgency} onChange={e => setUrgency(e.target.value)}>
             <option value="ต่ำ">ต่ำ</option>
             <option value="กลาง">กลาง</option>
             <option value="สูง">สูง</option>
           </select>
         </div>
 
-        <div style={{ border: '1px solid #eee', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>
-          <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>เพิ่มรายการสินค้า</h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <select style={{ ...inputStyle, flex: 2 }} value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
+        <div style={{ border: '1px solid rgba(0, 212, 255, 0.2)', padding: '16px', borderRadius: '8px', marginBottom: '16px', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
+          <h3 style={{ fontWeight: '600', marginBottom: '12px', color: '#ffffff', fontSize: '1rem' }}>เพิ่มรายการสินค้า</h3>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+            <select style={{ ...selectStyle, flex: 2, marginBottom: 0 }} value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
               <option value="">-- เลือกสินค้า --</option>
               {inventory.map(i => (
                 <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
@@ -170,40 +205,40 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
             </select>
             <input
               type="number"
-              style={{ ...inputStyle, flex: 1 }}
+              style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
               value={itemQuantity}
               onChange={e => setItemQuantity(Number(e.target.value))}
               min="1"
             />
             <button
               onClick={handleAddItem}
-              style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', padding: '0 15px', height: '42px', cursor: 'pointer' }}
+              style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
             >
               เพิ่ม
             </button>
           </div>
 
           {/* Selected Items List */}
-          <ul style={{ marginTop: '10px', listStyle: 'none', padding: 0 }}>
+          <ul style={{ marginTop: '12px', listStyle: 'none', padding: 0 }}>
             {requestItems.map((item, idx) => (
-              <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #eee' }}>
+              <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(0, 212, 255, 0.1)', color: 'rgba(255, 255, 255, 0.8)' }}>
                 <span>{item.name} x {item.quantity}</span>
-                <button onClick={() => handleRemoveItem(idx)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>ลบ</button>
+                <button onClick={() => handleRemoveItem(idx)} style={{ color: '#ff6b6b', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '500' }}>ลบ</button>
               </li>
             ))}
           </ul>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
           <button
             onClick={onClose}
-            style={{ padding: '10px 20px', border: '1px solid #ccc', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
+            style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}
           >
             ยกเลิก
           </button>
           <button
             onClick={handleSubmit}
-            style={{ padding: '10px 20px', backgroundColor: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            style={{ padding: '10px 24px', backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
           >
             ยืนยันการสร้าง
           </button>
