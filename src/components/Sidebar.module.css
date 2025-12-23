@@ -79,7 +79,7 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-.navLink.active {
+.navLink[data-active='true'] {
   color: #ffffff;
   background: rgba(0, 212, 255, 0.1);
   font-weight: 500;

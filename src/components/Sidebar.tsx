@@ -34,14 +34,14 @@ const menuItems = [
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
+  const [activePath, setActivePath] = useState<string>('');
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setActivePath(pathname);
+  }, [pathname]);
 
   const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/');
+    return activePath === href || activePath.startsWith(href + '/');
   };
 
   return (
@@ -61,7 +61,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <li key={item.href} className={styles.navItem}>
                   <a
                     href={item.href}
-                    className={`${styles.navLink} ${mounted && isActive(item.href) ? styles.active : ''}`}
+                    className={styles.navLink}
+                    suppressHydrationWarning
+                    data-active={isActive(item.href) ? 'true' : 'false'}
                   >
                     <span className={styles.icon}>{item.icon}</span>
                     <span>{item.label}</span>
