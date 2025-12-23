@@ -60,7 +60,7 @@ export default function Dashboard() {
         <div className={styles.contentArea}>
           {/* Page Title */}
           <div className={styles.pageHeader}>
-            <h1>แผงควบคุมหลัก (Donation Dashboard)</h1>
+            <h1>Donation Dashboard</h1>
             <div className={styles.breadcrumb}>
               <span>หน้าหลัก</span>
               <span className={styles.separator}>&gt;</span>
@@ -73,29 +73,21 @@ export default function Dashboard() {
             <StatCard
               title="จำนวนศูนย์พักพิงทั้งหมด"
               value={loading ? '...' : stats.shelterCount.toLocaleString()}
-              percentage={stats.shelterCount > 0 ? 100 : 0}
-              trend="up"
               color="cyan"
             />
             <StatCard
               title="รายการสินค้าในคลัง"
               value={loading ? '...' : stats.totalInventoryItems.toLocaleString()}
-              percentage={100}
-              trend="up"
               color="cyan"
             />
             <StatCard
               title="คำขอรอดำเนินการ"
               value={loading ? '...' : stats.pendingRequests.toLocaleString()}
-              percentage={stats.pendingRequests > 0 ? 100 : 0}
-              trend={stats.pendingRequests > 5 ? "up" : "down"}
               color="purple"
             />
             <StatCard
               title="สินค้าใกล้หมด (Low Stock)"
               value={loading ? '...' : stats.lowStockCount.toLocaleString()}
-              percentage={stats.lowStockCount > 0 ? 100 : 0}
-              trend="down"
               color="red"
             />
           </div>

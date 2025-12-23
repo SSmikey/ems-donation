@@ -12,7 +12,7 @@ const menuItems = [
   {
     section: 'การจัดการหลัก',
     items: [
-      { href: '/dashboard', label: 'แผงควบคุม (Dashboard)', icon: '📊' },
+      { href: '/dashboard', label: 'Dashboard', icon: '📊' },
       { href: '/centers', label: 'จัดการศูนย์พักพิง', icon: '🏠' },
     ],
   },
