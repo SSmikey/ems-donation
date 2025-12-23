@@ -35,6 +35,7 @@
     margin-bottom: 25px;
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .searchInput {
@@ -56,31 +57,160 @@
 
 .filterSelect {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0 15px;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 12px 15px;
     border-radius: 12px;
     color: #fff;
     outline: none;
+    min-width: 180px;
+    transition: all 0.3s ease;
+    font-size: 16px;
 }
 
-.centersGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+.filterSelect:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #00d4ff;
 }
 
-.centerCard {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 20px;
+.filterSelect:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sheltersTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
 }
 
-.centerCard:hover {
-    transform: translateY(-5px);
-    border-color: rgba(74, 222, 128, 0.3);
+.sheltersTable thead {
+    background: rgba(0, 212, 255, 0.1);
+    border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.sheltersTable th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sheltersTable td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.sheltersTable td:last-child {
+    border-right: none;
+}
+
+.sheltersTable th:not(:last-child) {
+    border-right: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.sheltersTable tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.sheltersTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.nameCell {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.editBtn,
+.deleteBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    line-height: 1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editBtn {
+    color: #00d4ff;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.editBtn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: #00d4ff;
+}
+
+.deleteBtn {
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.deleteBtn:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: #ff6b6b;
+}
+
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.paginationBtn {
+    padding: 10px 20px;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    color: #00d4ff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: #00d4ff;
+}
+
+.paginationBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    min-width: 200px;
+    text-align: center;
 }
 
 .statusBadge {
@@ -89,7 +219,6 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    margin-bottom: 12px;
 }
 
 .statusNormal {

@@ -13,11 +13,16 @@ export default function CentersPage() {
     const [shelters, setShelters] = useState<Shelter[]>([]);
     const [filteredShelters, setFilteredShelters] = useState<Shelter[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [filterName, setFilterName] = useState('');
+    const [filterDistrict, setFilterDistrict] = useState('');
+    const [filterSubdistrict, setFilterSubdistrict] = useState('');
+    const [filterType, setFilterType] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingShelter, setEditingShelter] = useState<Shelter | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const [errorInfo, setErrorInfo] = useState<any>(null);
 
@@ -50,14 +55,15 @@ export default function CentersPage() {
 
     useEffect(() => {
         const results = shelters.filter(s => {
-            const matchSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                s.district?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                s.subdistrict?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchName = !filterName || s.name.toLowerCase().includes(filterName.toLowerCase());
+            const matchDistrict = !filterDistrict || s.district?.toLowerCase().includes(filterDistrict.toLowerCase());
+            const matchSubdistrict = !filterSubdistrict || s.subdistrict?.toLowerCase().includes(filterSubdistrict.toLowerCase());
+            const matchType = !filterType || s.shelterType === filterType;
             const matchStatus = filterStatus === 'all' || s.capacityStatus === filterStatus;
-            return matchSearch && matchStatus;
+            return matchName && matchDistrict && matchSubdistrict && matchType && matchStatus;
         });
         setFilteredShelters(results);
-    }, [searchTerm, filterStatus, shelters]);
+    }, [filterName, filterDistrict, filterSubdistrict, filterType, filterStatus, shelters]);
 
     const handleDelete = async (id: string, name: string) => {
         if (!confirm(`ยืนยันการลบศูนย์พักพิง: ${name}?`)) return;
@@ -90,6 +96,25 @@ export default function CentersPage() {
         }
     };
 
+    const uniqueDistricts = Array.from(new Set(shelters.map(s => s.district).filter(Boolean))).sort();
+    const uniqueSubdistricts = Array.from(new Set(
+        shelters
+            .filter(s => !filterDistrict || s.district === filterDistrict)
+            .map(s => s.subdistrict)
+            .filter(Boolean)
+    )).sort();
+    const uniqueTypes = Array.from(new Set(shelters.map(s => s.shelterType).filter(Boolean))).sort();
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredShelters.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedShelters = filteredShelters.slice(startIndex, startIndex + itemsPerPage);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterName, filterDistrict, filterSubdistrict, filterType, filterStatus]);
+
     return (
         <div className={styles.container}>
             <Sidebar isOpen={sidebarOpen} />
@@ -119,19 +144,65 @@ export default function CentersPage() {
                     </div>
 
                     <div className={styles.searchSection}>
+                        <style>{`
+                            select option {
+                                background-color: #1a1a2e;
+                                color: #ffffff;
+                                padding: 8px;
+                            }
+                            select option:hover {
+                                background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+                                background-color: #16213e;
+                            }
+                            select option:checked {
+                                background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+                                background-color: #16213e;
+                            }
+                        `}</style>
                         <input
                             type="text"
-                            placeholder="ค้นหาชื่อศูนย์, อำเภอ, ตำบล..."
+                            placeholder="ชื่อศูนย์พักพิง..."
                             className={styles.searchInput}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={filterName}
+                            onChange={(e) => setFilterName(e.target.value)}
                         />
+                        <select
+                            className={styles.filterSelect}
+                            value={filterDistrict}
+                            onChange={(e) => setFilterDistrict(e.target.value)}
+                        >
+                            <option value="">ทั้งหมด (อำเภอ)</option>
+                            {uniqueDistricts.map(district => (
+                                <option key={district} value={district}>{district}</option>
+                            ))}
+                        </select>
+                        <select
+                            className={styles.filterSelect}
+                            value={filterSubdistrict}
+                            onChange={(e) => setFilterSubdistrict(e.target.value)}
+                            disabled={!filterDistrict}
+                        >
+                            <option value="">ทั้งหมด (ตำบล)</option>
+                            {uniqueSubdistricts.map(subdistrict => (
+                                <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
+                            ))}
+                        </select>
+                        <select
+                            className={styles.filterSelect}
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                        >
+                            <option value="">ทั้งหมด (ประเภท)</option>
+                            {uniqueTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
                         <select
                             className={styles.filterSelect}
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                         >
-                            <option value="all">ทุกสถานะ</option>
+                            <option value="all">ทั้งหมด (สถานะ)</option>
                             <option value="รองรับได้">รองรับได้</option>
                             <option value="ใกล้เต็ม">ใกล้เต็ม</option>
                             <option value="เต็มแล้ว">เต็มแล้ว</option>
@@ -141,51 +212,78 @@ export default function CentersPage() {
                     {loading ? (
                         <p>กำลังโหลดข้อมูลศูนย์พักพิง...</p>
                     ) : (
-                        <div className={styles.centersGrid}>
-                            {filteredShelters.map((s) => (
-                                <div key={s._id} className={styles.centerCard}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <span className={`${styles.statusBadge} ${getStatusClass(s.capacityStatus)}`}>
-                                            {s.capacityStatus || 'ปกติ'}
-                                        </span>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <button
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                                                title="แก้ไข"
-                                                onClick={() => {
-                                                    setEditingShelter(s);
-                                                    setIsModalOpen(true);
-                                                }}
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                                                title="ลบ"
-                                                onClick={() => s._id && handleDelete(s._id, s.name)}
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <h3 className={styles.centerName}>{s.name}</h3>
-                                    <p className={styles.centerLocation}>📍 ต.{s.subdistrict} อ.{s.district}</p>
+                        <>
+                            <table className={styles.sheltersTable}>
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อศูนย์พักพิง</th>
+                                        <th>ตำบล/อำเภอ</th>
+                                        <th>ประเภท</th>
+                                        <th>เบอร์โทร</th>
+                                        <th>ผู้ดูแล</th>
+                                        <th>สถานะ</th>
+                                        <th>จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {paginatedShelters.map((s) => (
+                                        <tr key={s._id}>
+                                            <td className={styles.nameCell}>{s.name}</td>
+                                            <td>ต.{s.subdistrict} อ.{s.district}</td>
+                                            <td>{s.shelterType}</td>
+                                            <td>{s.phoneNumbers?.[0] || '-'}</td>
+                                            <td>{s.responsible?.[0]?.firstName || '-'}</td>
+                                            <td>
+                                                <span className={`${styles.statusBadge} ${getStatusClass(s.capacityStatus)}`}>
+                                                    {s.capacityStatus || 'ปกติ'}
+                                                </span>
+                                            </td>
+                                            <td className={styles.actionsCell}>
+                                                <button
+                                                    className={styles.editBtn}
+                                                    title="แก้ไข"
+                                                    onClick={() => {
+                                                        setEditingShelter(s);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                >
+                                                    แก้ไข
+                                                </button>
+                                                <button
+                                                    className={styles.deleteBtn}
+                                                    title="ลบ"
+                                                    onClick={() => s._id && handleDelete(s._id, s.name)}
+                                                >
+                                                    ลบ
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
 
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.label}>ประเภท:</span>
-                                        <span>{s.shelterType}</span>
+                            {filteredShelters.length === 0 ? null : (
+                                <div className={styles.paginationContainer}>
+                                    <button
+                                        className={styles.paginationBtn}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        ← ก่อนหน้า
+                                    </button>
+                                    <div className={styles.pageInfo}>
+                                        หน้า {currentPage} จาก {totalPages} ({filteredShelters.length} รายการ)
                                     </div>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.label}>เบอร์โทร:</span>
-                                        <span>{s.phoneNumbers?.[0] || '-'}</span>
-                                    </div>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.label}>ผู้ดูแล:</span>
-                                        <span>{s.responsible?.[0]?.firstName || '-'}</span>
-                                    </div>
+                                    <button
+                                        className={styles.paginationBtn}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        ถัดไป →
+                                    </button>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
 
                     {!loading && filteredShelters.length === 0 && (
