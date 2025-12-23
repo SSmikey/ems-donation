@@ -1,0 +1,149 @@
+import { NextResponse } from 'next/server';
+import clientPromise from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
+
+// PUT - Approve distribution request and update inventory
+export async function PUT(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const id = params.id;
+        const body = await request.json();
+
+        // Validate ObjectId format
+        if (!ObjectId.isValid(id)) {
+            return NextResponse.json({
+                error: 'Invalid request ID format',
+                details: 'ID must be a valid MongoDB ObjectId'
+            }, { status: 400 });
+        }
+
+        // Validate approvedBy field
+        if (!body.approvedBy || typeof body.approvedBy !== 'string' || body.approvedBy.trim() === '') {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: ['approvedBy is required and must be a non-empty string']
+            }, { status: 400 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db('ems-donation');
+
+        // 1. Check if distribution request exists
+        const distributionRequest = await db.collection('DistributionRequests').findOne({
+            _id: new ObjectId(id)
+        });
+
+        if (!distributionRequest) {
+            return NextResponse.json({
+                error: 'Distribution request not found',
+                details: `No distribution request found with ID: ${id}`
+            }, { status: 404 });
+        }
+
+        // 2. Check if request is in pending status
+        if (distributionRequest.status !== 'รอดำเนินการ') {
+            return NextResponse.json({
+                error: 'Cannot approve request',
+                details: `Can only approve requests with status 'รอดำเนินการ'. Current status: ${distributionRequest.status}`
+            }, { status: 400 });
+        }
+
+        // 3. Check stock availability for all items
+        const stockCheckErrors: string[] = [];
+        const inventoryUpdates: any[] = [];
+
+        for (const item of distributionRequest.items) {
+            // Find inventory item by name (case-insensitive)
+            const inventoryItem = await db.collection('Inventory').findOne({
+                itemName: { $regex: new RegExp(`^${item.itemName}$`, 'i') }
+            });
+
+            if (!inventoryItem) {
+                stockCheckErrors.push(`Item "${item.itemName}" not found in inventory`);
+                continue;
+            }
+
+            // Check if sufficient stock
+            if (inventoryItem.quantity < item.quantity) {
+                stockCheckErrors.push(
+                    `Insufficient stock for "${item.itemName}". Required: ${item.quantity} ${inventoryItem.unit}, Available: ${inventoryItem.quantity} ${inventoryItem.unit}`
+                );
+                continue;
+            }
+
+            // Store for later update
+            inventoryUpdates.push({
+                _id: inventoryItem._id,
+                itemName: item.itemName,
+                currentQuantity: inventoryItem.quantity,
+                requestedQuantity: item.quantity,
+                newQuantity: inventoryItem.quantity - item.quantity
+            });
+        }
+
+        // 4. If there are stock errors, return them
+        if (stockCheckErrors.length > 0) {
+            return NextResponse.json({
+                error: 'Stock availability check failed',
+                details: stockCheckErrors,
+                requestItems: distributionRequest.items
+            }, { status: 409 }); // 409 Conflict
+        }
+
+        // 5. Update inventory quantities (reduce stock)
+        for (const update of inventoryUpdates) {
+            await db.collection('Inventory').updateOne(
+                { _id: update._id },
+                {
+                    $set: {
+                        quantity: update.newQuantity,
+                        lastUpdated: new Date()
+                    }
+                }
+            );
+
+            console.log(`Reduced "${update.itemName}" from ${update.currentQuantity} to ${update.newQuantity}`);
+        }
+
+        // 6. Update distribution request status
+        const result = await db.collection('DistributionRequests').updateOne(
+            { _id: new ObjectId(id) },
+            {
+                $set: {
+                    status: 'อนุมัติแล้ว',
+                    approvedBy: body.approvedBy,
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        console.log(`Successfully approved distribution request with ID: ${id}`);
+
+        // Fetch updated request
+        const updatedRequest = await db.collection('DistributionRequests').findOne({
+            _id: new ObjectId(id)
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Distribution request approved successfully',
+            data: {
+                request: updatedRequest,
+                inventoryUpdates: inventoryUpdates.map(u => ({
+                    itemName: u.itemName,
+                    previousQuantity: u.currentQuantity,
+                    newQuantity: u.newQuantity,
+                    reduced: u.requestedQuantity
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('Approve Distribution Request Error:', error);
+        return NextResponse.json({
+            error: 'Failed to approve distribution request',
+            details: String(error)
+        }, { status: 500 });
+    }
+}
