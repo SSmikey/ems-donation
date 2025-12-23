@@ -20,6 +20,7 @@ const menuItems = [
     section: 'จัดการทรัพยากร',
     items: [
       { href: '/warehouse', label: 'คลังสินค้าส่วนกลาง', icon: '📦' },
+      { href: '/create-request', label: 'สร้างคำขอเบิกสิ่งของ', icon: '📝' },
       { href: '/distribution', label: 'รายการคำขอเบิกสิ่งของ', icon: '🚚' },
       { href: '/quick-donation', label: 'บันทึกของเข้าด่วน', icon: '⚡' },
     ],

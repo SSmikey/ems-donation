@@ -17,20 +17,27 @@ interface InventoryItem {
 interface CreateRequestModalProps {
   onClose: () => void;
   onSuccess: () => void;
+  initialShelterId?: string;
 }
 
-export default function CreateRequestModal({ onClose, onSuccess }: CreateRequestModalProps) {
+export default function CreateRequestModal({ onClose, onSuccess, initialShelterId }: CreateRequestModalProps) {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
   // Form State
-  const [selectedShelter, setSelectedShelter] = useState('');
+  const [selectedShelter, setSelectedShelter] = useState(initialShelterId || '');
   const [urgency, setUrgency] = useState('กลาง');
   const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number }[]>([]);
 
   // Item Selection State
   const [selectedItem, setSelectedItem] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
+
+  useEffect(() => {
+    if (initialShelterId) {
+      setSelectedShelter(initialShelterId);
+    }
+  }, [initialShelterId]);
 
   useEffect(() => {
     // Fetch Shelters
