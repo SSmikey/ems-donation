@@ -22,12 +22,12 @@ interface CreateRequestModalProps {
 export default function CreateRequestModal({ onClose, onSuccess }: CreateRequestModalProps) {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  
+
   // Form State
   const [selectedShelter, setSelectedShelter] = useState('');
   const [urgency, setUrgency] = useState('กลาง');
   const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number }[]>([]);
-  
+
   // Item Selection State
   const [selectedItem, setSelectedItem] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
@@ -72,7 +72,7 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
 
   const handleAddItem = () => {
     if (!selectedItem || itemQuantity <= 0) return;
-    
+
     const item = inventory.find(i => i._id === selectedItem);
     if (!item) return;
 
@@ -106,7 +106,8 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
           shelterId: selectedShelter,
           items: requestItems.map(i => ({ itemName: i.name, quantity: i.quantity })), // Adjust based on API requirement
           urgency,
-          status: 'รอดำเนินการ'
+          status: 'รอดำเนินการ',
+          requestBy: 'เจ้าหน้าที่ศูนย์'
         })
       });
 
@@ -127,7 +128,7 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
   };
-  
+
   const modalContentStyle: CSSProperties = {
     backgroundColor: 'white', padding: '20px', borderRadius: '8px', width: '90%', maxWidth: '600px', color: '#333'
   };
@@ -140,7 +141,7 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
     <div style={modalOverlayStyle}>
       <div style={modalContentStyle}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '15px', fontWeight: 'bold' }}>สร้างคำขอเบิกของใหม่</h2>
-        
+
         <div style={{ marginBottom: '15px' }}>
           <label>ศูนย์พักพิง:</label>
           <select style={inputStyle} value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
@@ -167,14 +168,14 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
                 <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
               ))}
             </select>
-            <input 
-              type="number" 
-              style={{ ...inputStyle, flex: 1 }} 
-              value={itemQuantity} 
+            <input
+              type="number"
+              style={{ ...inputStyle, flex: 1 }}
+              value={itemQuantity}
               onChange={e => setItemQuantity(Number(e.target.value))}
               min="1"
             />
-            <button 
+            <button
               onClick={handleAddItem}
               style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', padding: '0 15px', height: '42px', cursor: 'pointer' }}
             >
@@ -194,13 +195,13 @@ export default function CreateRequestModal({ onClose, onSuccess }: CreateRequest
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-          <button 
+          <button
             onClick={onClose}
             style={{ padding: '10px 20px', border: '1px solid #ccc', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
           >
             ยกเลิก
           </button>
-          <button 
+          <button
             onClick={handleSubmit}
             style={{ padding: '10px 20px', backgroundColor: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
           >

@@ -85,17 +85,53 @@ export async function GET(request: Request) {
             filter.shelterId = shelterId;
         }
 
-        // Fetch requests with pagination
+        // Build aggregation pipeline for join with shelters
+        const pipeline: any[] = [
+            { $match: filter },
+            {
+                $addFields: {
+                    // Convert string shelterId to ObjectId for join if possible
+                    shelterObjId: {
+                        $cond: {
+                            if: { $eq: [{ $type: "$shelterId" }, "string"] },
+                            then: { $toObjectId: "$shelterId" },
+                            else: "$shelterId"
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'OperationCenters',
+                    localField: 'shelterObjId',
+                    foreignField: '_id',
+                    as: 'shelterInfo'
+                }
+            },
+            {
+                $addFields: {
+                    shelterName: { $arrayElemAt: ['$shelterInfo.name', 0] }
+                }
+            },
+            {
+                $project: {
+                    shelterInfo: 0,
+                    shelterObjId: 0
+                }
+            },
+            { $sort: { createdAt: -1 } },
+            { $skip: offset },
+            { $limit: limit }
+        ];
+
+        // Fetch requests with aggregation
         const requests = await db.collection(collectionName)
-            .find(filter)
-            .sort({ createdAt: -1 }) // Most recent first
-            .skip(offset)
-            .limit(limit)
+            .aggregate(pipeline)
             .toArray();
 
         const total = await db.collection(collectionName).countDocuments(filter);
 
-        console.log(`Successfully fetched ${requests.length} distribution requests (total: ${total})`);
+        console.log(`Successfully fetched ${requests.length} distribution requests with shelter names (total: ${total})`);
 
         return NextResponse.json({
             success: true,

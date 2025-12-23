@@ -11,7 +11,7 @@ interface Request {
     _id: string;
     shelterName: string;
     items: { itemName: string; quantity: number }[];
-    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'จัดส่งแล้ว';
+    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'ส่งมอบแล้ว';
     urgency: 'สูง' | 'กลาง' | 'ต่ำ';
     createdAt: string;
 }
@@ -24,13 +24,13 @@ export default function DistributionPage() {
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterUrgency, setFilterUrgency] = useState('all');
     const [filterDate, setFilterDate] = useState('');
-    const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     const fetchRequests = async () => {
         try {
             setLoading(true);
             const res = await fetch('/api/distribution-requests');
-            
+
             const contentType = res.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
                 const data = await res.json();
@@ -63,12 +63,12 @@ export default function DistributionPage() {
 
     const handleApprove = async (id: string) => {
         if (!confirm('ยืนยันการอนุมัติ? สต็อกสินค้าจะถูกตัดทันที')) return;
-        
+
         try {
             const res = await fetch(`/api/distribution-requests/${id}/approve`, {
                 method: 'PUT'
             });
-            
+
             if (res.ok) {
                 setToast({ message: 'อนุมัติคำขอสำเร็จ', type: 'success' });
                 fetchRequests();
@@ -114,22 +114,23 @@ export default function DistributionPage() {
                             <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
                                 จัดการคำร้องขอทรัพยากรจากศูนย์พักพิงต่างๆ และติดตามสถานะการจัดส่ง
                             </p>
-                            
+
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <select 
-                                        value={filterStatus} 
+                                    <select
+                                        value={filterStatus}
                                         onChange={(e) => setFilterStatus(e.target.value)}
                                         style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
                                     >
                                         <option value="all">สถานะทั้งหมด</option>
                                         <option value="รอดำเนินการ">รอดำเนินการ</option>
                                         <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                        <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
+                                        <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
+                                        <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
                                     </select>
 
-                                    <select 
-                                        value={filterUrgency} 
+                                    <select
+                                        value={filterUrgency}
                                         onChange={(e) => setFilterUrgency(e.target.value)}
                                         style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', cursor: 'pointer' }}
                                     >
@@ -139,7 +140,7 @@ export default function DistributionPage() {
                                         <option value="ต่ำ">ต่ำ</option>
                                     </select>
 
-                                    <input 
+                                    <input
                                         type="date"
                                         value={filterDate}
                                         onChange={(e) => setFilterDate(e.target.value)}
@@ -147,7 +148,7 @@ export default function DistributionPage() {
                                     />
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={() => setIsModalOpen(true)}
                                     style={{ padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
@@ -160,63 +161,63 @@ export default function DistributionPage() {
                     {loading ? (
                         <div style={{ color: 'white', textAlign: 'center', padding: '20px' }}>กำลังโหลดข้อมูล...</div>
                     ) : (
-                    <div className={styles.requestGrid}>
-                        {filteredRequests.map((req) => (
-                            <div key={req._id} className={styles.requestCard}>
-                                <div className={styles.cardTop}>
-                                    <div>
-                                        <span className={styles.statusBadge}>REQ-{req._id.slice(-4)}</span>
-                                        <h3 className={styles.shelterName}>{req.shelterName}</h3>
-                                    </div>
-                                    <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
-                                        เร่งด่วน{req.urgency}
-                                    </span>
-                                </div>
-
-                                <div className={styles.itemList}>
-                                    {req.items.map((item, idx) => (
-                                        <div key={idx} className={styles.itemEntry}>
-                                            <span>{item.itemName}</span>
-                                            <span style={{ fontWeight: '600' }}>{item.quantity} รายการ</span>
+                        <div className={styles.requestGrid}>
+                            {filteredRequests.map((req) => (
+                                <div key={req._id} className={styles.requestCard}>
+                                    <div className={styles.cardTop}>
+                                        <div>
+                                            <span className={styles.statusBadge}>REQ-{req._id.slice(-4)}</span>
+                                            <h3 className={styles.shelterName}>{req.shelterName}</h3>
                                         </div>
-                                    ))}
-                                </div>
+                                        <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
+                                            เร่งด่วน{req.urgency}
+                                        </span>
+                                    </div>
 
-                                <div className={styles.footer}>
-                                    <span className={styles.statusText}>
-                                        สถานะ: {req.status} (เมื่อ {new Date(req.createdAt).toLocaleDateString('th-TH')})
-                                    </span>
-                                    {req.status === 'รอดำเนินการ' && (
-                                        <button 
-                                            className={styles.actionBtn}
-                                            onClick={() => handleApprove(req._id)}
-                                        >
-                                            อนุมัติและจัดส่ง
-                                        </button>
-                                    )}
+                                    <div className={styles.itemList}>
+                                        {req.items.map((item, idx) => (
+                                            <div key={idx} className={styles.itemEntry}>
+                                                <span>{item.itemName}</span>
+                                                <span style={{ fontWeight: '600' }}>{item.quantity} รายการ</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className={styles.footer}>
+                                        <span className={styles.statusText}>
+                                            สถานะ: {req.status} (เมื่อ {new Date(req.createdAt).toLocaleDateString('th-TH')})
+                                        </span>
+                                        {req.status === 'รอดำเนินการ' && (
+                                            <button
+                                                className={styles.actionBtn}
+                                                onClick={() => handleApprove(req._id)}
+                                            >
+                                                อนุมัติและจัดส่ง
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
                     )}
                 </div>
             </div>
-            
+
             {isModalOpen && (
-                <CreateRequestModal 
-                    onClose={() => setIsModalOpen(false)} 
+                <CreateRequestModal
+                    onClose={() => setIsModalOpen(false)}
                     onSuccess={() => {
                         setIsModalOpen(false);
                         fetchRequests();
-                    }} 
+                    }}
                 />
             )}
 
             {toast && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={() => setToast(null)} 
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
                 />
             )}
         </div>
