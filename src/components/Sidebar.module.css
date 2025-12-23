@@ -71,20 +71,18 @@
   text-decoration: none;
   border-radius: 8px;
   font-size: 14px;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .navLink:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.05);
-  border-left-color: rgba(0, 212, 255, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .navLink.active {
   color: #ffffff;
-  background: rgba(0, 212, 255, 0.15);
-  border-left-color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+  font-weight: 500;
 }
 
 .icon {

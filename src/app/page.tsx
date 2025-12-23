@@ -52,7 +52,6 @@ export default function LoginPage() {
       <div className={styles.card}>
         {/* Logo Section */}
         <div className={styles.logoSection}>
-          <div className={styles.logoIcon}>🎯</div>
           <h1 className={styles.appName}>ems-donation</h1>
         </div>
 
@@ -90,7 +89,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Remember Me & Forgot Password */}
+          {/* Remember Me */}
           <div className={styles.optionsRow}>
             <label className={styles.rememberCheckbox}>
               <input
@@ -100,9 +99,6 @@ export default function LoginPage() {
               />
               <span>Remember me?</span>
             </label>
-            <a href="#" className={styles.forgotLink}>
-              Forgot Password?
-            </a>
           </div>
 
           {/* Login Button */}
@@ -110,14 +106,6 @@ export default function LoginPage() {
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'Login'}
           </button>
         </form>
-
-        {/* Sign Up Link */}
-        <div className={styles.signupSection}>
-          <span>Don't have an Account? </span>
-          <a href="#" className={styles.signupLink}>
-            Create Account
-          </a>
-        </div>
       </div>
     </div>
   );
