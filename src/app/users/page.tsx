@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './users.module.css';
@@ -9,11 +9,12 @@ import CreateUserModal from './CreateUserModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface User {
-    id: string;
+    _id: string;
     username: string;
-    fullName: string;
+    firstName: string;
+    lastName: string;
     role: 'admin' | 'staff';
-    status: 'active' | 'inactive';
+    status?: 'active' | 'inactive';
 }
 
 export default function UsersPage() {
@@ -21,29 +22,56 @@ export default function UsersPage() {
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmDialog, setConfirmDialog] = useState<{ userId: string; username: string } | null>(null);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Mock Data สำหรับผู้ใช้งาน
-    const [users, setUsers] = useState<User[]>([
-        { id: '1', username: 'admin@ems.com', fullName: 'Admin User', role: 'admin', status: 'active' },
-        { id: '2', username: 'staff1@ems.com', fullName: 'Somchai Staff', role: 'staff', status: 'active' },
-        { id: '3', username: 'staff2@ems.com', fullName: 'Somsri Volunteer', role: 'staff', status: 'inactive' },
-    ]);
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('/api/users');
+            if (response.ok) {
+                const data = await response.json();
+                setUsers(data);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            setToast({ message: 'โหลดข้อมูลล้มเหลว', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
 
     const handleDelete = (id: string, username: string) => {
         setConfirmDialog({ userId: id, username });
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!confirmDialog) return;
-        setUsers(users.filter(u => u.id !== confirmDialog.userId));
-        setToast({ message: 'ลบผู้ใช้งานสำเร็จ', type: 'success' });
-        setConfirmDialog(null);
+        try {
+            const response = await fetch(`/api/users?id=${confirmDialog.userId}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setToast({ message: 'ลบผู้ใช้งานสำเร็จ', type: 'success' });
+                fetchUsers();
+            } else {
+                setToast({ message: 'ลบผู้ใช้งานล้มเหลว', type: 'error' });
+            }
+        } catch (error) {
+            setToast({ message: 'เกิดข้อผิดพลาดในการลบ', type: 'error' });
+        } finally {
+            setConfirmDialog(null);
+        }
     };
 
     const handleCreateUser = (newUser: any) => {
-        setUsers([...users, newUser]);
         setIsModalOpen(false);
-        setToast({ message: 'เพิ่มผู้ใช้งานสำเร็จ', type: 'success' });
+        setToast({ message: 'เพิ่มผู้ใช้งานสำเร็จ (Mock)', type: 'success' });
+        fetchUsers();
     };
 
     return (
@@ -66,46 +94,50 @@ export default function UsersPage() {
                     </div>
 
                     <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>ชื่อ-นามสกุล</th>
-                                    <th>อีเมล / Username</th>
-                                    <th>สิทธิ์ (Role)</th>
-                                    <th>สถานะ</th>
-                                    <th>จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>{user.fullName}</td>
-                                        <td>{user.username}</td>
-                                        <td>
-                                            <span className={styles.roleBadge} style={{
-                                                backgroundColor: user.role === 'admin' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                                color: user.role === 'admin' ? '#f472b6' : '#60a5fa'
-                                            }}>
-                                                {user.role.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span style={{ color: user.status === 'active' ? '#4ade80' : '#9ca3af' }}>
-                                                ● {user.status === 'active' ? 'ใช้งานปกติ' : 'ระงับการใช้งาน'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleDelete(user.id, user.username)}
-                                                style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}
-                                            >
-                                                ลบ
-                                            </button>
-                                        </td>
+                        {loading ? (
+                            <p style={{ padding: '20px', textAlign: 'center' }}>กำลังโหลดข้อมูล...</p>
+                        ) : (
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อ-นามสกุล</th>
+                                        <th>Username</th>
+                                        <th>สิทธิ์ (Role)</th>
+                                        <th>สถานะ</th>
+                                        <th>จัดการ</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {users.map((user) => (
+                                        <tr key={user._id}>
+                                            <td>{user.firstName} {user.lastName}</td>
+                                            <td>{user.username}</td>
+                                            <td>
+                                                <span className={styles.roleBadge} style={{
+                                                    backgroundColor: user.role === 'admin' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                                    color: user.role === 'admin' ? '#f472b6' : '#60a5fa'
+                                                }}>
+                                                    {user.role.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span style={{ color: (user.status || 'active') === 'active' ? '#4ade80' : '#9ca3af' }}>
+                                                    ● {(user.status || 'active') === 'active' ? 'ใช้งานปกติ' : 'ระงับการใช้งาน'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDelete(user._id, user.username)}
+                                                    style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}
+                                                >
+                                                    ลบ
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>
