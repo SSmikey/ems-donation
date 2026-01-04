@@ -1,30 +1,74 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9.4%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9.4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9.4%;
+    --muted: 0 0% 90.2%;
+    --muted-foreground: 0 0% 39.2%;
+    --accent: 0 84.2% 60.2%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.3% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --ring: 0 84.2% 60.2%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 9.4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 14.2%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 14.2%;
+    --popover-foreground: 0 0% 98%;
+    --muted: 0 0% 23.5%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 84.2% 60.2%;
+    --accent-foreground: 0 0% 9.4%;
+    --destructive: 0 84.3% 60.2%;
+    --destructive-foreground: 0 0% 9.4%;
+    --border: 0 0% 19.8%;
+    --input: 0 0% 19.8%;
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 0 0% 9.4%;
+    --secondary: 0 0% 14.3%;
+    --secondary-foreground: 0 0% 98%;
+    --ring: 0 84.2% 60.2%;
   }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  height: 100%;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* Scrollbar styling */
@@ -44,12 +88,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
