@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import styles from './distribution.module.css';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import CreateRequestModal from './CreateRequestModal';
-import Toast from '@/components/Toast';
-import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface Request {
     _id: string;
+    requestNo?: string;
     shelterName: string;
     items: { itemName: string; quantity: number }[];
     status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'ส่งมอบแล้ว';
@@ -24,9 +27,7 @@ export default function DistributionPage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterUrgency, setFilterUrgency] = useState('all');
-    const [filterDate, setFilterDate] = useState('');
-    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
-    const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchRequests = async () => {
         try {
@@ -63,181 +64,183 @@ export default function DistributionPage() {
         fetchRequests();
     }, []);
 
-    const handleCreateRequest = async (id: string, shelterName: string) => {
-        setConfirmDialog({ requestId: id, shelterName });
-    };
-
-    const confirmCreateRequest = async () => {
-        if (!confirmDialog) return;
-
-        try {
-            const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ approvedBy: 'Admin (System)' })
-            });
-
-            if (res.ok) {
-                setToast({ message: 'อนุมัติคำขอสำเร็จ สต็อกสินค้าจะถูกตัดทันที', type: 'success' });
-                fetchRequests();
-            } else {
-                const errorData = await res.json();
-                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้ (สินค้าอาจไม่พอ)', type: 'error' });
-            }
-        } catch (error) {
-            console.error('Error approving request:', error);
-            setToast({ message: 'เกิดข้อผิดพลาดในการอนุมัติคำขอ', type: 'error' });
-        } finally {
-            setConfirmDialog(null);
+    const getUrgencyColor = (urgency: string) => {
+        switch (urgency) {
+            case 'สูง': return 'bg-red-100 text-red-800';
+            case 'กลาง': return 'bg-amber-100 text-amber-800';
+            default: return 'bg-green-100 text-green-800';
         }
     };
 
-    const getUrgencyClass = (urgency: string) => {
-        switch (urgency) {
-            case 'สูง': return styles.urgencyHigh;
-            case 'กลาง': return styles.urgencyMedium;
-            default: return styles.urgencyLow;
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'รอดำเนินการ': return 'bg-blue-100 text-blue-800';
+            case 'อนุมัติแล้ว': return 'bg-cyan-100 text-cyan-800';
+            case 'กำลังจัดส่ง': return 'bg-purple-100 text-purple-800';
+            default: return 'bg-green-100 text-green-800';
         }
     };
 
     const filteredRequests = requests.filter(req => {
-        if (filterStatus !== 'all' && req.status !== filterStatus) return false;
-        if (filterUrgency !== 'all' && req.urgency !== filterUrgency) return false;
-        if (filterDate) {
-            const reqDate = new Date(req.createdAt).toISOString().split('T')[0];
-            return reqDate === filterDate;
-        }
-        return true;
+        const matchesStatus = filterStatus === 'all' || req.status === filterStatus;
+        const matchesUrgency = filterUrgency === 'all' || req.urgency === filterUrgency;
+        const matchesSearch = req.shelterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            req.requestNo?.includes(searchTerm);
+        return matchesStatus && matchesUrgency && matchesSearch;
     });
 
+    const pendingCount = requests.filter(r => r.status === 'รอดำเนินการ').length;
+    const approvedCount = requests.filter(r => r.status === 'อนุมัติแล้ว').length;
+    const shippingCount = requests.filter(r => r.status === 'กำลังจัดส่ง').length;
+
     return (
-        <div className={styles.container}>
+        <div className="flex h-screen bg-background">
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+
+            <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
-                        <button
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            + สร้างคำขอใหม่
-                        </button>
+                <main className="flex-1 overflow-y-auto p-6">
+                    {/* Page Header */}
+                    <div className="mb-6">
+                        <h1 className="text-3xl font-bold text-foreground">รายการคำขอเบิกสิ่งของ</h1>
+                        <p className="text-muted-foreground mt-1">จัดการคำขอเบิกสินค้าและการจัดส่งไปยังศูนย์พักพิง</p>
                     </div>
 
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterGroup}>
-                            <label>สถานะ</label>
-                            <select
-                                className={styles.filterSelect}
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <option value="all">ทั้งหมด</option>
-                                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
-                                <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
-                            </select>
-                        </div>
+                    {/* Request Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">รอดำเนินการ</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-blue-600">{pendingCount}</div>
+                                <p className="text-xs text-muted-foreground mt-1">คำขออพยพ</p>
+                            </CardContent>
+                        </Card>
 
-                        <div className={styles.filterGroup}>
-                            <label>ความเร่งด่วน</label>
-                            <select
-                                className={styles.filterSelect}
-                                value={filterUrgency}
-                                onChange={(e) => setFilterUrgency(e.target.value)}
-                            >
-                                <option value="all">ทั้งหมด</option>
-                                <option value="สูง">สูง</option>
-                                <option value="กลาง">กลาง</option>
-                                <option value="ต่ำ">ต่ำ</option>
-                            </select>
-                        </div>
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">อนุมัติแล้ว</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-cyan-600">{approvedCount}</div>
+                                <p className="text-xs text-muted-foreground mt-1">รอจัดส่ง</p>
+                            </CardContent>
+                        </Card>
 
-                        <div className={styles.filterGroup}>
-                            <label>วันที่</label>
-                            <input
-                                type="date"
-                                className={styles.filterSelect}
-                                value={filterDate}
-                                onChange={(e) => setFilterDate(e.target.value)}
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">กำลังจัดส่ง</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-purple-600">{shippingCount}</div>
+                                <p className="text-xs text-muted-foreground mt-1">ในขั้นจัดส่ง</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="mb-6">
+                        <Button onClick={() => setIsModalOpen(true)}>
+                            + สร้างคำขอใหม่
+                        </Button>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex gap-3 mb-6 flex-wrap">
+                        <div className="flex-1 min-w-64">
+                            <Input
+                                placeholder="ค้นหาศูนย์พักพิงหรือเลขที่คำขอ..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="px-3 py-2 rounded-md border border-input bg-background text-foreground"
+                        >
+                            <option value="all">สถานะทั้งหมด</option>
+                            <option value="รอดำเนินการ">รอดำเนินการ</option>
+                            <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                            <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
+                            <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
+                        </select>
+                        <select
+                            value={filterUrgency}
+                            onChange={(e) => setFilterUrgency(e.target.value)}
+                            className="px-3 py-2 rounded-md border border-input bg-background text-foreground"
+                        >
+                            <option value="all">ความเร่งด่วนทั้งหมด</option>
+                            <option value="สูง">สูง</option>
+                            <option value="กลาง">กลาง</option>
+                            <option value="ต่ำ">ต่ำ</option>
+                        </select>
                     </div>
 
-                    {loading ? (
-                        <p>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
-                    ) : (
-                        <>
-                            <table className={styles.requestsTable}>
-                                <thead>
-                                    <tr>
-                                        <th>เลขที่คำขอ</th>
-                                        <th>ศูนย์พักพิง</th>
-                                        <th>สินค้าที่ขอ</th>
-                                        <th>ความเร่งด่วน</th>
-                                        <th>สถานะ</th>
-                                        <th>วันที่สร้าง</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredRequests.map((req) => (
-                                        <tr key={req._id}>
-                                            <td className={styles.requestId}>REQ-{req._id.slice(-4)}</td>
-                                            <td>{req.shelterName}</td>
-                                            <td>
-                                                <div className={styles.itemsList}>
-                                                    {req.items.map((item, idx) => (
-                                                        <div key={idx}>{item.itemName} x{item.quantity}</div>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
-                                                    {req.urgency}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={styles.statusBadge}>{req.status}</span>
-                                            </td>
-                                            <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
-                                            <td className={styles.actionsCell}>
-                                                {req.status === 'รอดำเนินการ' && (
-                                                    <button
-                                                        className={styles.createBtn}
-                                                        onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                    >
-                                                        อนุมัติคำขอ
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
-                            {filteredRequests.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
-                                    <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
+                    {/* Requests Table */}
+                    <Card>
+                        <CardContent className="p-0">
+                            {loading ? (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...
                                 </div>
+                            ) : filteredRequests.length === 0 ? (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    ไม่พบรายการคำขอเบิกสิ่งของ
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>เลขที่คำขอ</TableHead>
+                                            <TableHead>ศูนย์พักพิง</TableHead>
+                                            <TableHead>สินค้าที่ขอ</TableHead>
+                                            <TableHead>ความเร่งด่วน</TableHead>
+                                            <TableHead>สถานะ</TableHead>
+                                            <TableHead className="text-right">วันที่สร้าง</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredRequests.map((req) => (
+                                            <TableRow key={req._id}>
+                                                <TableCell className="font-medium">{req.requestNo || `REQ-${req._id.slice(-4)}`}</TableCell>
+                                                <TableCell>{req.shelterName}</TableCell>
+                                                <TableCell>
+                                                    <div className="text-sm space-y-1">
+                                                        {req.items.slice(0, 2).map((item, idx) => (
+                                                            <div key={idx}>{item.itemName} x{item.quantity}</div>
+                                                        ))}
+                                                        {req.items.length > 2 && (
+                                                            <div className="text-xs text-muted-foreground">+{req.items.length - 2} เพิ่มเติม</div>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={getUrgencyColor(req.urgency)}>
+                                                        {req.urgency}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={getStatusColor(req.status)}>
+                                                        {req.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right text-sm text-muted-foreground">
+                                                    {new Date(req.createdAt).toLocaleDateString('th-TH')}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             )}
-                        </>
-                    )}
-                </div>
+                        </CardContent>
+                    </Card>
+                </main>
             </div>
 
+            {/* Create Request Modal */}
             {isModalOpen && (
                 <CreateRequestModal
                     onClose={() => setIsModalOpen(false)}
@@ -245,25 +248,6 @@ export default function DistributionPage() {
                         setIsModalOpen(false);
                         fetchRequests();
                     }}
-                />
-            )}
-
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
-            {confirmDialog && (
-                <ConfirmDialog
-                    title="อนุมัติคำขอเบิกสิ่งของ"
-                    message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? สต็อกสินค้าจะถูกตัดทันที`}
-                    confirmText="อนุมัติคำขอ"
-                    cancelText="ยกเลิก"
-                    isDangerous={true}
-                    onConfirm={confirmCreateRequest}
-                    onCancel={() => setConfirmDialog(null)}
                 />
             )}
         </div>

@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 interface Shelter {
   _id: string;
@@ -12,6 +15,7 @@ interface InventoryItem {
   itemName: string;
   quantity: number;
   unit: string;
+  category: string;
 }
 
 interface CreateRequestModalProps {
@@ -32,6 +36,7 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
   // Item Selection State
   const [selectedItem, setSelectedItem] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialShelterId) {
@@ -71,8 +76,8 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
       .catch(err => {
         console.warn('Using mock inventory:', err);
         setInventory([
-          { _id: 'i1', itemName: 'ข้าวสาร (Mock)', quantity: 100, unit: 'kg' },
-          { _id: 'i2', itemName: 'น้ำดื่ม (Mock)', quantity: 500, unit: 'pack' }
+          { _id: 'i1', itemName: 'ข้าวสาร (Mock)', quantity: 100, unit: 'kg', category: 'อาหาร' },
+          { _id: 'i2', itemName: 'น้ำดื่ม (Mock)', quantity: 500, unit: 'pack', category: 'น้ำดื่ม' }
         ]);
       });
   }, []);
@@ -85,6 +90,13 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
 
     if (itemQuantity > item.quantity) {
       alert(`สินค้าในคลังมีเพียง ${item.quantity} ${item.unit}`);
+      return;
+    }
+
+    // Check if item already added
+    const existingItem = requestItems.find(i => i.itemId === selectedItem);
+    if (existingItem) {
+      alert('สินค้านี้มีอยู่ในรายการแล้ว กรุณาลบและเพิ่มใหม่หากต้องการเปลี่ยนจำนวน');
       return;
     }
 
@@ -105,13 +117,14 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
       return;
     }
 
+    setLoading(true);
     try {
       const res = await fetch('/api/distribution-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shelterId: selectedShelter,
-          items: requestItems.map(i => ({ itemName: i.name, quantity: i.quantity })), // Adjust based on API requirement
+          items: requestItems.map(i => ({ itemName: i.name, quantity: i.quantity })),
           urgency,
           status: 'รอดำเนินการ',
           requestBy: 'เจ้าหน้าที่ศูนย์'
@@ -122,133 +135,169 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         alert('สร้างคำขอสำเร็จ');
         onSuccess();
       } else {
-        alert('เกิดข้อผิดพลาดในการสร้างคำขอ');
+        const errorData = await res.json();
+        alert(errorData.error || 'เกิดข้อผิดพลาดในการสร้างคำขอ');
       }
     } catch (error) {
       console.error('Error creating request:', error);
       alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Inline styles for modal
-  const modalOverlayStyle: CSSProperties = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-  };
-
-  const modalContentStyle: CSSProperties = {
-    backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '600px',
-    color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
-  };
-
-  const inputStyle: CSSProperties = {
-    width: '100%', padding: '12px', marginBottom: '16px',
-    border: '1px solid rgba(0, 212, 255, 0.3)',
-    borderRadius: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    color: '#ffffff',
-    fontSize: '0.95rem'
-  };
-
-  const labelStyle: CSSProperties = {
-    display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
-    color: 'rgba(255, 255, 255, 0.8)'
-  };
-
-  const selectStyle: CSSProperties = {
-    ...inputStyle,
-    appearance: 'none',
-    paddingRight: '32px',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 12px center',
-  };
+  const selectedShelterName = shelters.find(s => s._id === selectedShelter)?.name || '';
+  const availableItem = inventory.find(i => i._id === selectedItem);
 
   return (
-    <div style={modalOverlayStyle}>
-      <div style={modalContentStyle}>
-        <style>{`
-          select option {
-            background-color: #1a1a2e;
-            color: #ffffff;
-            padding: 8px;
-          }
-          select option:hover {
-            background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-            background-color: #16213e;
-          }
-          select option:checked {
-            background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-            background-color: #16213e;
-          }
-        `}</style>
-        <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>สร้างคำขอเบิกของใหม่</h2>
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={labelStyle}>ศูนย์พักพิง:</label>
-          <select style={selectStyle} value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
-            <option value="">-- เลือกศูนย์พักพิง --</option>
-            {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-          </select>
+    <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-1000 p-4">
+      <div className="bg-card rounded-lg border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg">
+        {/* Modal Header */}
+        <div className="sticky top-0 bg-card border-b border-border p-6">
+          <h2 className="text-2xl font-bold text-foreground">สร้างคำขอเบิกของใหม่</h2>
+          <p className="text-sm text-muted-foreground mt-1">เลือกศูนย์พักพิงและรายการสินค้าที่ต้องการขอเบิก</p>
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={labelStyle}>ความเร่งด่วน:</label>
-          <select style={selectStyle} value={urgency} onChange={e => setUrgency(e.target.value)}>
-            <option value="ต่ำ">ต่ำ</option>
-            <option value="กลาง">กลาง</option>
-            <option value="สูง">สูง</option>
-          </select>
-        </div>
-
-        <div style={{ border: '1px solid rgba(0, 212, 255, 0.2)', padding: '16px', borderRadius: '8px', marginBottom: '16px', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
-          <h3 style={{ fontWeight: '600', marginBottom: '12px', color: '#ffffff', fontSize: '1rem' }}>เพิ่มรายการสินค้า</h3>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-            <select style={{ ...selectStyle, flex: 2, marginBottom: 0 }} value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
-              <option value="">-- เลือกสินค้า --</option>
-              {inventory.map(i => (
-                <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
-              value={itemQuantity}
-              onChange={e => setItemQuantity(Number(e.target.value))}
-              min="1"
-            />
-            <button
-              onClick={handleAddItem}
-              style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+        {/* Modal Content */}
+        <div className="p-6 space-y-6">
+          {/* Shelter Selection */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-foreground">ศูนย์พักพิง *</label>
+            <select
+              value={selectedShelter}
+              onChange={e => setSelectedShelter(e.target.value)}
+              className="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground"
             >
-              เพิ่ม
-            </button>
+              <option value="">-- เลือกศูนย์พักพิง --</option>
+              {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+            </select>
           </div>
 
-          {/* Selected Items List */}
-          <ul style={{ marginTop: '12px', listStyle: 'none', padding: 0 }}>
-            {requestItems.map((item, idx) => (
-              <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(0, 212, 255, 0.1)', color: 'rgba(255, 255, 255, 0.8)' }}>
-                <span>{item.name} x {item.quantity}</span>
-                <button onClick={() => handleRemoveItem(idx)} style={{ color: '#ff6b6b', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '500' }}>ลบ</button>
-              </li>
-            ))}
-          </ul>
+          {/* Urgency Selection */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-foreground">ความเร่งด่วน *</label>
+            <div className="flex gap-3">
+              {['ต่ำ', 'กลาง', 'สูง'].map(level => (
+                <label key={level} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="urgency"
+                    value={level}
+                    checked={urgency === level}
+                    onChange={e => setUrgency(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">{level}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Items Section */}
+          <div className="border border-border rounded-lg p-4 bg-muted/20">
+            <h3 className="font-semibold mb-4 text-foreground">เพิ่มรายการสินค้า *</h3>
+
+            {/* Add Item Controls */}
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-foreground">เลือกสินค้า</label>
+                <select
+                  value={selectedItem}
+                  onChange={e => setSelectedItem(e.target.value)}
+                  className="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground"
+                >
+                  <option value="">-- เลือกสินค้า --</option>
+                  {inventory.map(i => (
+                    <option key={i._id} value={i._id}>
+                      {i.itemName} (คงเหลือ: {i.quantity} {i.unit})
+                    </option>
+                  ))}
+                </select>
+                {availableItem && (
+                  <p className="text-xs text-muted-foreground mt-1">หมวดหมู่: {availableItem.category}</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-2 text-foreground">จำนวน</label>
+                  <Input
+                    type="number"
+                    value={itemQuantity}
+                    onChange={e => setItemQuantity(Number(e.target.value))}
+                    min="1"
+                    max={availableItem?.quantity || 999}
+                  />
+                </div>
+                <Button
+                  onClick={handleAddItem}
+                  disabled={!selectedItem || itemQuantity <= 0}
+                  className="whitespace-nowrap"
+                >
+                  เพิ่ม
+                </Button>
+              </div>
+            </div>
+
+            {/* Selected Items List */}
+            {requestItems.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <h4 className="font-medium mb-3 text-foreground">รายการสินค้าที่เลือก</h4>
+                <div className="space-y-2">
+                  {requestItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 bg-background rounded border border-border"
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">จำนวน: {item.quantity} หน่วย</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveItem(idx)}
+                        className="text-destructive"
+                      >
+                        ลบ
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
+                  <p className="text-sm text-foreground">
+                    รวม: <span className="font-semibold">{requestItems.length}</span> รายการ
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Summary */}
+          {selectedShelterName && requestItems.length > 0 && (
+            <div className="p-4 bg-accent/10 rounded-lg border border-accent/30">
+              <p className="text-sm text-foreground">
+                <span className="font-semibold">ศูนย์พักพิง:</span> {selectedShelterName}
+              </p>
+              <p className="text-sm text-foreground mt-2">
+                <span className="font-semibold">ความเร่งด่วน:</span>
+                <Badge className="ml-2" variant="outline">{urgency}</Badge>
+              </p>
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-          <button
-            onClick={onClose}
-            style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
+        {/* Modal Footer */}
+        <div className="sticky bottom-0 bg-card border-t border-border p-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={onClose}>
             ยกเลิก
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
-            style={{ padding: '10px 24px', backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+            disabled={loading || !selectedShelter || requestItems.length === 0}
           >
-            ยืนยันการสร้าง
-          </button>
+            {loading ? 'กำลังสร้าง...' : 'ยืนยันการสร้าง'}
+          </Button>
         </div>
       </div>
     </div>
