@@ -10,7 +10,9 @@ interface Shelter {
 interface InventoryItem {
   _id: string;
   itemName: string;
-  quantity: number;
+  quantity: number;        // Total
+  reserved?: number;       // Reserved
+  available?: number;      // Available
   unit: string;
 }
 
@@ -58,8 +60,8 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         ]);
       });
 
-    // Fetch Inventory
-    fetch('/api/inventory')
+    // Fetch Inventory with available stock
+    fetch('/api/inventory/available')
       .then(async res => {
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) return res.json();
@@ -71,8 +73,8 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
       .catch(err => {
         console.warn('Using mock inventory:', err);
         setInventory([
-          { _id: 'i1', itemName: 'ข้าวสาร (Mock)', quantity: 100, unit: 'kg' },
-          { _id: 'i2', itemName: 'น้ำดื่ม (Mock)', quantity: 500, unit: 'pack' }
+          { _id: 'i1', itemName: 'ข้าวสาร (Mock)', quantity: 100, reserved: 20, available: 80, unit: 'kg' },
+          { _id: 'i2', itemName: 'น้ำดื่ม (Mock)', quantity: 500, reserved: 100, available: 400, unit: 'pack' }
         ]);
       });
   }, []);
@@ -83,8 +85,10 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
     const item = inventory.find(i => i._id === selectedItem);
     if (!item) return;
 
-    if (itemQuantity > item.quantity) {
-      alert(`สินค้าในคลังมีเพียง ${item.quantity} ${item.unit}`);
+    // Check available stock (not total stock)
+    const availableStock = item.available || (item.quantity - (item.reserved || 0));
+    if (itemQuantity > availableStock) {
+      alert(`สินค้าพร้อมใช้มีเพียง ${availableStock} ${item.unit} (รวม: ${item.quantity}, จองแล้ว: ${item.reserved || 0})`);
       return;
     }
 

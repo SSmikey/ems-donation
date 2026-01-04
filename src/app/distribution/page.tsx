@@ -12,9 +12,11 @@ interface Request {
     _id: string;
     shelterName: string;
     items: { itemName: string; quantity: number }[];
-    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'ส่งมอบแล้ว';
+    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'สำเร็จ' | 'ยกเลิก';
     urgency: 'สูง' | 'กลาง' | 'ต่ำ';
     createdAt: string;
+    cancelledAt?: string;
+    cancellationReason?: string;
 }
 
 export default function DistributionPage() {
@@ -26,7 +28,8 @@ export default function DistributionPage() {
     const [filterUrgency, setFilterUrgency] = useState('all');
     const [filterDate, setFilterDate] = useState('');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
-    const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string; action: 'approve' | 'ship' | 'confirm' | 'cancel' } | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
 
     const fetchRequests = async () => {
         try {
@@ -63,30 +66,59 @@ export default function DistributionPage() {
         fetchRequests();
     }, []);
 
-    const handleCreateRequest = async (id: string, shelterName: string) => {
-        setConfirmDialog({ requestId: id, shelterName });
+    const handleAction = (id: string, shelterName: string, action: 'approve' | 'ship' | 'confirm' | 'cancel') => {
+        setConfirmDialog({ requestId: id, shelterName, action });
     };
 
-    const confirmCreateRequest = async () => {
+    const confirmAction = async () => {
         if (!confirmDialog) return;
 
         try {
-            const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
-                method: 'PUT',
+            let endpoint = '';
+            let method = 'PUT';
+            let body: any = {};
+
+            switch (confirmDialog.action) {
+                case 'approve':
+                    endpoint = `/api/distribution-requests/${confirmDialog.requestId}/approve`;
+                    body = { approvedBy: 'Admin (System)' };
+                    break;
+                case 'ship':
+                    endpoint = `/api/distribution-requests/${confirmDialog.requestId}/ship`;
+                    break;
+                case 'confirm':
+                    endpoint = `/api/distribution-requests/${confirmDialog.requestId}/confirm`;
+                    body = { confirmedBy: 'Admin (System)' };
+                    break;
+                case 'cancel':
+                    endpoint = `/api/distribution-requests/${confirmDialog.requestId}/cancel`;
+                    body = { cancelledBy: 'Admin (System)', cancellationReason: cancelReason || 'ไม่มีเหตุผลระบุ' };
+                    break;
+            }
+
+            const res = await fetch(endpoint, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ approvedBy: 'Admin (System)' })
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {
-                setToast({ message: 'อนุมัติคำขอสำเร็จ สต็อกสินค้าจะถูกตัดทันที', type: 'success' });
+                const messages: Record<string, string> = {
+                    approve: 'อนุมัติคำขอสำเร็จ (สต็อกถูกจองแล้วจากการสร้างคำขอ)',
+                    ship: 'อัพเดทสถานะเป็นกำลังจัดส่งสำเร็จ',
+                    confirm: 'ยืนยันรับของสำเร็จ (สต็อกถูกตัดแล้ว)',
+                    cancel: 'ยกเลิกคำขอสำเร็จ (สต็อกถูกคืนแล้ว)'
+                };
+                setToast({ message: messages[confirmDialog.action], type: 'success' });
+                setCancelReason('');
                 fetchRequests();
             } else {
                 const errorData = await res.json();
-                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้ (สินค้าอาจไม่พอ)', type: 'error' });
+                setToast({ message: errorData.error || 'ไม่สามารถดำเนินการได้', type: 'error' });
             }
         } catch (error) {
-            console.error('Error approving request:', error);
-            setToast({ message: 'เกิดข้อผิดพลาดในการอนุมัติคำขอ', type: 'error' });
+            console.error('Error:', error);
+            setToast({ message: 'เกิดข้อผิดพลาดในการดำเนินการ', type: 'error' });
         } finally {
             setConfirmDialog(null);
         }
@@ -137,7 +169,8 @@ export default function DistributionPage() {
                                 <option value="รอดำเนินการ">รอดำเนินการ</option>
                                 <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
                                 <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
-                                <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
+                                <option value="สำเร็จ">สำเร็จ</option>
+                                <option value="ยกเลิก">ยกเลิก</option>
                             </select>
                         </div>
 
@@ -204,14 +237,54 @@ export default function DistributionPage() {
                                             </td>
                                             <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
                                             <td className={styles.actionsCell}>
-                                                {req.status === 'รอดำเนินการ' && (
-                                                    <button
-                                                        className={styles.createBtn}
-                                                        onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                    >
-                                                        อนุมัติคำขอ
-                                                    </button>
-                                                )}
+                                                <div className="d-flex gap-2 flex-wrap">
+                                                    {req.status === 'รอดำเนินการ' && (
+                                                        <>
+                                                            <button
+                                                                className={`${styles.createBtn} btn btn-sm`}
+                                                                onClick={() => handleAction(req._id, req.shelterName || 'ศูนย์พักพิง', 'approve')}
+                                                            >
+                                                                อนุมัติ
+                                                            </button>
+                                                            <button
+                                                                className={`btn btn-sm btn-danger`}
+                                                                onClick={() => handleAction(req._id, req.shelterName || 'ศูนย์พักพิง', 'cancel')}
+                                                            >
+                                                                ยกเลิก
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {req.status === 'อนุมัติแล้ว' && (
+                                                        <>
+                                                            <button
+                                                                className={`${styles.createBtn} btn btn-sm`}
+                                                                onClick={() => handleAction(req._id, req.shelterName || 'ศูนย์พักพิง', 'ship')}
+                                                            >
+                                                                จัดส่ง
+                                                            </button>
+                                                            <button
+                                                                className={`btn btn-sm btn-danger`}
+                                                                onClick={() => handleAction(req._id, req.shelterName || 'ศูนย์พักพิง', 'cancel')}
+                                                            >
+                                                                ยกเลิก
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {req.status === 'กำลังจัดส่ง' && (
+                                                        <button
+                                                            className={`btn btn-sm btn-success`}
+                                                            onClick={() => handleAction(req._id, req.shelterName || 'ศูนย์พักพิง', 'confirm')}
+                                                        >
+                                                            ยืนยันรับของ
+                                                        </button>
+                                                    )}
+                                                    {req.status === 'สำเร็จ' && (
+                                                        <span className="badge bg-success">เสร็จสิ้น</span>
+                                                    )}
+                                                    {req.status === 'ยกเลิก' && (
+                                                        <span className="badge bg-danger">ยกเลิก</span>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -246,15 +319,58 @@ export default function DistributionPage() {
                 />
             )}
             {confirmDialog && (
-                <ConfirmDialog
-                    title="อนุมัติคำขอเบิกสิ่งของ"
-                    message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? สต็อกสินค้าจะถูกตัดทันที`}
-                    confirmText="อนุมัติคำขอ"
-                    cancelText="ยกเลิก"
-                    isDangerous={true}
-                    onConfirm={confirmCreateRequest}
-                    onCancel={() => setConfirmDialog(null)}
-                />
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {confirmDialog.action === 'approve' && 'อนุมัติคำขอเบิกสิ่งของ'}
+                                    {confirmDialog.action === 'ship' && 'จัดส่งสิ่งของ'}
+                                    {confirmDialog.action === 'confirm' && 'ยืนยันรับสิ่งของ'}
+                                    {confirmDialog.action === 'cancel' && 'ยกเลิกคำขอเบิกสิ่งของ'}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={() => setConfirmDialog(null)}></button>
+                            </div>
+                            <div className="modal-body">
+                                {confirmDialog.action === 'approve' && (
+                                    <p>ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "{confirmDialog.shelterName}"?<br/><small className="text-muted">สต็อกถูกจองแล้วตั้งแต่การสร้างคำขอ ตอนนี้เพียงแต่อนุมัติสถานะ</small></p>
+                                )}
+                                {confirmDialog.action === 'ship' && (
+                                    <p>ยืนยันการจัดส่งสิ่งของให้กับ "{confirmDialog.shelterName}"?<br/><small className="text-muted">สต็อกยังไม่ถูกตัด จะตัดเมื่อยืนยันรับของ</small></p>
+                                )}
+                                {confirmDialog.action === 'confirm' && (
+                                    <p>ยืนยันว่า "{confirmDialog.shelterName}" ได้รับสิ่งของแล้ว?<br/><small className="text-muted">สต็อกจะถูกตัดทันที</small></p>
+                                )}
+                                {confirmDialog.action === 'cancel' && (
+                                    <>
+                                        <p>ยกเลิกคำขอเบิกสิ่งของสำหรับ "{confirmDialog.shelterName}"?</p>
+                                        <div className="mb-3">
+                                            <label className="form-label">เหตุผลการยกเลิก</label>
+                                            <textarea
+                                                className="form-control"
+                                                placeholder="ระบุเหตุผลการยกเลิก..."
+                                                value={cancelReason}
+                                                onChange={(e) => setCancelReason(e.target.value)}
+                                                rows={3}
+                                            />
+                                        </div>
+                                        <small className="text-muted">สต็อกที่จองไว้จะถูกคืนแล้ว</small>
+                                    </>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setConfirmDialog(null)}>ยกเลิก</button>
+                                <button
+                                    type="button"
+                                    className={`btn ${confirmDialog.action === 'cancel' ? 'btn-danger' : 'btn-primary'}`}
+                                    onClick={confirmAction}
+                                >
+                                    ยืนยัน
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

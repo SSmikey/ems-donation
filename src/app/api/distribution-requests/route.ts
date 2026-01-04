@@ -3,7 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 // Valid status values
-const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'ส่งมอบแล้ว'];
+const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'สำเร็จ', 'ยกเลิก'];
 
 // Valid urgency values
 const VALID_URGENCIES = ['ต่ำ', 'กลาง', 'สูง'];
@@ -154,7 +154,7 @@ export async function GET(request: Request) {
     }
 }
 
-// POST - Create new distribution request
+// POST - Create new distribution request and reserve stock
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -184,7 +184,80 @@ export async function POST(request: Request) {
             }, { status: 404 });
         }
 
-        // Prepare distribution request data
+        // STEP 1: Check stock availability (not reserved stock) for all items
+        const stockCheckErrors: string[] = [];
+        const inventoryUpdates: any[] = [];
+
+        for (const item of body.items) {
+            // Find inventory item by name (case-insensitive)
+            const inventoryItem = await db.collection('Inventory').findOne({
+                itemName: { $regex: new RegExp(`^${item.itemName}$`, 'i') }
+            });
+
+            if (!inventoryItem) {
+                stockCheckErrors.push(`Item "${item.itemName}" not found in inventory`);
+                continue;
+            }
+
+            // Check if sufficient available stock (quantity - reserved)
+            const availableStock = inventoryItem.quantity - (inventoryItem.reserved || 0);
+            if (availableStock < item.quantity) {
+                stockCheckErrors.push(
+                    `Insufficient available stock for "${item.itemName}". Required: ${item.quantity} ${inventoryItem.unit}, Available: ${availableStock} ${inventoryItem.unit} (Total: ${inventoryItem.quantity}, Reserved: ${inventoryItem.reserved || 0})`
+                );
+                continue;
+            }
+
+            // Store for later update (reserve stock)
+            inventoryUpdates.push({
+                _id: inventoryItem._id,
+                itemName: item.itemName,
+                currentQuantity: inventoryItem.quantity,
+                currentReserved: inventoryItem.reserved || 0,
+                requestedQuantity: item.quantity,
+                newReserved: (inventoryItem.reserved || 0) + item.quantity
+            });
+        }
+
+        // If there are stock errors, return them
+        if (stockCheckErrors.length > 0) {
+            return NextResponse.json({
+                error: 'Stock availability check failed',
+                details: stockCheckErrors,
+                requestItems: body.items
+            }, { status: 409 }); // 409 Conflict
+        }
+
+        // STEP 2: Reserve stock for all items
+        for (const update of inventoryUpdates) {
+            await db.collection('Inventory').updateOne(
+                { _id: update._id },
+                {
+                    $set: {
+                        reserved: update.newReserved,
+                        lastUpdated: new Date()
+                    }
+                }
+            );
+
+            // Log the reservation
+            await db.collection('StockLogs').insertOne({
+                itemName: update.itemName,
+                itemId: update._id.toString(),
+                action: 'reserve',
+                previousQuantity: update.currentQuantity,
+                currentReserved: update.currentReserved,
+                newReserved: update.newReserved,
+                change: update.requestedQuantity,
+                performedBy: body.requestBy,
+                notes: `Reserved for distribution request (will be created)`,
+                createdAt: new Date()
+            });
+
+            console.log(`Reserved "${update.itemName}": ${update.currentReserved} → ${update.newReserved}`);
+        }
+
+        // STEP 3: Create distribution request
         const newRequest = {
             shelterId: body.shelterId,
             items: body.items,
@@ -192,21 +265,30 @@ export async function POST(request: Request) {
             urgency: body.urgency,
             requestBy: body.requestBy,
             approvedBy: null,
+            cancelledBy: null,
+            cancellationReason: null,
+            cancelledAt: null,
             createdAt: new Date(),
             updatedAt: new Date()
         };
 
         const result = await db.collection(collectionName).insertOne(newRequest);
 
-        console.log(`Successfully created distribution request with ID: ${result.insertedId}`);
+        console.log(`Successfully created distribution request with ID: ${result.insertedId} (stock reserved for ${body.items.length} items)`);
 
         return NextResponse.json({
             success: true,
-            message: 'Distribution request created successfully',
+            message: 'Distribution request created successfully and stock reserved',
             data: {
                 _id: result.insertedId,
                 ...newRequest
-            }
+            },
+            stockReservations: inventoryUpdates.map(u => ({
+                itemName: u.itemName,
+                reserved: u.requestedQuantity,
+                totalReserved: u.newReserved,
+                available: u.currentQuantity - u.newReserved
+            }))
         }, { status: 201 });
     } catch (error) {
         console.error('POST Distribution Request Error:', error);

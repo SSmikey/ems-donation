@@ -11,7 +11,9 @@ interface InventoryItem {
     _id: string;
     itemName: string;
     category: string;
-    quantity: number;
+    quantity: number;      // Total stock
+    reserved?: number;     // Reserved stock
+    available?: number;    // Available stock (calculated: quantity - reserved)
     unit: string;
     lastUpdated?: string;
 }
@@ -29,7 +31,7 @@ export default function WarehousePage() {
     const fetchInventory = async () => {
         try {
             setLoading(true);
-            const res = await fetch('/api/inventory');
+            const res = await fetch('/api/inventory/available');
             const data = await res.json();
             if (data.success) {
                 setInventory(data.data);
@@ -52,9 +54,9 @@ export default function WarehousePage() {
         return matchesSearch && matchesCategory;
     });
 
-    const getStatusInfo = (quantity: number) => {
-        if (quantity >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
-        if (quantity >= 20) return { label: 'เหลือน้อย', color: '#fbbf24', percent: '40%' };
+    const getStatusInfo = (available: number) => {
+        if (available >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
+        if (available >= 20) return { label: 'เหลือน้อย', color: '#fbbf24', percent: '40%' };
         return { label: 'ขาดแคลน', color: '#f87171', percent: '15%' };
     };
 
@@ -136,7 +138,9 @@ export default function WarehousePage() {
                                     <tr>
                                         <th>ชื่อสินค้า</th>
                                         <th>หมวดหมู่</th>
-                                        <th>จำนวนคงเหลือ</th>
+                                        <th>รวมทั้งหมด</th>
+                                        <th>จองแล้ว</th>
+                                        <th>พร้อมใช้</th>
                                         <th>หน่วย</th>
                                         <th>สถานะสต็อก</th>
                                         <th>จัดการ</th>
@@ -144,12 +148,15 @@ export default function WarehousePage() {
                                 </thead>
                                 <tbody>
                                     {filteredItems.map(item => {
-                                        const status = getStatusInfo(item.quantity);
+                                        const available = item.available || (item.quantity - (item.reserved || 0));
+                                        const status = getStatusInfo(available);
                                         return (
                                             <tr key={item._id}>
                                                 <td className="fw-medium">{item.itemName}</td>
                                                 <td><span className={styles.categoryTag}>{item.category}</span></td>
-                                                <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
+                                                <td style={{ fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
+                                                <td style={{ fontWeight: '600', color: '#fbbf24' }}>{(item.reserved || 0).toLocaleString()}</td>
+                                                <td style={{ color: status.color, fontWeight: '600' }}>{available.toLocaleString()}</td>
                                                 <td>{item.unit}</td>
                                                 <td>
                                                     <div className={`d-flex align-items-center gap-2 ${styles.stockLevel}`}>

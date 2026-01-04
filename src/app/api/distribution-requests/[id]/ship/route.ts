@@ -2,28 +2,19 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-// PUT - Approve distribution request (stock already reserved, no inventory change)
+// PUT - Update request status to "กำลังจัดส่ง" (In Transit)
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
         const id = params.id;
-        const body = await request.json();
 
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({
                 error: 'Invalid request ID format',
                 details: 'ID must be a valid MongoDB ObjectId'
-            }, { status: 400 });
-        }
-
-        // Validate approvedBy field
-        if (!body.approvedBy || typeof body.approvedBy !== 'string' || body.approvedBy.trim() === '') {
-            return NextResponse.json({
-                error: 'Validation failed',
-                details: ['approvedBy is required and must be a non-empty string']
             }, { status: 400 });
         }
 
@@ -42,28 +33,26 @@ export async function PUT(
             }, { status: 404 });
         }
 
-        // 2. Check if request is in pending status
-        if (distributionRequest.status !== 'รอดำเนินการ') {
+        // 2. Check if request is in approved status
+        if (distributionRequest.status !== 'อนุมัติแล้ว') {
             return NextResponse.json({
-                error: 'Cannot approve request',
-                details: `Can only approve requests with status 'รอดำเนินการ'. Current status: ${distributionRequest.status}`
+                error: 'Cannot ship request',
+                details: `Can only ship requests with status 'อนุมัติแล้ว'. Current status: ${distributionRequest.status}`
             }, { status: 400 });
         }
 
-        // 3. Just update the request status to approved
-        // Stock is already reserved from creation, no inventory changes needed here
-        const result = await db.collection('DistributionRequests').updateOne(
+        // 3. Update request status to "กำลังจัดส่ง"
+        await db.collection('DistributionRequests').updateOne(
             { _id: new ObjectId(id) },
             {
                 $set: {
-                    status: 'อนุมัติแล้ว',
-                    approvedBy: body.approvedBy,
+                    status: 'กำลังจัดส่ง',
                     updatedAt: new Date()
                 }
             }
         );
 
-        console.log(`Successfully approved distribution request with ID: ${id}`);
+        console.log(`Successfully updated request ${id} status to "กำลังจัดส่ง"`);
 
         // Fetch updated request
         const updatedRequest = await db.collection('DistributionRequests').findOne({
@@ -72,16 +61,15 @@ export async function PUT(
 
         return NextResponse.json({
             success: true,
-            message: 'Distribution request approved successfully (stock already reserved)',
+            message: 'Request status updated to "กำลังจัดส่ง" successfully',
             data: {
-                request: updatedRequest,
-                note: 'Stock reservation was done at request creation. No inventory changes at approval.'
+                request: updatedRequest
             }
         });
     } catch (error) {
-        console.error('Approve Distribution Request Error:', error);
+        console.error('Ship Distribution Request Error:', error);
         return NextResponse.json({
-            error: 'Failed to approve distribution request',
+            error: 'Failed to ship distribution request',
             details: String(error)
         }, { status: 500 });
     }

@@ -59,12 +59,6 @@ export default function Dashboard() {
           {/* Page Title */}
           <div className="mb-5">
             <h1 className="fw-bold mb-3 text-white" style={{ fontSize: '32px' }}>Donation Dashboard</h1>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb bg-transparent p-0 m-0">
-                <li className="breadcrumb-item"><span className="text-white">หน้าหลัก</span></li>
-                <li className="breadcrumb-item active text-white" aria-current="page">แผงควบคุม</li>
-              </ol>
-            </nav>
           </div>
 
           {/* Statistics Row */}
