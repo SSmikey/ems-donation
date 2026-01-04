@@ -67,7 +67,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     suppressHydrationWarning
                     data-active={isActive(item.href) ? 'true' : 'false'}
                   >
-                    <span className={styles.icon}>{item.icon}</span>
                     <span>{item.label}</span>
                   </a>
                 </li>

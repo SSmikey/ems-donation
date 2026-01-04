@@ -69,7 +69,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <div className={`position-absolute end-0 mt-2 ${styles.profileDropdown}`}>
               <div className={styles.profileHeader}>
                 <div className={styles.avatar}>
-                  👤
+                  U
                 </div>
                 <div className="d-flex flex-column">
                   <span className={`fw-bold ${styles.userName}`}>
