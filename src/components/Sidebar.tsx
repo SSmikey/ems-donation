@@ -5,6 +5,12 @@ import { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './Sidebar.module.css';
 
+const LogoutIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </svg>
+);
+
 interface SidebarProps {
   isOpen: boolean;
 }
@@ -37,24 +43,40 @@ const menuItems = [
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
   const [activePath, setActivePath] = useState<string>('');
+  const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setActivePath(pathname);
+    setMounted(true);
+    const savedUser = sessionStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Failed to parse user from session');
+      }
+    }
   }, [pathname]);
 
   const isActive = (href: string) => {
     return activePath === href || activePath.startsWith(href + '/');
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    window.location.href = '/';
+  };
+
   return (
-    <aside className={`${isOpen ? styles.open : styles.closed} ${styles.sidebar}`}>
+    <aside className={`${isOpen ? styles.open : styles.closed} ${styles.sidebar} d-flex flex-column`}>
       {/* Logo */}
       <div className={`px-3 mb-4 ${styles.logo}`}>
         <span className={styles.logoText}>ems-donation</span>
       </div>
 
       {/* Navigation */}
-      <nav className="d-flex flex-column gap-3">
+      <nav className="d-flex flex-column gap-3 flex-grow-1">
         {menuItems.map((section) => (
           <div key={section.section} className={`px-2 ${styles.navSection}`}>
             <h3 className={`text-uppercase small fw-bold ${styles.navTitle}`}>{section.section}</h3>
@@ -75,6 +97,32 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </div>
         ))}
       </nav>
+
+      {/* User Profile Section at Bottom */}
+      {mounted && user && (
+        <div className={`px-3 py-3 border-top ${styles.userProfile}`}>
+          <div className="d-flex align-items-center gap-2">
+            <div className={styles.avatar}>U</div>
+            <div className="flex-grow-1 min-w-0">
+              <div className={`small fw-bold text-truncate ${styles.userName}`}>
+                {user.firstName} {user.lastName}
+              </div>
+              <div className={`text-truncate small ${styles.userEmail}`}>
+                {user.username}@ems
+              </div>
+            </div>
+          </div>
+          <button
+            className={`btn btn-sm w-100 mt-2 d-flex align-items-center justify-content-center gap-2 ${styles.logoutButton}`}
+            onClick={handleLogout}
+          >
+            <span className={styles.logoutIcon}>
+              <LogoutIcon />
+            </span>
+            Logout
+          </button>
+        </div>
+      )}
     </aside>
   );
 }
