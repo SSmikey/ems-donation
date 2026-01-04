@@ -1,8 +1,9 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import styles from './Sidebar.module.css';
+import { cn } from '@/lib/utils';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,16 +14,20 @@ const menuItems = [
     section: 'การจัดการหลัก',
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-      { href: '/centers', label: 'จัดการศูนย์พักพิง', icon: '🏠' },
+      { href: '/centers', label: 'ศูนย์พักพิง', icon: '🏠' },
     ],
   },
   {
-    section: 'จัดการทรัพยากร',
+    section: 'คลังสินค้า',
     items: [
-      { href: '/warehouse', label: 'คลังสินค้าส่วนกลาง', icon: '📦' },
-      { href: '/create-request', label: 'สร้างคำขอเบิกสิ่งของ', icon: '📝' },
-      { href: '/distribution', label: 'รายการคำขอเบิกสิ่งของ', icon: '🚚' },
-      { href: '/quick-donation', label: 'บันทึกของเข้าด่วน', icon: '⚡' },
+      { href: '/warehouse', label: 'ดูสต็อก', icon: '📦' },
+      { href: '/quick-donation', label: 'บันทึกของเข้า', icon: '⚡' },
+    ],
+  },
+  {
+    section: 'คำขอเบิก',
+    items: [
+      { href: '/distribution', label: 'จัดการคำขอ', icon: '🚚' },
     ],
   },
   {
@@ -46,29 +51,50 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   };
 
   return (
-    <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
+    <aside
+      className={cn(
+        'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300',
+        isOpen ? 'w-64' : 'w-20'
+      )}
+    >
       {/* Logo */}
-      <div className={styles.logo}>
-        <span className={styles.logoText}>ems-donation</span>
+      <div className="h-16 flex items-center justify-center border-b border-border">
+        <span
+          className={cn(
+            'font-bold text-lg transition-all',
+            isOpen ? 'block text-foreground' : 'hidden'
+          )}
+        >
+          ems-donation
+        </span>
+        {!isOpen && <span className="text-lg">📦</span>}
       </div>
 
       {/* Navigation */}
-      <nav className={styles.nav}>
+      <nav className="mt-8 px-2 space-y-6">
         {menuItems.map((section) => (
-          <div key={section.section} className={styles.navSection}>
-            <h3 className={styles.navTitle}>{section.section}</h3>
-            <ul className={styles.navList}>
+          <div key={section.section}>
+            {isOpen && (
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-3">
+                {section.section}
+              </h3>
+            )}
+            <ul className="space-y-1">
               {section.items.map((item) => (
-                <li key={item.href} className={styles.navItem}>
-                  <a
+                <li key={item.href}>
+                  <Link
                     href={item.href}
-                    className={styles.navLink}
-                    suppressHydrationWarning
-                    data-active={isActive(item.href) ? 'true' : 'false'}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
+                      isActive(item.href)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-foreground hover:bg-muted'
+                    )}
+                    title={item.label}
                   >
-                    <span className={styles.icon}>{item.icon}</span>
-                    <span>{item.label}</span>
-                  </a>
+                    <span className="text-lg flex-shrink-0">{item.icon}</span>
+                    {isOpen && <span className="truncate">{item.label}</span>}
+                  </Link>
                 </li>
               ))}
             </ul>
