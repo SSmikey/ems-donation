@@ -1,15 +1,8 @@
 /* Container and Background */
 .container {
-  min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  z-index: 1;
 }
 
 /* Decorative Background Elements */
@@ -67,49 +60,40 @@
 
 /* Card Styling */
 .card {
-  background: rgba(22, 33, 62, 0.9);
+  background: rgba(22, 33, 62, 0.9) !important;
   backdrop-filter: blur(10px);
-  border-radius: 20px;
+  border-radius: 20px !important;
   padding: 60px 50px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   position: relative;
   z-index: 10;
+  color: #ffffff;
+}
+
+.card * {
+  color: #ffffff;
 }
 
 /* Logo Section */
 .logoSection {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.logoIcon {
-  font-size: 48px;
-  margin-bottom: 15px;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
 }
 
 .appName {
   font-size: 28px;
   font-weight: 600;
   color: #ffffff;
-  margin: 0;
   letter-spacing: 0.5px;
 }
 
-/* Form Styling */
-.form {
-  width: 100%;
-}
-
+/* Login Title */
 .loginTitle {
   font-size: 24px;
   font-weight: 500;
   color: #ffffff;
-  margin: 0 0 30px 0;
-  text-align: center;
   letter-spacing: 0.5px;
 }
 
@@ -119,15 +103,12 @@
 }
 
 .input {
-  width: 100%;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
   font-size: 14px;
   transition: all 0.3s ease;
-  box-sizing: border-box;
 }
 
 .input::placeholder {
@@ -135,33 +116,26 @@
 }
 
 .input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
 }
 
-/* Options Row (Remember Me & Forgot Password) */
+/* Options Row */
 .optionsRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin: 25px 0 30px 0;
   font-size: 13px;
 }
 
 .rememberCheckbox {
-  display: flex;
-  align-items: center;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.7);
   transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .rememberCheckbox input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
-  margin-right: 8px;
   cursor: pointer;
   accent-color: rgba(255, 255, 255, 0.6);
 }
@@ -170,28 +144,15 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-.forgotLink {
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: none;
-  transition: color 0.3s ease;
-  font-weight: 500;
-}
-
-.forgotLink:hover {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: underline;
-}
-
 /* Login Button */
 .loginButton {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  border: none;
-  border-radius: 10px;
-  color: #ffffff;
+  padding: 14px !important;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 600 !important;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -200,33 +161,12 @@
 .loginButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-  background: linear-gradient(135deg, #00e5ff 0%, #00aadd 100%);
+  background: linear-gradient(135deg, #00e5ff 0%, #00aadd 100%) !important;
 }
 
 .loginButton:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Sign Up Section */
-.signupSection {
-  text-align: center;
-  margin-top: 25px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-}
-
-.signupLink {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-  margin-left: 5px;
-}
-
-.signupLink:hover {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: underline;
 }
 
 /* Responsive Design */
@@ -242,21 +182,15 @@
 
   .loginTitle {
     font-size: 20px;
-    margin-bottom: 25px;
   }
 
   .input {
-    padding: 12px 14px;
+    padding: 12px 14px !important;
     font-size: 13px;
   }
 
-  .optionsRow {
-    font-size: 12px;
-    margin: 20px 0 25px 0;
-  }
-
   .loginButton {
-    padding: 12px;
+    padding: 12px !important;
     font-size: 15px;
   }
 }
@@ -264,11 +198,7 @@
 @media (max-width: 480px) {
   .card {
     padding: 30px 20px;
-    border-radius: 15px;
-  }
-
-  .logoIcon {
-    font-size: 36px;
+    border-radius: 15px !important;
   }
 
   .appName {
@@ -277,26 +207,15 @@
 
   .loginTitle {
     font-size: 18px;
-    margin-bottom: 20px;
   }
 
   .input {
-    padding: 11px 12px;
+    padding: 11px 12px !important;
     font-size: 12px;
   }
 
   .inputGroup {
     margin-bottom: 15px;
-  }
-
-  .optionsRow {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .forgotLink {
-    display: block;
   }
 
   .decorationTL,

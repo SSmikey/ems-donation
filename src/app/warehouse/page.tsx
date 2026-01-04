@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import styles from './warehouse.module.css';
 import Toast from '@/components/Toast';
 import InventoryModal from './InventoryModal';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface InventoryItem {
     _id: string;
@@ -76,20 +77,20 @@ export default function WarehousePage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
+                <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
+                    <div className={`d-flex justify-content-between align-items-start mb-4 ${styles.pageHeader}`}>
                         <div>
-                            <h1>คลังสินค้าส่วนกลาง (Central Warehouse)</h1>
+                            <h1 className="fw-bold text-white" style={{ fontSize: '28px', margin: 0 }}>คลังสินค้าส่วนกลาง (Central Warehouse)</h1>
                             <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>จัดการสต็อกสิ่งของบริจาคและทรัพยากรทั้งหมด</p>
                         </div>
-                        <div className={styles.actionButtons}>
+                        <div className={`d-flex gap-3 ${styles.actionButtons}`}>
                             <button
-                                className={styles.primaryButton}
+                                className={`btn ${styles.primaryButton}`}
                                 onClick={() => {
                                     setEditingItem(null);
                                     setIsModalOpen(true);
@@ -100,9 +101,9 @@ export default function WarehousePage() {
                         </div>
                     </div>
 
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterGroup} style={{ flex: 1 }}>
-                            <label>ค้นหาสินค้า</label>
+                    <div className={`d-flex gap-3 mb-4 p-3 rounded ${styles.filterSection}`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <div className={`d-flex flex-column gap-2 flex-grow-1 ${styles.filterGroup}`}>
+                            <label className="small">ค้นหาสินค้า</label>
                             <input
                                 type="text"
                                 placeholder="ค้นหาชื่อสินค้า..."
@@ -111,8 +112,8 @@ export default function WarehousePage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className={styles.filterGroup}>
-                            <label>หมวดหมู่</label>
+                        <div className={`d-flex flex-column gap-2 ${styles.filterGroup}`}>
+                            <label className="small">หมวดหมู่</label>
                             <select
                                 className={styles.inputField}
                                 value={categoryFilter}
@@ -128,7 +129,7 @@ export default function WarehousePage() {
                     </div>
 
                     {loading ? (
-                        <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
+                        <div className="text-center mt-5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                             <p>กำลังโหลดข้อมูลคลังสินค้า...</p>
                         </div>
                     ) : (
@@ -149,12 +150,12 @@ export default function WarehousePage() {
                                         const status = getStatusInfo(item.quantity);
                                         return (
                                             <tr key={item._id}>
-                                                <td style={{ fontWeight: '500' }}>{item.itemName}</td>
+                                                <td className="fw-medium">{item.itemName}</td>
                                                 <td><span className={styles.categoryTag}>{item.category}</span></td>
                                                 <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
                                                 <td>{item.unit}</td>
                                                 <td>
-                                                    <div className={styles.stockLevel}>
+                                                    <div className={`d-flex align-items-center gap-2 ${styles.stockLevel}`}>
                                                         <div className={styles.levelBar}>
                                                             <div
                                                                 className={styles.levelFill}
@@ -168,7 +169,7 @@ export default function WarehousePage() {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className={styles.actions}>
+                                                    <div className={`d-flex gap-2 align-items-center ${styles.actions}`}>
                                                         <button
                                                             className={styles.editBtn}
                                                             title="แก้ไข"
@@ -195,7 +196,7 @@ export default function WarehousePage() {
                             </table>
 
                             {filteredItems.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
+                                <div className="text-center mt-5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                                     <p>ไม่พบรายการสินค้าที่ต้องการ</p>
                                 </div>
                             )}

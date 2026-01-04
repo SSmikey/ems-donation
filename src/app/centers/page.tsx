@@ -8,6 +8,7 @@ import { Shelter } from '@/lib/models/shelter';
 import ShelterModal from './ShelterModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function CentersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -124,24 +125,16 @@ export default function CentersPage() {
     }, [filterName, filterDistrict, filterSubdistrict, filterType, filterStatus]);
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>จัดการศูนย์พักพิง ({shelters.length} แห่ง)</h1>
+                <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
+                    <div className={`d-flex justify-content-between align-items-center mb-4 ${styles.pageHeader}`}>
+                        <h1 className="fw-bold text-white" style={{ fontSize: '28px', margin: 0 }}>จัดการศูนย์พักพิง ({shelters.length} แห่ง)</h1>
                         <button
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer'
-                            }}
+                            className="btn btn-primary fw-bold"
                             onClick={() => {
                                 setEditingShelter(null);
                                 setIsModalOpen(true);
@@ -151,7 +144,7 @@ export default function CentersPage() {
                         </button>
                     </div>
 
-                    <div className={styles.searchSection}>
+                    <div className={`d-flex gap-3 flex-wrap mb-4 ${styles.searchSection}`}>
                         <style>{`
                             select option {
                                 background-color: #1a1a2e;
@@ -271,33 +264,33 @@ export default function CentersPage() {
                             </table>
 
                             {filteredShelters.length === 0 ? null : (
-                                <div className={styles.paginationContainer}>
+                                <div className={`d-flex justify-content-center align-items-center gap-4 mt-4 pt-3 border-top border-secondary ${styles.paginationContainer}`}>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(1)}
                                         disabled={currentPage === 1}
                                     >
                                         ⇤ หน้าแรก
                                     </button>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPage === 1}
                                     >
                                         ← ก่อนหน้า
                                     </button>
-                                    <div className={styles.pageInfo}>
+                                    <div className="small" style={{ color: 'rgba(255,255,255,0.6)', minWidth: '200px', textAlign: 'center' }}>
                                         หน้า {currentPage} จาก {totalPages} ({filteredShelters.length} รายการ)
                                     </div>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                         disabled={currentPage === totalPages}
                                     >
                                         ถัดไป →
                                     </button>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(totalPages)}
                                         disabled={currentPage === totalPages}
                                     >

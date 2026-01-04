@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import styles from './create-request.module.css';
 import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 import Toast from '@/components/Toast';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface Shelter {
     _id: string;
@@ -103,17 +104,17 @@ export default function CreateRequestPage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)</h1>
+                <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
+                    <div className="mb-5">
+                        <h1 className="fw-bold text-white" style={{ fontSize: '28px' }}>สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)</h1>
                     </div>
 
-                    <div className={styles.searchSection}>
+                    <div className={`d-flex gap-3 flex-wrap mb-4 ${styles.searchSection}`}>
                         <style>{`
                             select option {
                                 background-color: #1a1a2e;
@@ -132,7 +133,7 @@ export default function CreateRequestPage() {
                         <input
                             type="text"
                             placeholder="ชื่อศูนย์พักพิง..."
-                            className={styles.searchInput}
+                            className={`flex-grow-1 ${styles.searchInput}`}
                             value={filterName}
                             onChange={(e) => setFilterName(e.target.value)}
                         />
@@ -218,37 +219,37 @@ export default function CreateRequestPage() {
                             </table>
 
                             {filteredShelters.length === 0 ? (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="text-center mt-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                     <p>ไม่พบข้อมูลศูนย์ที่ตรงกับการค้นหา</p>
                                 </div>
                             ) : (
-                                <div className={styles.paginationContainer}>
+                                <div className={`d-flex justify-content-center align-items-center gap-4 mt-4 pt-3 border-top border-secondary ${styles.paginationContainer}`}>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(1)}
                                         disabled={currentPage === 1}
                                     >
                                         ⇤ หน้าแรก
                                     </button>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPage === 1}
                                     >
                                         ← ก่อนหน้า
                                     </button>
-                                    <div className={styles.pageInfo}>
+                                    <div className="small" style={{ color: 'rgba(255,255,255,0.6)', minWidth: '200px', textAlign: 'center' }}>
                                         หน้า {currentPage} จาก {totalPages} ({filteredShelters.length} รายการ)
                                     </div>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                         disabled={currentPage === totalPages}
                                     >
                                         ถัดไป →
                                     </button>
                                     <button
-                                        className={styles.paginationBtn}
+                                        className={`${styles.paginationBtn} btn btn-sm`}
                                         onClick={() => setCurrentPage(totalPages)}
                                         disabled={currentPage === totalPages}
                                     >

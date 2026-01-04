@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import styles from './quick-donation.module.css';
 import Toast from '@/components/Toast';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function QuickDonationPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -47,27 +48,27 @@ export default function QuickDonationPage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
+                <div className={`flex-grow-1 d-flex justify-content-center align-items-start p-4 p-md-5 ${styles.contentArea}`}>
                     <div className={styles.formCard}>
-                        <div className={styles.formHeader}>
-                            <h1>⚡ บันทึกของเข้าด่วน (Quick Donation)</h1>
-                            <p style={{ color: 'rgba(255,255,255,0.5)' }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
+                        <div className={`text-center mb-4 ${styles.formHeader}`}>
+                            <h1 className="fw-bold text-white" style={{ fontSize: '24px', marginBottom: '10px' }}>⚡ บันทึกของเข้าด่วน (Quick Donation)</h1>
+                            <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
                         </div>
 
                         <form onSubmit={handleSubmit}>
-                            <div className={styles.formGroup}>
-                                <label>เลือกหมวดหมู่</label>
-                                <div className={styles.categoryGroup}>
+                            <div className={`d-flex flex-column gap-2 mb-3 ${styles.formGroup}`}>
+                                <label className="small">เลือกหมวดหมู่</label>
+                                <div className={`d-flex gap-2 flex-wrap ${styles.categoryGroup}`}>
                                     {categories.map((cat) => (
                                         <button
                                             key={cat}
                                             type="button"
-                                            className={`${styles.categoryBtn} ${category === cat ? styles.categoryBtnActive : ''}`}
+                                            className={`btn btn-sm ${category === cat ? styles.categoryBtnActive : styles.categoryBtn}`}
                                             onClick={() => setCategory(cat)}
                                         >
                                             {cat}
@@ -76,8 +77,8 @@ export default function QuickDonationPage() {
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label>ชื่อรายการสิ่งของ</label>
+                            <div className={`d-flex flex-column gap-2 mb-3 ${styles.formGroup}`}>
+                                <label className="small">ชื่อรายการสิ่งของ</label>
                                 <input
                                     type="text"
                                     placeholder="เช่น ข้าวสาร, ยาแก้ปวด..."
@@ -88,9 +89,9 @@ export default function QuickDonationPage() {
                                 />
                             </div>
 
-                            <div className={styles.row}>
-                                <div className={styles.formGroup}>
-                                    <label>จำนวน</label>
+                            <div className={`row g-3 mb-3 ${styles.row}`}>
+                                <div className={`col-6 ${styles.formGroup}`}>
+                                    <label className="small">จำนวน</label>
                                     <input
                                         type="number"
                                         placeholder="0"
@@ -100,8 +101,8 @@ export default function QuickDonationPage() {
                                         required
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label>หน่วย</label>
+                                <div className={`col-6 ${styles.formGroup}`}>
+                                    <label className="small">หน่วย</label>
                                     <select
                                         className={styles.inputField}
                                         value={unit}
@@ -116,7 +117,7 @@ export default function QuickDonationPage() {
                                 </div>
                             </div>
 
-                            <button type="submit" className={styles.submitBtn}>
+                            <button type="submit" className={`btn btn-primary w-100 fw-bold ${styles.submitBtn}`}>
                                 ยืนยันการบันทึก (Confirm)
                             </button>
                         </form>

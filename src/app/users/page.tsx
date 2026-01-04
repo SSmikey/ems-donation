@@ -7,6 +7,7 @@ import styles from './users.module.css';
 import Toast from '@/components/Toast';
 import CreateUserModal from './CreateUserModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface User {
     _id: string;
@@ -75,27 +76,27 @@ export default function UsersPage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
+                <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
+                    <div className={`d-flex justify-content-between align-items-center mb-4 ${styles.pageHeader}`}>
                         <div>
-                            <h1>จัดการผู้ใช้งาน (User Management)</h1>
+                            <h1 className="fw-bold text-white" style={{ fontSize: '28px', margin: 0 }}>จัดการผู้ใช้งาน (User Management)</h1>
                             <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
                                 ดูแลจัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง
                             </p>
                         </div>
-                        <button className={styles.addButton} onClick={() => setIsModalOpen(true)}>
+                        <button className={`btn d-flex align-items-center gap-2 ${styles.addButton}`} onClick={() => setIsModalOpen(true)}>
                             + เพิ่มผู้ใช้งาน
                         </button>
                     </div>
 
                     <div className={styles.tableContainer}>
                         {loading ? (
-                            <p style={{ padding: '20px', textAlign: 'center' }}>กำลังโหลดข้อมูล...</p>
+                            <p className="p-3 text-center">กำลังโหลดข้อมูล...</p>
                         ) : (
                             <table className={styles.table}>
                                 <thead>

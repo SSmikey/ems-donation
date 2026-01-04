@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -46,23 +47,23 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   };
 
   return (
-    <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
+    <aside className={`${isOpen ? styles.open : styles.closed} ${styles.sidebar}`}>
       {/* Logo */}
-      <div className={styles.logo}>
+      <div className={`px-3 mb-4 ${styles.logo}`}>
         <span className={styles.logoText}>ems-donation</span>
       </div>
 
       {/* Navigation */}
-      <nav className={styles.nav}>
+      <nav className="d-flex flex-column gap-3">
         {menuItems.map((section) => (
-          <div key={section.section} className={styles.navSection}>
-            <h3 className={styles.navTitle}>{section.section}</h3>
-            <ul className={styles.navList}>
+          <div key={section.section} className={`px-2 ${styles.navSection}`}>
+            <h3 className={`text-uppercase small fw-bold ${styles.navTitle}`}>{section.section}</h3>
+            <ul className="list-unstyled m-0">
               {section.items.map((item) => (
-                <li key={item.href} className={styles.navItem}>
+                <li key={item.href} className="mb-2">
                   <a
                     href={item.href}
-                    className={styles.navLink}
+                    className={`text-decoration-none d-flex align-items-center gap-2 py-2 px-3 rounded ${styles.navLink}`}
                     suppressHydrationWarning
                     data-active={isActive(item.href) ? 'true' : 'false'}
                   >

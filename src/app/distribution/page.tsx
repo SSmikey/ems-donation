@@ -7,6 +7,7 @@ import styles from './distribution.module.css';
 import CreateRequestModal from './CreateRequestModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface Request {
     _id: string;
@@ -111,33 +112,25 @@ export default function DistributionPage() {
     });
 
     return (
-        <div className={styles.container}>
+        <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
+                <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
+                    <div className={`d-flex justify-content-between align-items-center mb-4 ${styles.pageHeader}`}>
+                        <h1 className="fw-bold text-white" style={{ fontSize: '28px', margin: 0 }}>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
                         <button
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer'
-                            }}
+                            className="btn btn-primary fw-bold"
                             onClick={() => setIsModalOpen(true)}
                         >
                             + สร้างคำขอใหม่
                         </button>
                     </div>
 
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterGroup}>
-                            <label>สถานะ</label>
+                    <div className={`d-flex gap-3 mb-4 p-3 rounded ${styles.filterSection}`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <div className={`d-flex flex-column gap-2 ${styles.filterGroup}`}>
+                            <label className="small">สถานะ</label>
                             <select
                                 className={styles.filterSelect}
                                 value={filterStatus}
@@ -151,8 +144,8 @@ export default function DistributionPage() {
                             </select>
                         </div>
 
-                        <div className={styles.filterGroup}>
-                            <label>ความเร่งด่วน</label>
+                        <div className={`d-flex flex-column gap-2 ${styles.filterGroup}`}>
+                            <label className="small">ความเร่งด่วน</label>
                             <select
                                 className={styles.filterSelect}
                                 value={filterUrgency}
@@ -165,8 +158,8 @@ export default function DistributionPage() {
                             </select>
                         </div>
 
-                        <div className={styles.filterGroup}>
-                            <label>วันที่</label>
+                        <div className={`d-flex flex-column gap-2 ${styles.filterGroup}`}>
+                            <label className="small">วันที่</label>
                             <input
                                 type="date"
                                 className={styles.filterSelect}
@@ -229,7 +222,7 @@ export default function DistributionPage() {
                             </table>
 
                             {filteredRequests.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="text-center mt-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                     <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
                                 </div>
                             )}
