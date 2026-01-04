@@ -184,21 +184,55 @@ export async function POST(request: Request) {
             }, { status: 404 });
         }
 
+        // Generate request number (R2501030001 format)
+        const { RequestNumberGenerator } = await import('@/lib/utils/requestNumberGenerator');
+        const generator = new RequestNumberGenerator(db);
+        const requestNo = await generator.generateRequestNo();
+
+        // Prepare items with itemId and reserved timestamps
+        const itemsWithIds = body.items.map((item: any) => ({
+            itemId: item.itemId || '',
+            itemName: item.itemName,
+            quantity: item.quantity,
+            reservedAt: new Date(),
+            releasedAt: undefined,
+            deductedAt: undefined,
+        }));
+
         // Prepare distribution request data
         const newRequest = {
+            requestNo, // 🆕 NEW
             shelterId: body.shelterId,
-            items: body.items,
-            status: 'รอดำเนินการ', // Default status
-            urgency: body.urgency,
+            items: itemsWithIds,
+            status: 'pending', // Changed to English
+            urgency: body.urgency || 'medium',
             requestBy: body.requestBy,
-            approvedBy: null,
+            approvedBy: undefined,
             createdAt: new Date(),
             updatedAt: new Date()
         };
 
         const result = await db.collection(collectionName).insertOne(newRequest);
 
-        console.log(`Successfully created distribution request with ID: ${result.insertedId}`);
+        // Reserve stock for all items
+        const { StockService } = await import('@/services/stockService');
+        const stockService = new StockService(db);
+
+        for (const item of itemsWithIds) {
+            try {
+                await stockService.reserveStock(
+                    item.itemId,
+                    item.quantity,
+                    result.insertedId.toString(),
+                    body.requestBy
+                );
+            } catch (error) {
+                console.error(`Failed to reserve stock for item ${item.itemId}:`, error);
+                // Continue with other items
+            }
+        }
+
+        console.log(`Successfully created distribution request with ID: ${result.insertedId}, RequestNo: ${requestNo}`);
 
         return NextResponse.json({
             success: true,
