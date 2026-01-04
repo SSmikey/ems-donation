@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './dashboard.module.css';
@@ -56,8 +55,6 @@ export default function Dashboard() {
     <div className={`d-flex min-vh-100 ${styles.dashboardContainer}`}>
       <Sidebar isOpen={sidebarOpen} />
       <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
         <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
           {/* Page Title */}
           <div className="mb-5">

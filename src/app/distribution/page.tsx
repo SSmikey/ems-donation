@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import styles from './distribution.module.css';
 import CreateRequestModal from './CreateRequestModal';
 import Toast from '@/components/Toast';
@@ -115,8 +114,6 @@ export default function DistributionPage() {
         <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
             <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
                 <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
                     <div className={`d-flex justify-content-between align-items-center mb-4 ${styles.pageHeader}`}>
                         <h1 className="fw-bold text-white" style={{ fontSize: '28px', margin: 0 }}>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>

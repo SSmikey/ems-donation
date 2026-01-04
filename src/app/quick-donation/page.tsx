@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import styles from './quick-donation.module.css';
 import Toast from '@/components/Toast';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -51,8 +50,6 @@ export default function QuickDonationPage() {
         <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
             <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
                 <div className={`flex-grow-1 d-flex justify-content-center align-items-start p-4 p-md-5 ${styles.contentArea}`}>
                     <div className={styles.formCard}>
                         <div className={`text-center mb-4 ${styles.formHeader}`}>

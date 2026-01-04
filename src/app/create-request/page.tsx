@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import styles from './create-request.module.css';
 import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 import Toast from '@/components/Toast';
@@ -107,8 +106,6 @@ export default function CreateRequestPage() {
         <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
             <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
                 <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
                     <div className="mb-5">
                         <h1 className="fw-bold text-white" style={{ fontSize: '28px' }}>สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)</h1>

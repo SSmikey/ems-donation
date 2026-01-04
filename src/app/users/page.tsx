@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
 import styles from './users.module.css';
 import Toast from '@/components/Toast';
 import CreateUserModal from './CreateUserModal';
@@ -79,8 +78,6 @@ export default function UsersPage() {
         <div className={`d-flex min-vh-100 ${styles.container}`}>
             <Sidebar isOpen={sidebarOpen} />
             <div className={`flex-grow-1 d-flex flex-column ${styles.mainContent}`}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
                 <div className={`flex-grow-1 overflow-auto p-4 p-md-5 ${styles.contentArea}`}>
                     <div className={`d-flex justify-content-between align-items-center mb-4 ${styles.pageHeader}`}>
                         <div>
