@@ -13,23 +13,23 @@ const menuItems = [
   {
     section: 'การจัดการหลัก',
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-      { href: '/centers', label: 'จัดการศูนย์พักพิง', icon: '🏠' },
+      { href: '/dashboard', label: 'Dashboard', icon: '' },
+      { href: '/centers', label: 'จัดการศูนย์พักพิง', icon: '' },
     ],
   },
   {
     section: 'จัดการทรัพยากร',
     items: [
-      { href: '/warehouse', label: 'คลังสินค้าส่วนกลาง', icon: '📦' },
-      { href: '/create-request', label: 'สร้างคำขอเบิกสิ่งของ', icon: '📝' },
-      { href: '/distribution', label: 'รายการคำขอเบิกสิ่งของ', icon: '🚚' },
-      { href: '/quick-donation', label: 'บันทึกของเข้าด่วน', icon: '⚡' },
+      { href: '/warehouse', label: 'คลังสินค้าส่วนกลาง', icon: '' },
+      { href: '/create-request', label: 'สร้างคำขอเบิกสิ่งของ', icon: '' },
+      { href: '/distribution', label: 'รายการคำขอเบิกสิ่งของ', icon: '' },
+      { href: '/quick-donation', label: 'บันทึกของเข้าด่วน', icon: '' },
     ],
   },
   {
     section: 'ผู้ดูแลระบบ',
     items: [
-      { href: '/users', label: 'จัดการผู้ใช้งาน', icon: '👥' },
+      { href: '/users', label: 'จัดการผู้ใช้งาน', icon: '' },
     ],
   },
 ];

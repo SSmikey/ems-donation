@@ -56,7 +56,7 @@ export default function QuickDonationPage() {
                 <div className={`flex-grow-1 d-flex justify-content-center align-items-start p-4 p-md-5 ${styles.contentArea}`}>
                     <div className={styles.formCard}>
                         <div className={`text-center mb-4 ${styles.formHeader}`}>
-                            <h1 className="fw-bold text-white" style={{ fontSize: '24px', marginBottom: '10px' }}>⚡ บันทึกของเข้าด่วน (Quick Donation)</h1>
+                            <h1 className="fw-bold text-white" style={{ fontSize: '24px', marginBottom: '10px' }}>บันทึกของเข้าด่วน (Quick Donation)</h1>
                             <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
                         </div>
 
