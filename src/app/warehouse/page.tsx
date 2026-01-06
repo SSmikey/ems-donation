@@ -105,11 +105,11 @@ export default function WarehousePage() {
                             <div className="card shadow-sm border-0 h-100">
                                 <div className="card-body">
                                     <div>
-                                        <p className="text-muted mb-1" style={{ fontSize: '14px' }}>รายการทั้งหมด</p>
+                                        <p className="text-muted mb-1" style={{ fontSize: '14px' }}>จำนวนสินค้าทั้งหมด</p>
                                         <h3 className="fw-bold mb-0" style={{ fontSize: '28px', color: '#111827' }}>
-                                            {inventory.length}
+                                            {inventory.reduce((sum, item) => sum + (item.quantity - (item.reservedQuantity || 0)), 0)}
                                         </h3>
-                                        <p className="text-muted mb-0" style={{ fontSize: '13px' }}>รายการ</p>
+                                        <p className="text-muted mb-0" style={{ fontSize: '13px' }}>ชิ้น</p>
                                     </div>
                                 </div>
                             </div>
@@ -118,9 +118,9 @@ export default function WarehousePage() {
                             <div className="card shadow-sm border-0 h-100" style={{ borderLeft: '4px solid #4ade80' }}>
                                 <div className="card-body">
                                     <div>
-                                        <p className="text-muted mb-1" style={{ fontSize: '14px' }}>สินค้าพอเพียง</p>
+                                        <p className="text-muted mb-1" style={{ fontSize: '14px' }}>รายการทั้งหมด</p>
                                         <h3 className="fw-bold mb-0" style={{ fontSize: '28px', color: '#4ade80' }}>
-                                            {inventory.filter(item => (item.quantity - (item.reservedQuantity || 0)) >= 100).length}
+                                            {inventory.length}
                                         </h3>
                                         <p className="text-muted mb-0" style={{ fontSize: '13px' }}>รายการ</p>
                                     </div>

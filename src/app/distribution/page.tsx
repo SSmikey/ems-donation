@@ -146,12 +146,12 @@ export default function DistributionPage() {
 
     const getStatusBadgeClass = (status: string) => {
         switch (status) {
-            case 'รอดำเนินการ': return 'badge bg-warning text-dark';
-            case 'อนุมัติแล้ว': return 'badge bg-info';
-            case 'กำลังจัดส่ง': return 'badge bg-primary';
-            case 'ส่งมอบแล้ว': return 'badge bg-success';
-            case 'ยกเลิกแล้ว': return 'badge bg-secondary';
-            default: return 'badge bg-secondary';
+            case 'รอดำเนินการ': return 'badge bg-warning text-white fw-semibold';
+            case 'อนุมัติแล้ว': return 'badge bg-info text-white fw-semibold';
+            case 'กำลังจัดส่ง': return 'badge bg-primary text-white fw-semibold';
+            case 'ส่งมอบแล้ว': return 'badge bg-success text-white fw-semibold';
+            case 'ยกเลิกแล้ว': return 'badge bg-secondary text-white fw-semibold';
+            default: return 'badge bg-secondary text-white fw-semibold';
         }
     };
 
@@ -208,62 +208,38 @@ export default function DistributionPage() {
                     {/* Statistics Cards */}
                     <div className="row g-3 mb-4">
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card border-0 shadow-sm h-100">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #6c757d' }}>
                                 <div className="card-body">
-                                    <div className="d-flex align-items-center">
-                                        <div className="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
-                                            <i className="bi bi-clipboard-data text-primary" style={{ fontSize: '24px' }}></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted mb-1 small">คำขอทั้งหมด</p>
-                                            <h3 className="fw-bold mb-0" style={{ color: '#2c3e50' }}>{stats.total}</h3>
-                                        </div>
-                                    </div>
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>คำขอทั้งหมด</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.total}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
                                 </div>
                             </div>
                         </div>
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card border-0 shadow-sm h-100">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #fbbf24' }}>
                                 <div className="card-body">
-                                    <div className="d-flex align-items-center">
-                                        <div className="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
-                                            <i className="bi bi-hourglass-split text-warning" style={{ fontSize: '24px' }}></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted mb-1 small">รอดำเนินการ</p>
-                                            <h3 className="fw-bold mb-0" style={{ color: '#2c3e50' }}>{stats.pending}</h3>
-                                        </div>
-                                    </div>
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>รอดำเนินการ</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.pending}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
                                 </div>
                             </div>
                         </div>
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card border-0 shadow-sm h-100">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #3b82f6' }}>
                                 <div className="card-body">
-                                    <div className="d-flex align-items-center">
-                                        <div className="rounded-circle bg-info bg-opacity-10 p-3 me-3">
-                                            <i className="bi bi-check-circle text-info" style={{ fontSize: '24px' }}></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted mb-1 small">อนุมัติแล้ว</p>
-                                            <h3 className="fw-bold mb-0" style={{ color: '#2c3e50' }}>{stats.approved}</h3>
-                                        </div>
-                                    </div>
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>อนุมัติแล้ว</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.approved}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
                                 </div>
                             </div>
                         </div>
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card border-0 shadow-sm h-100">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #4ade80' }}>
                                 <div className="card-body">
-                                    <div className="d-flex align-items-center">
-                                        <div className="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                                            <i className="bi bi-box-seam text-success" style={{ fontSize: '24px' }}></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted mb-1 small">ส่งมอบแล้ว</p>
-                                            <h3 className="fw-bold mb-0" style={{ color: '#2c3e50' }}>{stats.completed}</h3>
-                                        </div>
-                                    </div>
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>ส่งมอบแล้ว</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.completed}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
                                 </div>
                             </div>
                         </div>
@@ -284,9 +260,9 @@ export default function DistributionPage() {
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -309,9 +285,9 @@ export default function DistributionPage() {
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -333,9 +309,9 @@ export default function DistributionPage() {
                                     <input
                                         type="date"
                                         className="form-control form-control-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -397,11 +373,11 @@ export default function DistributionPage() {
                                             </thead>
                                             <tbody>
                                                 {filteredRequests.map((req) => (
-                                                    <tr 
-                                                        key={req._id} 
-                                                        style={{ 
+                                                    <tr
+                                                        key={req._id}
+                                                        style={{
                                                             borderBottom: '1px solid #f1f3f5',
-                                                            opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1 
+                                                            opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1
                                                         }}
                                                     >
                                                         <td className="ps-4 py-3">
@@ -436,10 +412,10 @@ export default function DistributionPage() {
                                                         </td>
                                                         <td className="py-3">
                                                             <span style={{ color: '#6c757d', fontSize: '14px' }}>
-                                                                {new Date(req.createdAt).toLocaleDateString('th-TH', { 
-                                                                    year: 'numeric', 
-                                                                    month: 'short', 
-                                                                    day: 'numeric' 
+                                                                {new Date(req.createdAt).toLocaleDateString('th-TH', {
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric'
                                                                 })}
                                                             </span>
                                                         </td>
@@ -448,8 +424,8 @@ export default function DistributionPage() {
                                                                 {req.status === 'รอดำเนินการ' && (
                                                                     <button
                                                                         className="btn btn-success btn-sm"
-                                                                        style={{ 
-                                                                            borderRadius: '8px', 
+                                                                        style={{
+                                                                            borderRadius: '8px',
                                                                             padding: '6px 16px',
                                                                             fontWeight: '500',
                                                                             fontSize: '13px'
@@ -463,8 +439,8 @@ export default function DistributionPage() {
                                                                 {['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง'].includes(req.status) && (
                                                                     <button
                                                                         className="btn btn-outline-danger btn-sm"
-                                                                        style={{ 
-                                                                            borderRadius: '8px', 
+                                                                        style={{
+                                                                            borderRadius: '8px',
                                                                             padding: '6px 16px',
                                                                             fontWeight: '500',
                                                                             fontSize: '13px'
@@ -484,6 +460,61 @@ export default function DistributionPage() {
                                     </div>
                                 </div>
                             </div>
+
+                            {filteredRequests.length > 0 && (
+                                <div className="card shadow-sm border-0 mt-4">
+                                    <div className="card-body">
+                                        <nav aria-label="Page navigation">
+                                            <ul className="pagination justify-content-center mb-0">
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        หน้าแรก
+                                                    </button>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        ก่อนหน้า
+                                                    </button>
+                                                </li>
+                                                <li className="page-item active">
+                                                    <span
+                                                        className="page-link border-0 bg-primary me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 20px', fontWeight: '500' }}
+                                                    >
+                                                        หน้า 1 / 1 ({filteredRequests.length} รายการ)
+                                                    </span>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        ถัดไป
+                                                    </button>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        หน้าสุดท้าย
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            )}
 
                             {filteredRequests.length === 0 && (
                                 <div className="card border-0 shadow-sm mt-4">

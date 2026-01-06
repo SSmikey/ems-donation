@@ -130,7 +130,7 @@ export default function CreateRequestPage() {
                                 ตัวกรองข้อมูล
                             </h6>
                             <div className="row g-3">
-                                <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="col-12 col-lg">
                                     <label className="form-label small fw-semibold text-secondary mb-2">
                                         <i className="bi bi-search me-1"></i>
                                         ชื่อศูนย์พักพิง
@@ -139,9 +139,9 @@ export default function CreateRequestPage() {
                                         type="text"
                                         placeholder="ค้นหาชื่อศูนย์พักพิง..."
                                         className="form-control form-control-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -149,16 +149,16 @@ export default function CreateRequestPage() {
                                         onChange={(e) => setFilterName(e.target.value)}
                                     />
                                 </div>
-                                <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="col-12 col-lg">
                                     <label className="form-label small fw-semibold text-secondary mb-2">
                                         <i className="bi bi-geo-alt me-1"></i>
                                         อำเภอ
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -171,16 +171,16 @@ export default function CreateRequestPage() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="col-12 col-lg">
                                     <label className="form-label small fw-semibold text-secondary mb-2">
                                         <i className="bi bi-geo me-1"></i>
                                         ตำบล
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -194,16 +194,16 @@ export default function CreateRequestPage() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="col-12 col-lg">
                                     <label className="form-label small fw-semibold text-secondary mb-2">
                                         <i className="bi bi-tag me-1"></i>
                                         ประเภทศูนย์
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -216,16 +216,16 @@ export default function CreateRequestPage() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="col-12 col-lg">
                                     <label className="form-label small fw-semibold text-secondary mb-2">
                                         <i className="bi bi-info-circle me-1"></i>
                                         สถานะความจุ
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        style={{ 
-                                            background: '#ffffff', 
-                                            border: '2px solid #e9ecef', 
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
                                             borderRadius: '10px',
                                             fontSize: '15px'
                                         }}
@@ -308,8 +308,8 @@ export default function CreateRequestPage() {
                                                         <td className="pe-4 py-3 text-end">
                                                             <button
                                                                 className="btn btn-primary btn-sm"
-                                                                style={{ 
-                                                                    borderRadius: '8px', 
+                                                                style={{
+                                                                    borderRadius: '8px',
                                                                     padding: '8px 20px',
                                                                     fontWeight: '500',
                                                                     fontSize: '14px'
@@ -341,48 +341,48 @@ export default function CreateRequestPage() {
                                         <nav aria-label="Page navigation">
                                             <ul className="pagination justify-content-center mb-0">
                                                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                    <button 
-                                                        className="page-link border-0 me-2" 
+                                                    <button
+                                                        className="page-link border-0 me-2"
                                                         style={{ borderRadius: '8px', padding: '8px 16px' }}
-                                                        onClick={() => setCurrentPage(1)} 
+                                                        onClick={() => setCurrentPage(1)}
                                                         disabled={currentPage === 1}
                                                     >
                                                         <i className="bi bi-chevron-bar-left"></i> หน้าแรก
                                                     </button>
                                                 </li>
                                                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                    <button 
-                                                        className="page-link border-0 me-2" 
+                                                    <button
+                                                        className="page-link border-0 me-2"
                                                         style={{ borderRadius: '8px', padding: '8px 16px' }}
-                                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                                         disabled={currentPage === 1}
                                                     >
                                                         <i className="bi bi-chevron-left"></i> ก่อนหน้า
                                                     </button>
                                                 </li>
                                                 <li className="page-item active">
-                                                    <span 
-                                                        className="page-link border-0 bg-primary me-2" 
+                                                    <span
+                                                        className="page-link border-0 bg-primary me-2"
                                                         style={{ borderRadius: '8px', padding: '8px 20px', fontWeight: '500' }}
                                                     >
                                                         หน้า {currentPage} / {totalPages} ({filteredShelters.length} รายการ)
                                                     </span>
                                                 </li>
                                                 <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                    <button 
-                                                        className="page-link border-0 me-2" 
+                                                    <button
+                                                        className="page-link border-0 me-2"
                                                         style={{ borderRadius: '8px', padding: '8px 16px' }}
-                                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                                         disabled={currentPage === totalPages}
                                                     >
                                                         ถัดไป <i className="bi bi-chevron-right"></i>
                                                     </button>
                                                 </li>
                                                 <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                    <button 
-                                                        className="page-link border-0" 
+                                                    <button
+                                                        className="page-link border-0"
                                                         style={{ borderRadius: '8px', padding: '8px 16px' }}
-                                                        onClick={() => setCurrentPage(totalPages)} 
+                                                        onClick={() => setCurrentPage(totalPages)}
                                                         disabled={currentPage === totalPages}
                                                     >
                                                         หน้าสุดท้าย <i className="bi bi-chevron-bar-right"></i>
