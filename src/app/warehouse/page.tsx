@@ -11,6 +11,7 @@ interface InventoryItem {
     itemName: string;
     category: string;
     quantity: number;
+    reservedQuantity: number;
     unit: string;
     lastUpdated?: string;
 }
@@ -51,9 +52,9 @@ export default function WarehousePage() {
         return matchesSearch && matchesCategory;
     });
 
-    const getStatusInfo = (quantity: number) => {
-        if (quantity >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
-        if (quantity >= 20) return { label: 'เหลือน้อย', color: '#fbbf24', percent: '40%' };
+    const getStatusInfo = (available: number) => {
+        if (available >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
+        if (available >= 20) return { label: 'เหลือน้อย', color: '#fbbf24', percent: '40%' };
         return { label: 'ขาดแคลน', color: '#f87171', percent: '15%' };
     };
 
@@ -141,7 +142,9 @@ export default function WarehousePage() {
                                         <tr>
                                             <th style={{ color: '#495057' }}>ชื่อสินค้า</th>
                                             <th style={{ color: '#495057' }}>หมวดหมู่</th>
-                                            <th style={{ color: '#495057' }}>จำนวนคงเหลือ</th>
+                                            <th style={{ color: '#495057' }} className="text-center">สต็อกจริง</th>
+                                            <th style={{ color: '#495057' }} className="text-center">จองแล้ว</th>
+                                            <th style={{ color: '#495057' }} className="text-center">ใช้ได้จริง</th>
                                             <th style={{ color: '#495057' }}>หน่วย</th>
                                             <th style={{ color: '#495057' }}>สถานะสต็อก</th>
                                             <th style={{ color: '#495057' }}>จัดการ</th>
@@ -149,14 +152,18 @@ export default function WarehousePage() {
                                     </thead>
                                     <tbody style={{ borderColor: '#dee2e6' }}>
                                         {filteredItems.map(item => {
-                                            const status = getStatusInfo(item.quantity);
+                                            const reserved = item.reservedQuantity || 0;
+                                            const available = item.quantity - reserved;
+                                            const status = getStatusInfo(available);
                                             return (
                                                 <tr key={item._id} style={{ borderColor: '#dee2e6' }}>
                                                     <td style={{ fontWeight: '500', color: '#212529' }}>{item.itemName}</td>
                                                     <td>
                                                         <span className="badge bg-secondary">{item.category}</span>
                                                     </td>
-                                                    <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
+                                                    <td className="text-center text-muted" style={{ fontSize: '0.9rem' }}>{item.quantity.toLocaleString()}</td>
+                                                    <td className="text-center text-warning" style={{ fontSize: '0.9rem', fontWeight: '500' }}>{reserved > 0 ? reserved.toLocaleString() : '-'}</td>
+                                                    <td className="text-center" style={{ color: status.color, fontWeight: '700', fontSize: '1.1rem' }}>{available.toLocaleString()}</td>
                                                     <td style={{ color: '#495057' }}>{item.unit}</td>
                                                     <td>
                                                         <div className="d-flex align-items-center gap-2">

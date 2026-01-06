@@ -3,7 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 // Valid status values
-const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'ส่งมอบแล้ว'];
+const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'ส่งมอบแล้ว', 'ยกเลิกแล้ว'];
 
 // Valid urgency values
 const VALID_URGENCIES = ['ต่ำ', 'กลาง', 'สูง'];

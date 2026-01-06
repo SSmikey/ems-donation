@@ -107,19 +107,43 @@ export async function POST(
             }, { status: 409 }); // 409 Conflict
         }
 
-        // 5. Update inventory quantities (reduce stock)
+        // 5. Update inventory quantities (reduce stock and reservation)
+        const logsColl = db.collection('inventorylogs');
         for (const update of inventoryUpdates) {
+            const invItem = await db.collection('inventory').findOne({ _id: update._id });
+            const prevReserved = invItem?.reservedQuantity || 0;
+            const newReserved = Math.max(0, prevReserved - update.requestedQuantity);
+
             await db.collection('inventory').updateOne(
                 { _id: update._id },
                 {
                     $set: {
                         quantity: update.newQuantity,
+                        reservedQuantity: newReserved,
                         lastUpdated: new Date().toISOString() // ISO 8601 format
                     }
                 }
             );
 
-            console.log(`Reduced "${update.itemName}" from ${update.currentQuantity} to ${update.newQuantity}`);
+            // Log the deduction
+            await logsColl.insertOne({
+                inventoryId: update._id.toString(),
+                requestId: id,
+                type: 'DEDUCT',
+                changeQuantity: -update.requestedQuantity,
+                previousQuantity: update.currentQuantity,
+                newQuantity: update.newQuantity,
+                previousReservedQuantity: prevReserved,
+                newReservedQuantity: newReserved,
+                performedBy: {
+                    userId: body.approvedBy.userId,
+                    username: body.approvedBy.username
+                },
+                timestamp: new Date().toISOString(),
+                note: `Approved and stock deducted for request REQ-${id.slice(-4)}`
+            });
+
+            console.log(`Successfully deducted stock and reservation for "${update.itemName}"`);
         }
 
         // 6. Update distribution request status

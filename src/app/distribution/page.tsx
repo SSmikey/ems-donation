@@ -11,7 +11,7 @@ interface Request {
     _id: string;
     shelterName: string;
     items: { itemName: string; quantity: number }[];
-    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'ส่งมอบแล้ว';
+    status: 'รอดำเนินการ' | 'อนุมัติแล้ว' | 'กำลังจัดส่ง' | 'ส่งมอบแล้ว' | 'ยกเลิกแล้ว';
     urgency: 'สูง' | 'กลาง' | 'ต่ำ';
     createdAt: string;
 }
@@ -26,6 +26,7 @@ export default function DistributionPage() {
     const [filterDate, setFilterDate] = useState('');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+    const [cancelDialog, setCancelDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
 
     const fetchRequests = async () => {
         try {
@@ -62,32 +63,77 @@ export default function DistributionPage() {
         fetchRequests();
     }, []);
 
-    const handleCreateRequest = async (id: string, shelterName: string) => {
+    const handleApproveRequest = (id: string, shelterName: string) => {
         setConfirmDialog({ requestId: id, shelterName });
     };
 
-    const confirmCreateRequest = async () => {
+    const confirmApproveRequest = async () => {
         if (!confirmDialog) return;
 
         try {
+            // Updated to use system user info for approval
             const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ approvedBy: 'Admin (System)' })
+                body: JSON.stringify({
+                    approvedBy: {
+                        userId: 'admin-001',
+                        username: 'admin',
+                        firstName: 'เจ้าหน้าที่',
+                        lastName: 'ดูแลคลัง',
+                        role: 'ADMIN',
+                        approvedAt: new Date().toISOString()
+                    }
+                })
             });
 
             if (res.ok) {
-                setToast({ message: 'อนุมัติคำขอสำเร็จ สต็อกสินค้าจะถูกตัดทันที', type: 'success' });
+                setToast({ message: 'อนุมัติคำขอสำเร็จ ยอดจองจะถูกตัดออกจากสต็อกจริง', type: 'success' });
                 fetchRequests();
             } else {
                 const errorData = await res.json();
-                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้ (สินค้าอาจไม่พอ)', type: 'error' });
+                setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้', type: 'error' });
             }
         } catch (error) {
             console.error('Error approving request:', error);
             setToast({ message: 'เกิดข้อผิดพลาดในการอนุมัติคำขอ', type: 'error' });
         } finally {
             setConfirmDialog(null);
+        }
+    };
+
+    const handleCancelRequest = (id: string, shelterName: string) => {
+        setCancelDialog({ requestId: id, shelterName });
+    };
+
+    const confirmCancelRequest = async () => {
+        if (!cancelDialog) return;
+
+        try {
+            const res = await fetch(`/api/distribution-requests/${cancelDialog.requestId}/cancel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cancelledBy: {
+                        userId: 'admin-001',
+                        username: 'admin'
+                    },
+                    note: 'ยกเลิกโดยผู้ดูแลระบบ'
+                })
+            });
+
+            if (res.ok) {
+                setToast({ message: 'ยกเลิกคำขอเบิกสิ่งของคืนเรียบร้อยแล้ว', type: 'success' });
+                fetchRequests();
+            } else {
+                const errorData = await res.json();
+                setToast({ message: errorData.error || 'ไม่สามารถยกเลิกคำขอได้', type: 'error' });
+            }
+        } catch (error) {
+            console.error('Error cancelling request:', error);
+            setToast({ message: 'เกิดข้อผิดพลาดในการยกเลิกคำขอ', type: 'error' });
+        } finally {
+            setCancelDialog(null);
         }
     };
 
@@ -105,6 +151,7 @@ export default function DistributionPage() {
             case 'อนุมัติแล้ว': return 'badge bg-info';
             case 'กำลังจัดส่ง': return 'badge bg-primary';
             case 'ส่งมอบแล้ว': return 'badge bg-success';
+            case 'ยกเลิกแล้ว': return 'badge bg-secondary';
             default: return 'badge bg-secondary';
         }
     };
@@ -152,6 +199,7 @@ export default function DistributionPage() {
                                 <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
                                 <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
                                 <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
+                                <option value="ยกเลิกแล้ว">ยกเลิกแล้ว</option>
                             </select>
                         </div>
 
@@ -201,7 +249,7 @@ export default function DistributionPage() {
                                     </thead>
                                     <tbody style={{ borderColor: '#dee2e6' }}>
                                         {filteredRequests.map((req) => (
-                                            <tr key={req._id} style={{ borderColor: '#dee2e6' }}>
+                                            <tr key={req._id} style={{ borderColor: '#dee2e6', opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1 }}>
                                                 <td style={{ fontWeight: '500', color: '#212529' }}>REQ-{req._id.slice(-4)}</td>
                                                 <td style={{ color: '#495057' }}>{req.shelterName}</td>
                                                 <td>
@@ -223,14 +271,24 @@ export default function DistributionPage() {
                                                 </td>
                                                 <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
                                                 <td>
-                                                    {req.status === 'รอดำเนินการ' && (
-                                                        <button
-                                                            className="btn btn-sm btn-success"
-                                                            onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                        >
-                                                            อนุมัติคำขอ
-                                                        </button>
-                                                    )}
+                                                    <div className="d-flex gap-2">
+                                                        {req.status === 'รอดำเนินการ' && (
+                                                            <button
+                                                                className="btn btn-sm btn-success"
+                                                                onClick={() => handleApproveRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                            >
+                                                                อนุมัติ
+                                                            </button>
+                                                        )}
+                                                        {['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง'].includes(req.status) && (
+                                                            <button
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => handleCancelRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                            >
+                                                                ยกเลิก
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -239,7 +297,7 @@ export default function DistributionPage() {
                             </div>
 
                             {filteredRequests.length === 0 && (
-                                <div className="text-center" style={{ marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="text-center" style={{ marginTop: '50px', color: '#868e96' }}>
                                     <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
                                 </div>
                             )}
@@ -268,12 +326,23 @@ export default function DistributionPage() {
             {confirmDialog && (
                 <ConfirmDialog
                     title="อนุมัติคำขอเบิกสิ่งของ"
-                    message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? สต็อกสินค้าจะถูกตัดทันที`}
-                    confirmText="อนุมัติคำขอ"
+                    message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? ระบบจะตัดยอดสินค้าที่ "จองไว้" ออกจากคลังสินค้าจริงทันที`}
+                    confirmText="ยืนยันอนุมัติ"
                     cancelText="ยกเลิก"
-                    isDangerous={true}
-                    onConfirm={confirmCreateRequest}
+                    isDangerous={false}
+                    onConfirm={confirmApproveRequest}
                     onCancel={() => setConfirmDialog(null)}
+                />
+            )}
+            {cancelDialog && (
+                <ConfirmDialog
+                    title="ยกเลิกคำขอเบิกสิ่งของ"
+                    message={`คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอของ "${cancelDialog.shelterName}"? ระบบจะทำการคืนสินค้าที่จองไว้หรือที่หักไปแล้วกลับเข้าคลัง`}
+                    confirmText="ยืนยันการยกเลิก"
+                    cancelText="ไม่ยกเลิก"
+                    isDangerous={true}
+                    onConfirm={confirmCancelRequest}
+                    onCancel={() => setCancelDialog(null)}
                 />
             )}
         </div>

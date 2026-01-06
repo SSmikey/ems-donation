@@ -3,7 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 // Valid status values
-const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'ส่งมอบแล้ว'];
+const VALID_STATUSES = ['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง', 'ส่งมอบแล้ว', 'ยกเลิกแล้ว'];
 
 // Valid urgency values
 const VALID_URGENCIES = ['ต่ำ', 'กลาง', 'สูง'];
@@ -221,15 +221,78 @@ export async function POST(request: Request) {
             updatedAt: new Date().toISOString() // ISO 8601 format
         };
 
-        const result = await db.collection(collectionName).insertOne(newRequest);
+        // --- Start Stock Reservation Logic ---
+        const stockErrors: string[] = [];
+        const inventoryColl = db.collection('inventory');
+        const logsColl = db.collection('inventorylogs');
 
-        console.log(`Successfully created distribution request with ID: ${result.insertedId}`);
+        // Check availability for each item
+        for (const item of body.items) {
+            const invItem = await inventoryColl.findOne({ _id: new ObjectId(item.inventoryId) });
+            if (!invItem) {
+                stockErrors.push(`Item "${item.itemName}" not found in inventory`);
+                continue;
+            }
+
+            const available = (invItem.quantity || 0) - (invItem.reservedQuantity || 0);
+            if (available < item.quantity) {
+                stockErrors.push(`Insufficient stock for "${item.itemName}". Available: ${available}, Requested: ${item.quantity}`);
+            }
+        }
+
+        if (stockErrors.length > 0) {
+            return NextResponse.json({
+                error: 'Stock reservation failed',
+                details: stockErrors
+            }, { status: 409 });
+        }
+
+        // Proceed to insert request and update reservedQuantity
+        const result = await db.collection(collectionName).insertOne(newRequest);
+        const requestId = result.insertedId;
+
+        for (const item of body.items) {
+            const invItem = await inventoryColl.findOne({ _id: new ObjectId(item.inventoryId) });
+            const prevReserved = invItem.reservedQuantity || 0;
+            const newReserved = prevReserved + item.quantity;
+
+            await inventoryColl.updateOne(
+                { _id: new ObjectId(item.inventoryId) },
+                {
+                    $set: {
+                        reservedQuantity: newReserved,
+                        lastUpdated: new Date().toISOString()
+                    }
+                }
+            );
+
+            // Log the reservation
+            await logsColl.insertOne({
+                inventoryId: item.inventoryId,
+                requestId: requestId.toString(),
+                type: 'RESERVE',
+                changeQuantity: item.quantity,
+                previousQuantity: invItem.quantity,
+                newQuantity: invItem.quantity,
+                previousReservedQuantity: prevReserved,
+                newReservedQuantity: newReserved,
+                performedBy: {
+                    userId: body.requestBy.userId,
+                    username: body.requestBy.username
+                },
+                timestamp: new Date().toISOString(),
+                note: `Reserved for request REQ-${requestId.toString().slice(-4)}`
+            });
+        }
+        // --- End Stock Reservation Logic ---
+
+        console.log(`Successfully created distribution request with ID: ${requestId}`);
 
         return NextResponse.json({
             success: true,
-            message: 'Distribution request created successfully',
+            message: 'Distribution request created and stock reserved successfully',
             data: {
-                _id: result.insertedId,
+                _id: requestId,
                 ...newRequest
             }
         }, { status: 201 });
