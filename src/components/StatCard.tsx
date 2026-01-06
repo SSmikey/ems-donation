@@ -1,13 +1,15 @@
 interface StatCardProps {
   title: string;
   value: string;
-  color: 'cyan' | 'purple' | 'red';
+  color: 'cyan' | 'purple' | 'red' | 'green' | 'gray';
 }
 
 const colorMap = {
   cyan: '#00d4ff',
   purple: '#c084fc',
-  red: '#f87171'
+  red: '#f87171',
+  green: '#10b981',
+  gray: '#9ca3af'
 };
 
 export default function StatCard({
