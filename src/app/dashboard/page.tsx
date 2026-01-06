@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
 import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 import FormSelect from '@/components/FormSelect';
+import Toast from '@/components/Toast';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -37,9 +40,26 @@ export default function Dashboard() {
   const [reqUrgencyFilter, setReqUrgencyFilter] = useState('');
   const [reqStatusFilter, setReqStatusFilter] = useState('');
 
-  // Modal State
+  // Modal & UI State
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedShelterId, setSelectedShelterId] = useState<string | undefined>(undefined);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+  const [cancelDialog, setCancelDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+
+  const router = useRouter();
+
+  const fetchRequests = useCallback(async () => {
+    try {
+      const requestsRes = await fetch('/api/distribution-requests?limit=50');
+      const requestsData = await requestsRes.json();
+      if (requestsData.success) {
+        setRequests(requestsData.data);
+      }
+    } catch (error) {
+      console.warn('Error fetching requests:', error);
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -75,12 +95,7 @@ export default function Dashboard() {
         }
 
         // Fetch distribution requests
-        const requestsRes = await fetch('/api/distribution-requests?limit=50');
-        const requestsData = await requestsRes.json();
-        if (requestsData.success) {
-          setRequests(requestsData.data);
-          setFilteredReqs(requestsData.data);
-        }
+        await fetchRequests();
       } catch (error) {
         console.warn('Error fetching dashboard data:', error);
       } finally {
@@ -88,18 +103,17 @@ export default function Dashboard() {
       }
     }
     fetchData();
-  }, []);
+  }, [fetchRequests]);
 
   // Update filtered requests when filters or source requests change
   useEffect(() => {
-    let result = [...requests];
+    // Dashboard logic: strictly show only pending requests that need approval
+    let result = requests.filter(r => r.status === 'รอดำเนินการ');
 
     if (reqUrgencyFilter) {
       result = result.filter(r => r.urgency === reqUrgencyFilter);
     }
-    if (reqStatusFilter) {
-      result = result.filter(r => r.status === reqStatusFilter);
-    }
+    // We remove reqStatusFilter from this useEffect because dashboard is now fixed to pending
 
     // Sort: High Urgency first, then by date
     result.sort((a, b) => {
@@ -114,7 +128,7 @@ export default function Dashboard() {
     });
 
     setFilteredReqs(result);
-  }, [reqUrgencyFilter, reqStatusFilter, requests]);
+  }, [reqUrgencyFilter, requests]);
 
   // Extract unique values for filters
   const districts = [...new Set(shelters.map(s => s.district).filter(Boolean))].sort() as string[];
@@ -143,6 +157,74 @@ export default function Dashboard() {
   const handleCreateRequest = (id: string) => {
     setSelectedShelterId(id);
     setShowRequestModal(true);
+  };
+
+  const handleApproveRequest = (id: string, shelterName: string) => {
+    setConfirmDialog({ requestId: id, shelterName });
+  };
+
+  const confirmApproveRequest = async () => {
+    if (!confirmDialog) return;
+    try {
+      const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          approvedBy: {
+            userId: 'admin-001',
+            username: 'admin',
+            firstName: 'เจ้าหน้าที่',
+            lastName: 'ดูแลคลัง',
+            role: 'ADMIN',
+            approvedAt: new Date().toISOString()
+          }
+        })
+      });
+
+      if (res.ok) {
+        setToast({ message: 'อนุมัติคำขอสำเร็จ ยอดจองจะถูกตัดออกจากสต็อกจริง', type: 'success' });
+        fetchRequests();
+      } else {
+        const errorData = await res.json();
+        setToast({ message: errorData.error || 'ไม่สามารถอนุมัติคำขอได้', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error approving request:', error);
+      setToast({ message: 'เกิดข้อผิดพลาดในการอนุมัติคำขอ', type: 'error' });
+    } finally {
+      setConfirmDialog(null);
+    }
+  };
+
+  const handleCancelRequest = (id: string, shelterName: string) => {
+    setCancelDialog({ requestId: id, shelterName });
+  };
+
+  const confirmCancelRequest = async () => {
+    if (!cancelDialog) return;
+    try {
+      const res = await fetch(`/api/distribution-requests/${cancelDialog.requestId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cancelledBy: { userId: 'admin-001', username: 'admin' },
+          note: 'ยกเลิกโดยผู้ดูแลระบบ'
+        })
+      });
+
+      if (res.ok) {
+        setToast({ message: 'ยกเลิกคำขอเบิกสิ่งของคืนเรียบร้อยแล้ว', type: 'success' });
+        fetchRequests();
+      } else {
+        const errorData = await res.json();
+        setToast({ message: errorData.error || 'ไม่สามารถยกเลิกคำขอได้', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      setToast({ message: 'เกิดข้อผิดพลาดในการยกเลิกคำขอ', type: 'error' });
+    } finally {
+      setCancelDialog(null);
+    }
   };
 
   return (
@@ -412,7 +494,7 @@ export default function Dashboard() {
           <div className="mb-5 mt-5">
             <h5 className="fw-bold mb-4 d-flex align-items-center gap-2" style={{ color: '#111827' }}>
               <div style={{ width: '4px', height: '24px', backgroundColor: '#2563eb', borderRadius: '4px' }}></div>
-              รายการคำขอเบิกสิ่งของ
+              รายการคำขอเบิกสิ่งของ (รายการด่วน)
             </h5>
 
             <div className="row g-4">
@@ -484,7 +566,7 @@ export default function Dashboard() {
                   {loading ? (
                     <div className="text-center py-5">กำลังโหลดข้อมูล...</div>
                   ) : filteredReqs.length === 0 ? (
-                    <div className="text-center py-5 text-muted border border-dashed rounded-4">ไม่พบรายการคำขอเบิก</div>
+                    <div className="text-center py-5 text-muted border border-dashed rounded-4">ไม่พบรายการคำขอเบิกที่รอดำเนินการ</div>
                   ) : filteredReqs.map(req => (
                     <div key={req._id} className="card border-0 shadow-sm rounded-4 hov-lift overflow-hidden" style={{ transition: 'all 0.3s ease', backgroundColor: '#ffffff', border: '1px solid #f3f4f6' }}>
                       <div className="card-body p-0">
@@ -521,9 +603,29 @@ export default function Dashboard() {
                               {req.items?.length > 4 && <div className="text-muted small align-self-center">+ อีก {req.items.length - 4} รายการ</div>}
                             </div>
                           </div>
-                          <div className="p-3 border-start bg-light bg-opacity-10 d-flex flex-column justify-content-center" style={{ minWidth: '150px' }}>
-                            <button className="btn btn-primary btn-sm rounded-pill fw-bold mb-2">ตรวจสอบ</button>
-                            <button className="btn btn-white btn-sm rounded-pill border fw-600">รายละเอียด</button>
+                          <div className="p-3 border-start bg-light bg-opacity-10 d-flex flex-column justify-content-center gap-2" style={{ minWidth: '150px' }}>
+                            {req.status === 'รอดำเนินการ' && (
+                              <button
+                                onClick={() => handleApproveRequest(req._id, req.shelterName)}
+                                className="btn btn-success btn-sm rounded-pill fw-bold"
+                              >
+                                อนุมัติ
+                              </button>
+                            )}
+                            {['รอดำเนินการ', 'อนุมัติแล้ว'].includes(req.status) && (
+                              <button
+                                onClick={() => handleCancelRequest(req._id, req.shelterName)}
+                                className="btn btn-danger btn-sm rounded-pill fw-bold"
+                              >
+                                ยกเลิก
+                              </button>
+                            )}
+                            <button
+                              onClick={() => router.push(`/distribution?highlightId=${req._id}`)}
+                              className="btn btn-white btn-sm rounded-pill border fw-600 shadow-sm"
+                            >
+                              รายละเอียด
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -536,13 +638,53 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {showRequestModal && (
-        <CreateRequestModal
-          onClose={() => setShowRequestModal(false)}
-          onSuccess={() => setShowRequestModal(false)}
-          initialShelterId={selectedShelterId}
-        />
-      )}
-    </div>
+      {
+        showRequestModal && (
+          <CreateRequestModal
+            onClose={() => setShowRequestModal(false)}
+            onSuccess={() => setShowRequestModal(false)}
+            initialShelterId={selectedShelterId}
+          />
+        )
+      }
+
+      {
+        toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )
+      }
+
+      {
+        confirmDialog && (
+          <ConfirmDialog
+            title="อนุมัติคำขอเบิกสิ่งของ"
+            message={`ยืนยันการอนุมัติคำขอเบิกสิ่งของสำหรับ "${confirmDialog.shelterName}"? ระบบจะตัดยอดสินค้าที่ "จองไว้" ออกจากคลังสินค้าจริงทันที`}
+            confirmText="ยืนยันอนุมัติ"
+            cancelText="ยกเลิก"
+            isDangerous={false}
+            onConfirm={confirmApproveRequest}
+            onCancel={() => setConfirmDialog(null)}
+          />
+        )
+      }
+
+      {
+        cancelDialog && (
+          <ConfirmDialog
+            title="ยกเลิกคำขอเบิกสิ่งของ"
+            message={`คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอของ "${cancelDialog.shelterName}"? ระบบจะทำการคืนสินค้าที่จองไว้หรือที่หักไปแล้วกลับเข้าคลัง`}
+            confirmText="ยืนยันการยกเลิก"
+            cancelText="ไม่ยกเลิก"
+            isDangerous={true}
+            onConfirm={confirmCancelRequest}
+            onCancel={() => setCancelDialog(null)}
+          />
+        )
+      }
+    </div >
   );
 }

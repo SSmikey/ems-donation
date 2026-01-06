@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import CreateRequestModal from './CreateRequestModal';
@@ -27,6 +28,23 @@ export default function DistributionPage() {
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
     const [cancelDialog, setCancelDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
+
+    const searchParams = useSearchParams();
+    const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const hId = searchParams.get('highlightId');
+        if (hId) {
+            setHighlightedId(hId);
+            // Optional: Scroll to the element if it's a long list
+            setTimeout(() => {
+                const element = document.getElementById(`request-${hId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
+        }
+    }, [searchParams]);
 
     const fetchRequests = async () => {
         try {
@@ -89,6 +107,7 @@ export default function DistributionPage() {
 
             if (res.ok) {
                 setToast({ message: 'อนุมัติคำขอสำเร็จ ยอดจองจะถูกตัดออกจากสต็อกจริง', type: 'success' });
+                setHighlightedId(null); // Clear highlight on success
                 fetchRequests();
             } else {
                 const errorData = await res.json();
@@ -249,8 +268,21 @@ export default function DistributionPage() {
                                     </thead>
                                     <tbody style={{ borderColor: '#dee2e6' }}>
                                         {filteredRequests.map((req) => (
-                                            <tr key={req._id} style={{ borderColor: '#dee2e6', opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1 }}>
-                                                <td style={{ fontWeight: '500', color: '#212529' }}>REQ-{req._id.slice(-4)}</td>
+                                            <tr
+                                                key={req._id}
+                                                id={`request-${req._id}`}
+                                                style={{
+                                                    borderColor: '#dee2e6',
+                                                    opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1,
+                                                    backgroundColor: highlightedId === req._id ? 'rgba(37, 99, 235, 0.05)' : 'transparent',
+                                                    borderLeft: highlightedId === req._id ? '4px solid #2563eb' : 'none',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                <td style={{ fontWeight: highlightedId === req._id ? '700' : '500', color: highlightedId === req._id ? '#2563eb' : '#212529' }}>
+                                                    {highlightedId === req._id && <span className="me-1">📌</span>}
+                                                    REQ-{req._id.slice(-4)}
+                                                </td>
                                                 <td style={{ color: '#495057' }}>{req.shelterName}</td>
                                                 <td>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
