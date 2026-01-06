@@ -36,12 +36,12 @@ export default function StatCard({
     >
       <div className="card-body d-flex flex-column justify-content-between">
         <div>
-          <h6 className="text-uppercase fw-500 mb-3" style={{ fontSize: '14px', letterSpacing: '0.5px', color: '#868e96' }}>
+          <h6 className="text-uppercase fw-600 mb-3" style={{ fontSize: '13px', letterSpacing: '0.6px', color: '#374151' }}>
             {title}
           </h6>
         </div>
         <div>
-          <p className="display-6 fw-bold mb-0" style={{ fontSize: '28px', color: '#212529' }}>
+          <p className="display-6 fw-bold mb-0" style={{ fontSize: '32px', color: '#111827' }}>
             {value}
           </p>
         </div>

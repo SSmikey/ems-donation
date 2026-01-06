@@ -74,9 +74,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               style={{
                 fontSize: '11px',
                 letterSpacing: '1.2px',
-                color: '#8e94a0',
+                color: '#4b5563',
                 marginTop: '10px',
-                opacity: 0.8
+                fontWeight: '700'
               }}
             >
               {section.section}

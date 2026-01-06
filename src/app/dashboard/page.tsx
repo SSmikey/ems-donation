@@ -51,7 +51,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
+    <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
       <Sidebar isOpen={sidebarOpen} />
       <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
