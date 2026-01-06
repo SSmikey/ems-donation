@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
 import CreateRequestModal from '@/app/distribution/CreateRequestModal';
+import FormSelect from '@/components/FormSelect';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -189,25 +190,6 @@ export default function Dashboard() {
           {/* Shelter Search Table */}
           <div className="card border-0 shadow-sm mt-4">
             <style>{`
-              .filter-control {
-                transition: all 0.2s ease;
-                border: 1px solid #e5e7eb !important;
-                border-radius: 10px !important;
-                height: 44px !important;
-                font-size: 14px !important;
-                background-color: #f9fafb !important;
-                color: #374151 !important;
-              }
-              .filter-control:hover {
-                border-color: #d1d5db !important;
-                background-color: #f3f4f6 !important;
-              }
-              .filter-control:focus {
-                border-color: #2563eb !important;
-                background-color: #ffffff !important;
-                box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
-                outline: none !important;
-              }
               .filter-label {
                 font-size: 12px;
                 font-weight: 600;
@@ -237,48 +219,48 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="col-12 col-sm-6 col-md-2">
-                  <label className="filter-label">อำเภอ</label>
-                  <select
-                    className="form-select filter-control"
+                  <FormSelect
+                    label="อำเภอ"
                     value={selectedDistrict}
-                    onChange={(e) => { setSelectedDistrict(e.target.value); setSelectedSubdistrict(''); setCurrentPage(1); }}
-                  >
-                    <option value="">ทั้งหมด (อำเภอ)</option>
-                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                    onChange={(val) => { setSelectedDistrict(val); setSelectedSubdistrict(''); setCurrentPage(1); }}
+                    options={[
+                      { value: '', label: 'ทั้งหมด (อำเภอ)' },
+                      ...districts.map(d => ({ value: d, label: d }))
+                    ]}
+                  />
                 </div>
                 <div className="col-12 col-sm-6 col-md-2">
-                  <label className="filter-label">ตำบล</label>
-                  <select
-                    className="form-select filter-control"
+                  <FormSelect
+                    label="ตำบล"
                     value={selectedSubdistrict}
-                    onChange={(e) => { setSelectedSubdistrict(e.target.value); setCurrentPage(1); }}
-                  >
-                    <option value="">ทั้งหมด (ตำบล)</option>
-                    {subdistricts.map(sd => <option key={sd} value={sd}>{sd}</option>)}
-                  </select>
+                    onChange={(val) => { setSelectedSubdistrict(val); setCurrentPage(1); }}
+                    options={[
+                      { value: '', label: 'ทั้งหมด (ตำบล)' },
+                      ...subdistricts.map(sd => ({ value: sd, label: sd }))
+                    ]}
+                  />
                 </div>
                 <div className="col-12 col-sm-6 col-md-2">
-                  <label className="filter-label">ประเภทสถานที่</label>
-                  <select
-                    className="form-select filter-control"
+                  <FormSelect
+                    label="ประเภทสถานที่"
                     value={selectedType}
-                    onChange={(e) => { setSelectedType(e.target.value); setCurrentPage(1); }}
-                  >
-                    <option value="">ทั้งหมด (ประเภท)</option>
-                    {types.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                    onChange={(val) => { setSelectedType(val); setCurrentPage(1); }}
+                    options={[
+                      { value: '', label: 'ทั้งหมด (ประเภท)' },
+                      ...types.map(t => ({ value: t, label: t }))
+                    ]}
+                  />
                 </div>
                 <div className="col-12 col-sm-6 col-md-3">
-                  <label className="filter-label">สถานะการรับรอง</label>
-                  <select
-                    className="form-select filter-control"
+                  <FormSelect
+                    label="สถานะการรับรอง"
                     value={selectedStatus}
-                    onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
-                  >
-                    <option value="">ทั้งหมด (สถานะ)</option>
-                    {statuses.map(st => <option key={st} value={st}>{st}</option>)}
-                  </select>
+                    onChange={(val) => { setSelectedStatus(val); setCurrentPage(1); }}
+                    options={[
+                      { value: '', label: 'ทั้งหมด (สถานะ)' },
+                      ...statuses.map(st => ({ value: st, label: st }))
+                    ]}
+                  />
                 </div>
               </div>
 

@@ -7,6 +7,7 @@ import { Shelter } from '@/lib/models/shelter';
 import ShelterModal from './ShelterModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import FormSelect from '@/components/FormSelect';
 
 export default function CentersPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -103,14 +104,14 @@ export default function CentersPage() {
         }
     };
 
-    const uniqueDistricts = Array.from(new Set(shelters.map(s => s.district).filter(Boolean))).sort();
+    const uniqueDistricts = Array.from(new Set(shelters.map(s => s.district).filter(Boolean))).sort() as string[];
     const uniqueSubdistricts = Array.from(new Set(
         shelters
             .filter(s => !filterDistrict || s.district === filterDistrict)
             .map(s => s.subdistrict)
             .filter(Boolean)
-    )).sort();
-    const uniqueTypes = Array.from(new Set(shelters.map(s => s.shelterType).filter(Boolean))).sort();
+    )).sort() as string[];
+    const uniqueTypes = Array.from(new Set(shelters.map(s => s.shelterType).filter(Boolean))).sort() as string[];
 
     // Pagination logic
     const totalPages = Math.ceil(filteredShelters.length / itemsPerPage);
@@ -156,57 +157,51 @@ export default function CentersPage() {
                             />
                         </div>
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
+                            <FormSelect
                                 value={filterDistrict}
-                                onChange={(e) => setFilterDistrict(e.target.value)}
-                            >
-                                <option value="">ทั้งหมด (อำเภอ)</option>
-                                {uniqueDistricts.map(district => (
-                                    <option key={district} value={district}>{district}</option>
-                                ))}
-                            </select>
+                                onChange={setFilterDistrict}
+                                options={[
+                                    { value: '', label: 'ทั้งหมด (อำเภอ)' },
+                                    ...uniqueDistricts.map(d => ({ value: d, label: d }))
+                                ]}
+                                placeholder="ทั้งหมด (อำเภอ)"
+                            />
                         </div>
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
+                            <FormSelect
                                 value={filterSubdistrict}
-                                onChange={(e) => setFilterSubdistrict(e.target.value)}
+                                onChange={setFilterSubdistrict}
+                                options={[
+                                    { value: '', label: 'ทั้งหมด (ตำบล)' },
+                                    ...uniqueSubdistricts.map(sd => ({ value: sd, label: sd }))
+                                ]}
                                 disabled={!filterDistrict}
-                            >
-                                <option value="">ทั้งหมด (ตำบล)</option>
-                                {uniqueSubdistricts.map(subdistrict => (
-                                    <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
-                                ))}
-                            </select>
+                                placeholder="ทั้งหมด (ตำบล)"
+                            />
                         </div>
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
+                            <FormSelect
                                 value={filterType}
-                                onChange={(e) => setFilterType(e.target.value)}
-                            >
-                                <option value="">ทั้งหมด (ประเภท)</option>
-                                {uniqueTypes.map(type => (
-                                    <option key={type} value={type}>{type}</option>
-                                ))}
-                            </select>
+                                onChange={setFilterType}
+                                options={[
+                                    { value: '', label: 'ทั้งหมด (ประเภท)' },
+                                    ...uniqueTypes.map(t => ({ value: t, label: t }))
+                                ]}
+                                placeholder="ทั้งหมด (ประเภท)"
+                            />
                         </div>
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
+                            <FormSelect
                                 value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <option value="all">ทั้งหมด (สถานะ)</option>
-                                <option value="รองรับได้">รองรับได้</option>
-                                <option value="ใกล้เต็ม">ใกล้เต็ม</option>
-                                <option value="เต็มแล้ว">เต็มแล้ว</option>
-                            </select>
+                                onChange={setFilterStatus}
+                                options={[
+                                    { value: 'all', label: 'ทั้งหมด (สถานะ)' },
+                                    { value: 'รองรับได้', label: 'รองรับได้' },
+                                    { value: 'ใกล้เต็ม', label: 'ใกล้เต็ม' },
+                                    { value: 'เต็มแล้ว', label: 'เต็มแล้ว' }
+                                ]}
+                                placeholder="ทั้งหมด (สถานะ)"
+                            />
                         </div>
                     </div>
 
@@ -350,13 +345,6 @@ export default function CentersPage() {
                 />
             )}
 
-            <style>{`
-                select option {
-                    background-color: #1a1a2e;
-                    color: #ffffff;
-                    padding: 8px;
-                }
-            `}</style>
         </div>
     );
 }

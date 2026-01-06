@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import FormSelect from '@/components/FormSelect';
 
 interface Shelter {
     _id?: string;
@@ -87,19 +88,6 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
     return (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
             <style>{`
-                .shelter-modal-select option {
-                    background-color: #1a1a2e;
-                    color: #ffffff;
-                    padding: 8px;
-                }
-                .shelter-modal-select option:hover {
-                    background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-                    background-color: #16213e;
-                }
-                .shelter-modal-select option:checked {
-                    background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-                    background-color: #16213e;
-                }
                 .shelter-modal-input {
                     border: 1px solid rgba(0, 212, 255, 0.3) !important;
                     background-color: rgba(255, 255, 255, 0.05) !important;
@@ -135,21 +123,31 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ประเภทศูนย์</label>
-                            <select className="form-select shelter-modal-input" value={shelterType} onChange={e => setShelterType(e.target.value)}>
-                                <option value="ศูนย์พักพิงหลัก">ศูนย์พักพิงหลัก</option>
-                                <option value="ศูนย์พักพิงชั่วคราว">ศูนย์พักพิงชั่วคราว</option>
-                                <option value="โรงพยาบาลสนาม">โรงพยาบาลสนาม</option>
-                            </select>
+                            <FormSelect
+                                label="ประเภทศูนย์"
+                                value={shelterType}
+                                onChange={setShelterType}
+                                options={[
+                                    { value: 'ศูนย์พักพิงหลัก', label: 'ศูนย์พักพิงหลัก' },
+                                    { value: 'ศูนย์พักพิงชั่วคราว', label: 'ศูนย์พักพิงชั่วคราว' },
+                                    { value: 'โรงพยาบาลสนาม', label: 'โรงพยาบาลสนาม' }
+                                ]}
+                                dark={true}
+                            />
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>สถานะความจุ</label>
-                            <select className="form-select shelter-modal-input" value={capacityStatus} onChange={e => setCapacityStatus(e.target.value)}>
-                                <option value="รองรับได้">รองรับได้</option>
-                                <option value="ใกล้เต็ม">ใกล้เต็ม</option>
-                                <option value="เต็มแล้ว">เต็มแล้ว</option>
-                            </select>
+                            <FormSelect
+                                label="สถานะความจุ"
+                                value={capacityStatus}
+                                onChange={setCapacityStatus}
+                                options={[
+                                    { value: 'รองรับได้', label: 'รองรับได้' },
+                                    { value: 'ใกล้เต็ม', label: 'ใกล้เต็ม' },
+                                    { value: 'เต็มแล้ว', label: 'เต็มแล้ว' }
+                                ]}
+                                dark={true}
+                            />
                         </div>
 
                         <div className="mb-3">
@@ -185,6 +183,6 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                     </form>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
