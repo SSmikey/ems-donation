@@ -351,59 +351,61 @@ export default function CentersPage() {
                             </div>
 
                             {filteredShelters.length === 0 ? null : (
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <div style={{ fontSize: '15px', color: '#6c757d' }}>
-                                        แสดง {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredShelters.length)} จาก {filteredShelters.length} รายการ
+                                <div className="card shadow-sm border-0 mt-4">
+                                    <div className="card-body">
+                                        <nav aria-label="Page navigation">
+                                            <ul className="pagination justify-content-center mb-0">
+                                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        onClick={() => setCurrentPage(1)}
+                                                        disabled={currentPage === 1}
+                                                    >
+                                                        หน้าแรก
+                                                    </button>
+                                                </li>
+                                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                        disabled={currentPage === 1}
+                                                    >
+                                                        ก่อนหน้า
+                                                    </button>
+                                                </li>
+                                                <li className="page-item active">
+                                                    <span
+                                                        className="page-link border-0 bg-primary me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 20px', fontWeight: '500' }}
+                                                    >
+                                                        หน้า {currentPage} / {totalPages} ({filteredShelters.length} รายการ)
+                                                    </span>
+                                                </li>
+                                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                        disabled={currentPage === totalPages}
+                                                    >
+                                                        ถัดไป
+                                                    </button>
+                                                </li>
+                                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                    <button
+                                                        className="page-link border-0"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        onClick={() => setCurrentPage(totalPages)}
+                                                        disabled={currentPage === totalPages}
+                                                    >
+                                                        หน้าสุดท้าย
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
                                     </div>
-                                    <nav aria-label="Page navigation">
-                                        <ul className="pagination mb-0">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    style={{ fontSize: '14px', borderRadius: '6px 0 0 6px' }}
-                                                    onClick={() => setCurrentPage(1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    ⇤ หน้าแรก
-                                                </button>
-                                            </li>
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    style={{ fontSize: '14px' }}
-                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    ←
-                                                </button>
-                                            </li>
-                                            <li className="page-item active">
-                                                <span className="page-link" style={{ fontSize: '14px', fontWeight: '600' }}>
-                                                    {currentPage} / {totalPages}
-                                                </span>
-                                            </li>
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    style={{ fontSize: '14px' }}
-                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    →
-                                                </button>
-                                            </li>
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    style={{ fontSize: '14px', borderRadius: '0 6px 6px 0' }}
-                                                    onClick={() => setCurrentPage(totalPages)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    หน้าสุดท้าย ⇥
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
                                 </div>
                             )}
                         </>

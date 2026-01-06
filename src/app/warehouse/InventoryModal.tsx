@@ -71,41 +71,45 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
     };
 
     return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}>
             <style>{`
                 .modal-form-select option {
-                    background-color: #1a1a2e;
-                    color: #ffffff;
-                    padding: 8px;
+                    background-color: #ffffff;
+                    color: #212529;
+                    padding: 10px;
+                    font-size: 15px;
                 }
                 .modal-form-select option:hover {
-                    background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-                    background-color: #16213e;
+                    background-color: #f8f9fa;
+                    color: #0d6efd;
                 }
                 .modal-form-select option:checked {
-                    background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-                    background-color: #16213e;
+                    background-color: #e7f1ff;
+                    color: #0d6efd;
+                    font-weight: 600;
                 }
                 .modal-form-input {
-                    border: 1px solid rgba(0, 212, 255, 0.3) !important;
-                    background-color: rgba(255, 255, 255, 0.05) !important;
-                    color: #ffffff !important;
+                    border: 1px solid #dee2e6 !important;
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
+                    font-size: 15px;
                 }
                 .modal-form-input:focus {
-                    border-color: #00d4ff !important;
-                    background-color: rgba(255, 255, 255, 0.08) !important;
-                    color: #ffffff !important;
+                    border-color: #0d6efd !important;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
                 }
             `}</style>
-            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#1a1a2e', borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
+            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '600px', backgroundColor: '#ffffff', borderRadius: '12px' }}>
                 <div className="card-body p-4">
-                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.3rem', color: '#ffffff' }}>
+                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '24px', color: '#111827' }}>
                         {item ? 'แก้ไขรายการสินค้า' : 'เพิ่มรายการสินค้าใหม่'}
                     </h2>
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ชื่อรายการสิ่งของ</label>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>ชื่อรายการสิ่งของ</label>
                             <input
                                 type="text"
                                 className="form-control modal-form-input"
@@ -117,9 +121,9 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>หมวดหมู่</label>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>หมวดหมู่</label>
                             <select
-                                className="form-select modal-form-input"
+                                className="form-select modal-form-input modal-form-select"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
                             >
@@ -129,7 +133,7 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
 
                         <div className="row g-2 mb-3">
                             <div className="col-6">
-                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>จำนวน</label>
+                                <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>จำนวน</label>
                                 <input
                                     type="number"
                                     className="form-control modal-form-input"
@@ -140,9 +144,9 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                                 />
                             </div>
                             <div className="col-6">
-                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>หน่วย</label>
+                                <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>หน่วย</label>
                                 <select
-                                    className="form-select modal-form-input"
+                                    className="form-select modal-form-input modal-form-select"
                                     value={unit}
                                     onChange={(e) => setUnit(e.target.value)}
                                 >
@@ -160,18 +164,16 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="btn btn-outline-light"
+                                className="btn btn-outline-secondary px-4"
+                                style={{ fontSize: '15px' }}
                             >
                                 ยกเลิก
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="btn fw-600"
-                                style={{
-                                    backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none',
-                                    opacity: loading ? 0.7 : 1
-                                }}
+                                className="btn btn-primary px-4"
+                                style={{ fontSize: '15px', opacity: loading ? 0.7 : 1 }}
                             >
                                 {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
                             </button>
