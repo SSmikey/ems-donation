@@ -15,6 +15,7 @@ export default function QuickDonationPage() {
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [importedData, setImportedData] = useState<any[]>([]);
     const [isImporting, setIsImporting] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const categories = ['อาหาร', 'น้ำดื่ม', 'ยาและเวชภัณฑ์', 'เครื่องนุ่งห่ม', 'อื่นๆ'];
 
@@ -48,10 +49,7 @@ export default function QuickDonationPage() {
         }
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
+    const processFile = (file: File) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
             try {
@@ -78,6 +76,43 @@ export default function QuickDonationPage() {
             }
         };
         reader.readAsArrayBuffer(file);
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) processFile(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+            processFile(file);
+        } else {
+            setToast({ message: 'กรุณาอัปโหลดไฟล์ Excel (.xlsx, .xls) เท่านั้น', type: 'error' });
+        }
+    };
+
+    const downloadTemplate = () => {
+        const ws = XLSX.utils.json_to_sheet([
+            { 'หมวดหมู่': 'อาหาร', 'ชื่อรายการ': 'ข้าวสาร', 'จำนวน': 10, 'หน่วย': 'กิโลกรัม' },
+            { 'หมวดหมู่': 'น้ำดื่ม', 'ชื่อรายการ': 'น้ำเปล่าแพ็คโหล', 'จำนวน': 50, 'หน่วย': 'แพ็ค' },
+            { 'หมวดหมู่': 'ยาและเวชภัณฑ์', 'ชื่อรายการ': 'หน้ากากอนามัย', 'จำนวน': 100, 'หน่วย': 'กล่อง' }
+        ]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Template");
+        XLSX.writeFile(wb, "donation_template.xlsx");
     };
 
     const handleBulkSubmit = async () => {
@@ -123,23 +158,37 @@ export default function QuickDonationPage() {
                                 <h2 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#212529' }}>บันทึกของเข้าด่วน (Quick Donation)</h2>
                                 <p style={{ color: '#868e96', marginBottom: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
                                 
-                                {/* ปุ่ม Import Excel */}
-                                <div className="mt-3">
-                                    {!isImporting ? (
-                                        <label className="btn btn-outline-primary btn-sm" style={{ borderRadius: '20px' }}>
-                                            <i className="bi bi-file-earmark-excel me-2"></i> Import from Excel
+                                {/* ส่วน Drag & Drop Import Excel */}
+                                {!isImporting && (
+                                    <div 
+                                        className="mt-4 p-4 text-center"
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        style={{ 
+                                            border: `2px dashed ${isDragging ? '#198754' : '#dee2e6'}`, 
+                                            borderRadius: '16px',
+                                            backgroundColor: isDragging ? '#f0fff4' : '#ffffff',
+                                            transition: 'all 0.2s ease',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <i className="bi bi-cloud-upload" style={{ fontSize: '32px', color: isDragging ? '#198754' : '#adb5bd' }}></i>
+                                        <h5 className="mt-2 mb-1" style={{ fontSize: '16px', color: '#495057' }}>ลากไฟล์ Excel มาวางที่นี่</h5>
+                                        <p className="text-muted small mb-3">หรือคลิกเพื่อเลือกไฟล์</p>
+                                        
+                                        <label className="btn btn-outline-success btn-sm px-4" style={{ borderRadius: '20px' }}>
+                                            เลือกไฟล์
                                             <input type="file" accept=".xlsx, .xls" hidden onChange={handleFileUpload} />
                                         </label>
-                                    ) : (
-                                        <button 
-                                            className="btn btn-outline-secondary btn-sm" 
-                                            onClick={() => { setIsImporting(false); setImportedData([]); }}
-                                            style={{ borderRadius: '20px' }}
-                                        >
-                                            ยกเลิกการ Import
-                                        </button>
-                                    )}
-                                </div>
+
+                                        <div className="mt-3">
+                                            <button onClick={downloadTemplate} className="btn btn-link btn-sm text-decoration-none text-muted" style={{ fontSize: '12px' }}>
+                                                <i className="bi bi-download me-1"></i> ดาวน์โหลดแบบฟอร์มตัวอย่าง
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {isImporting ? (
@@ -173,12 +222,23 @@ export default function QuickDonationPage() {
                                             onClick={handleBulkSubmit}
                                             style={{ padding: '16px', fontSize: '18px', borderRadius: '12px' }}
                                         >
-                                            ยืนยันการนำเข้า {importedData.length} รายการ
+                                            ยืนยันนำเข้า ({importedData.length})
+                                        </button>
+                                        <button 
+                                            className="btn btn-light w-100 fw-bold text-muted" 
+                                            onClick={() => { setIsImporting(false); setImportedData([]); }}
+                                            style={{ padding: '16px', fontSize: '18px', borderRadius: '12px' }}
+                                        >
+                                            ยกเลิก
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 // ฟอร์มเดิมสำหรับการกรอกทีละรายการ
+                                <>
+                                <div className="d-flex align-items-center my-4">
+                                    <span className="text-muted small w-100 text-center">--- หรือ กรอกข้อมูลด้วยตัวเอง ---</span>
+                                </div>
                                 <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
                                     <label className="form-label" style={{ color: '#495057', fontSize: '14px' }}>
@@ -267,6 +327,7 @@ export default function QuickDonationPage() {
                                     ยืนยันการบันทึก (Confirm)
                                 </button>
                             </form>
+                            </>
                             )}
                         </div>
                     </div>
