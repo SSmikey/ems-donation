@@ -48,13 +48,16 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className="sidebar-dark position-sticky"
       style={{
-        width: '260px',
+        width: isOpen ? '260px' : '0',
+        minWidth: isOpen ? '260px' : '0',
         height: '100vh',
         top: 0,
-        overflowY: 'auto',
-        padding: '25px 0',
+        overflow: 'hidden',
+        overflowY: isOpen ? 'auto' : 'hidden',
+        padding: isOpen ? '25px 0' : '25px 0',
         transition: 'all 0.3s ease',
         transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+        opacity: isOpen ? 1 : 0,
       }}
     >
       {/* Logo */}
@@ -81,9 +84,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <li key={item.href} className="mb-2">
                   <a
                     href={item.href}
-                    className={`nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-decoration-none ${
-                      isActive(item.href) ? 'active' : ''
-                    }`}
+                    className={`nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-decoration-none ${isActive(item.href) ? 'active' : ''
+                      }`}
                     suppressHydrationWarning
                     style={{
                       color: isActive(item.href) ? '#6366f1' : '#495057',
