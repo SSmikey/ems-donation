@@ -13,6 +13,7 @@ export default function Dashboard() {
     totalInventoryItems: 0,
     pendingRequests: 0,
     lowStockCount: 0,
+    highUrgencyCount: 0,
     approvedRequests: 0,
     inTransitRequests: 0,
     totalDeliveries: 0,
@@ -40,9 +41,10 @@ export default function Dashboard() {
           setStats(prev => ({
             ...prev,
             shelterCount: summary.totalShelters,
-            totalInventoryItems: summary.totalInventoryItems,
+            totalInventoryItems: inventory.totalQuantity,
             pendingRequests: summary.pendingDistributions,
             lowStockCount: summary.lowStockAlerts,
+            highUrgencyCount: summary.highUrgencyCount || 0,
             approvedRequests: byStatus['อนุมัติแล้ว'] || 0,
             inTransitRequests: byStatus['กำลังจัดส่ง'] || 0,
             totalDeliveries: byStatus['ส่งมอบแล้ว'] || 0,
@@ -79,7 +81,7 @@ export default function Dashboard() {
               </div>
               <div className="col-12 col-sm-6 col-xl-3">
                 <StatCard
-                  title="รายการสินค้าในคลัง"
+                  title="จำนวนพัสดุในคลังทั้งหมด"
                   value={loading ? '...' : stats.totalInventoryItems.toLocaleString()}
                   color="cyan"
                 />
@@ -93,8 +95,8 @@ export default function Dashboard() {
               </div>
               <div className="col-12 col-sm-6 col-xl-3">
                 <StatCard
-                  title="สินค้าใกล้หมด (Low Stock)"
-                  value={loading ? '...' : stats.lowStockCount.toLocaleString()}
+                  title="คำขอที่มีความเร่งด่วนสูง"
+                  value={loading ? '...' : stats.highUrgencyCount.toLocaleString()}
                   color="red"
                 />
               </div>
@@ -111,12 +113,15 @@ export default function Dashboard() {
                   let color: 'red' | 'purple' | 'green' | 'gray' = totalQty < 100 ? 'red' : totalQty < 500 ? 'purple' : 'green';
                   if (name === 'อื่นๆ') color = 'gray';
 
+                  const progress = (totalQty / 50000) * 100;
+
                   return (
                     <div key={name} className="col">
                       <StatCard
                         title={name}
                         value={totalQty.toLocaleString()}
                         color={color}
+                        progress={progress}
                       />
                     </div>
                   );

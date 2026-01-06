@@ -90,6 +90,9 @@ export async function GET() {
                 createdAt: req.createdAt
             }));
 
+        // Count high urgency requests
+        const highUrgencyCount = distributionRequests.filter(req => req.urgency === 'สูง').length;
+
         console.log('Successfully calculated dashboard statistics');
 
         return NextResponse.json({
@@ -105,6 +108,7 @@ export async function GET() {
                 distribution: {
                     totalRequests: totalDistributionRequests,
                     pendingCount: pendingCount,
+                    highUrgencyCount: highUrgencyCount,
                     byStatus: distributionByStatus,
                     recentRequests: recentRequests
                 },
@@ -115,6 +119,7 @@ export async function GET() {
                     totalInventoryItems: totalInventoryItems,
                     totalShelters: totalShelters,
                     pendingDistributions: pendingCount,
+                    highUrgencyCount: highUrgencyCount,
                     lowStockAlerts: lowStockCount
                 },
                 chartData: chartData
