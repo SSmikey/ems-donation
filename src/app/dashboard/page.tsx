@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
@@ -9,6 +9,7 @@ import FormSelect from '@/components/FormSelect';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     shelterCount: 0,
     totalInventoryItems: 0,
@@ -19,10 +20,8 @@ export default function Dashboard() {
     inTransitRequests: 0,
     totalDeliveries: 0,
   });
-  const [categories, setCategories] = useState<any>({});
-  const [loading, setLoading] = useState(true);
 
-  // Shelters Table State
+  const [categories, setCategories] = useState<any>({});
   const [shelters, setShelters] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -31,6 +30,12 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
+
+  // Requests Table/Feed State
+  const [requests, setRequests] = useState<any[]>([]);
+  const [filteredReqs, setFilteredReqs] = useState<any[]>([]);
+  const [reqUrgencyFilter, setReqUrgencyFilter] = useState('');
+  const [reqStatusFilter, setReqStatusFilter] = useState('');
 
   // Modal State
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -62,11 +67,19 @@ export default function Dashboard() {
           setCategories(inventory.byCategory || {});
         }
 
-        // Fetch shelters for table
+        // Fetch shelters
         const sheltersRes = await fetch('/api/shelters');
         const sheltersData = await sheltersRes.json();
         if (sheltersData.success) {
           setShelters(sheltersData.data);
+        }
+
+        // Fetch distribution requests
+        const requestsRes = await fetch('/api/distribution-requests?limit=50');
+        const requestsData = await requestsRes.json();
+        if (requestsData.success) {
+          setRequests(requestsData.data);
+          setFilteredReqs(requestsData.data);
         }
       } catch (error) {
         console.warn('Error fetching dashboard data:', error);
@@ -77,32 +90,58 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  // Update filtered requests when filters or source requests change
+  useEffect(() => {
+    let result = [...requests];
+
+    if (reqUrgencyFilter) {
+      result = result.filter(r => r.urgency === reqUrgencyFilter);
+    }
+    if (reqStatusFilter) {
+      result = result.filter(r => r.status === reqStatusFilter);
+    }
+
+    // Sort: High Urgency first, then by date
+    result.sort((a, b) => {
+      const urgencyScore: any = { 'สูง': 3, 'กลาง': 2, 'ต่ำ': 1 };
+      const scoreA = urgencyScore[a.urgency] || 0;
+      const scoreB = urgencyScore[b.urgency] || 0;
+
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    setFilteredReqs(result);
+  }, [reqUrgencyFilter, reqStatusFilter, requests]);
+
   // Extract unique values for filters
   const districts = [...new Set(shelters.map(s => s.district).filter(Boolean))].sort() as string[];
   const subdistricts = [...new Set(shelters.filter(s => !selectedDistrict || s.district === selectedDistrict).map(s => s.subdistrict).filter(Boolean))].sort() as string[];
   const types = [...new Set(shelters.map(s => s.shelterType).filter(Boolean))].sort() as string[];
-  const statuses = [...new Set(shelters.map(s => s.capacityStatus).filter(Boolean))].sort() as string[];
+  const statuses = [...new Set(shelters.map(s => s.certificationStatus).filter(Boolean))].sort() as string[];
 
-  // Filter and Paginate Shelters
+  // Filter Logic
   const filteredShelters = shelters.filter(s => {
-    const matchesSearch = !searchQuery || s.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDistrict = !selectedDistrict || s.district === selectedDistrict;
     const matchesSubdistrict = !selectedSubdistrict || s.subdistrict === selectedSubdistrict;
     const matchesType = !selectedType || s.shelterType === selectedType;
-    const matchesStatus = !selectedStatus || s.capacityStatus === selectedStatus;
-
+    const matchesStatus = !selectedStatus || s.certificationStatus === selectedStatus;
     return matchesSearch && matchesDistrict && matchesSubdistrict && matchesType && matchesStatus;
   });
 
-  const isFiltered = !!(searchQuery || selectedDistrict || selectedSubdistrict || selectedType || selectedStatus);
+  const isFiltered = searchQuery !== '' || selectedDistrict !== '' || selectedSubdistrict !== '' || selectedType !== '' || selectedStatus !== '';
 
-  const totalPages = Math.ceil(filteredShelters.length / recordsPerPage);
+  // Pagination Logic
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = filteredShelters.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(filteredShelters.length / recordsPerPage);
 
-  const handleCreateRequest = (shelterId: string) => {
-    setSelectedShelterId(shelterId);
+  const handleCreateRequest = (id: string) => {
+    setSelectedShelterId(id);
     setShowRequestModal(true);
   };
 
@@ -157,7 +196,6 @@ export default function Dashboard() {
                   const totalQty = data.totalQuantity;
                   const reservedQty = data.totalReservedQuantity || 0;
 
-                  // Map specific colors to categories for consistency and variety
                   const categoryColorMap: any = {
                     'อาหาร': 'green',
                     'ยาและเวชภัณฑ์': 'orange',
@@ -167,11 +205,7 @@ export default function Dashboard() {
                   };
 
                   const color = categoryColorMap[name] || 'cyan';
-
-                  // Progress is the % of available items (Total - Reserved) / Total
-                  const progress = totalQty > 0
-                    ? ((totalQty - reservedQty) / totalQty) * 100
-                    : 100;
+                  const progress = totalQty > 0 ? ((totalQty - reservedQty) / totalQty) * 100 : 100;
 
                   return (
                     <div key={name} className="col">
@@ -196,9 +230,22 @@ export default function Dashboard() {
           </div>
 
           {/* Shelter Search Table */}
-          <div className="card border-0 shadow-sm mt-4">
+          <div className="card border-0 shadow-sm mt-4 mb-5">
             <div className="card-body p-4">
-              <h5 className="fw-bold mb-4" style={{ color: '#111827', fontSize: '18px' }}>ค้นหาศูนย์พักพิง</h5>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="fw-bold mb-0" style={{ color: '#111827', fontSize: '18px' }}>ค้นหาศูนย์พักพิง</h5>
+                <button
+                  className="btn btn-primary btn-sm px-3 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-sm"
+                  onClick={() => setShowRequestModal(true)}
+                  style={{ backgroundColor: '#2563eb', border: 'none' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  สร้างคำขอเบิกใหม่
+                </button>
+              </div>
 
               {/* Advanced Filters */}
               <div className="row g-3 mb-4">
@@ -289,12 +336,12 @@ export default function Dashboard() {
                               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                           </div>
-                          <div className="text-muted fw-500">กรุณาพิมพ์ชื่อหรือเลือกตัวกรองเพื่อเรียกดูข้อมูลศูนย์พักพิง</div>
+                          <div className="text-muted fw-500">กรุณาพิมพ์ชื่อหรือเลือกตัวกรองเพื่อนเรียกดูข้อมูล</div>
                         </td>
                       </tr>
                     ) : currentRecords.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center p-5 text-muted">ไม่พบข้อมูลศูนย์พักพิงที่ตรงตามเงื่อนไข</td>
+                        <td colSpan={5} className="text-center p-5 text-muted">ไม่พบข้อมูลที่ตรงตามเงื่อนไข</td>
                       </tr>
                     ) : (
                       currentRecords.map((s) => (
@@ -337,82 +384,153 @@ export default function Dashboard() {
 
               {/* Pagination */}
               {isFiltered && totalPages > 1 && (
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 gap-3">
-                  <div className="text-muted small order-2 order-md-1">
-                    แสดง <span className="fw-bold" style={{ color: '#374151' }}>{indexOfFirstRecord + 1}</span> ถึง{' '}
-                    <span className="fw-bold" style={{ color: '#374151' }}>{Math.min(indexOfLastRecord, filteredShelters.length)}</span> จาก{' '}
-                    <span className="fw-bold" style={{ color: '#374151' }}>{filteredShelters.length}</span> รายการ
+                <div className="d-flex justify-content-between align-items-center mt-4">
+                  <div className="text-muted small">
+                    แสดง {indexOfFirstRecord + 1} ถึง {Math.min(indexOfLastRecord, filteredShelters.length)} จาก {filteredShelters.length} รายการ
                   </div>
-                  <nav className="order-1 order-md-2">
+                  <nav>
                     <ul className="pagination pagination-sm mb-0 gap-1">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button
-                          className="page-link border-0 rounded-2 px-3 py-2"
-                          onClick={() => setCurrentPage(currentPage - 1)}
-                          style={{ color: '#4b5563', background: '#f3f4f6' }}
-                        >
-                          ก่อนหน้า
-                        </button>
-                      </li>
-
-                      {/* Page Numbers with Ellipsis */}
-                      {(() => {
-                        const pages = [];
-                        const maxVisible = 5;
-                        let start = Math.max(1, currentPage - 2);
-                        let end = Math.min(totalPages, start + maxVisible - 1);
-
-                        if (end - start < maxVisible - 1) {
-                          start = Math.max(1, end - maxVisible + 1);
-                        }
-
-                        if (start > 1) {
-                          pages.push(
-                            <li key={1} className="page-item">
-                              <button className="page-link border-0 rounded-2 px-3 py-2" onClick={() => setCurrentPage(1)} style={{ color: '#4b5563' }}>1</button>
-                            </li>
-                          );
-                          if (start > 2) pages.push(<li key="e1" className="page-item disabled"><span className="page-link border-0">...</span></li>);
-                        }
-
-                        for (let i = start; i <= end; i++) {
-                          pages.push(
-                            <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
-                              <button
-                                className="page-link border-0 rounded-2 px-3 py-2"
-                                onClick={() => setCurrentPage(i)}
-                                style={currentPage === i ? { backgroundColor: '#2563eb', color: '#fff', fontWeight: 600 } : { color: '#4b5563' }}
-                              >
-                                {i}
-                              </button>
-                            </li>
-                          );
-                        }
-
-                        if (end < totalPages) {
-                          if (end < totalPages - 1) pages.push(<li key="e2" className="page-item disabled"><span className="page-link border-0">...</span></li>);
-                          pages.push(
-                            <li key={totalPages} className="page-item">
-                              <button className="page-link border-0 rounded-2 px-3 py-2" onClick={() => setCurrentPage(totalPages)} style={{ color: '#4b5563' }}>{totalPages}</button>
-                            </li>
-                          );
-                        }
-                        return pages;
-                      })()}
-
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <button
-                          className="page-link border-0 rounded-2 px-3 py-2"
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                          style={{ color: '#4b5563', background: '#f3f4f6' }}
-                        >
-                          ถัดไป
-                        </button>
-                      </li>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                        <li key={p} className={`page-item ${currentPage === p ? 'active' : ''}`}>
+                          <button
+                            className="page-link border-0 rounded-2"
+                            onClick={() => setCurrentPage(p)}
+                            style={currentPage === p ? { backgroundColor: '#2563eb', color: '#fff' } : { color: '#4b5563' }}
+                          >
+                            {p}
+                          </button>
+                        </li>
+                      ))}
                     </ul>
                   </nav>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Distribution Request Feed Section */}
+          <div className="mb-5 mt-5">
+            <h5 className="fw-bold mb-4 d-flex align-items-center gap-2" style={{ color: '#111827' }}>
+              <div style={{ width: '4px', height: '24px', backgroundColor: '#2563eb', borderRadius: '4px' }}></div>
+              รายการคำขอเบิกสิ่งของ
+            </h5>
+
+            <div className="row g-4">
+              {/* Left Side: Filters */}
+              <div className="col-lg-3">
+                <div className="card border-0 shadow-sm p-4 rounded-4 sticky-top" style={{ top: '100px', backgroundColor: '#ffffff', border: '1px solid #f3f4f6' }}>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h6 className="fw-bold mb-0 d-flex align-items-center gap-2" style={{ color: '#374151', fontSize: '14px' }}>
+                      ตัวกรองรายการ
+                    </h6>
+                    {(reqUrgencyFilter || reqStatusFilter) && (
+                      <button
+                        className="btn btn-link btn-sm p-0 m-0 text-decoration-none text-muted"
+                        onClick={() => { setReqUrgencyFilter(''); setReqStatusFilter(''); }}
+                        style={{ fontSize: '11px' }}
+                      >
+                        ล้างตัวกรอง
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="filter-label mb-2 fw-600 d-block px-1" style={{ fontSize: '12px', color: '#6b7280', textTransform: 'uppercase' }}>ความเร่งด่วน</label>
+                    <div className="d-flex flex-column gap-2">
+                      {['', 'ต่ำ', 'กลาง', 'สูง'].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => setReqUrgencyFilter(val)}
+                          className={`btn btn-sm text-start py-2 px-3 rounded-3 border-0 ${reqUrgencyFilter === val ? 'shadow-sm' : ''}`}
+                          style={{
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            backgroundColor: reqUrgencyFilter === val ? '#2563eb' : '#f9fafb',
+                            color: reqUrgencyFilter === val ? '#ffffff' : '#4b5563'
+                          }}
+                        >
+                          {val === '' ? 'ทั้งหมด' : `เร่งด่วน${val}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="filter-label mb-2 fw-600 d-block px-1" style={{ fontSize: '12px', color: '#6b7280', textTransform: 'uppercase' }}>สถานะ</label>
+                    <div className="d-flex flex-column gap-2">
+                      {['', 'รอดำเนินการ', 'อนุมัติแล้ว', 'ยกเลิกแล้ว'].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => setReqStatusFilter(val)}
+                          className={`btn btn-sm text-start py-2 px-3 rounded-3 border-0 ${reqStatusFilter === val ? 'shadow-sm' : ''}`}
+                          style={{
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            backgroundColor: reqStatusFilter === val ? '#2563eb' : '#f9fafb',
+                            color: reqStatusFilter === val ? '#ffffff' : '#4b5563'
+                          }}
+                        >
+                          {val === '' ? 'ทั้งหมด' : val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Request Cards */}
+              <div className="col-lg-9">
+                <div className="d-flex flex-column gap-3">
+                  {loading ? (
+                    <div className="text-center py-5">กำลังโหลดข้อมูล...</div>
+                  ) : filteredReqs.length === 0 ? (
+                    <div className="text-center py-5 text-muted border border-dashed rounded-4">ไม่พบรายการคำขอเบิก</div>
+                  ) : filteredReqs.map(req => (
+                    <div key={req._id} className="card border-0 shadow-sm rounded-4 hov-lift overflow-hidden" style={{ transition: 'all 0.3s ease', backgroundColor: '#ffffff', border: '1px solid #f3f4f6' }}>
+                      <div className="card-body p-0">
+                        <div className="d-flex">
+                          <div style={{ width: '6px', backgroundColor: req.urgency === 'สูง' ? '#ef4444' : req.urgency === 'กลาง' ? '#f59e0b' : '#10b981' }}></div>
+                          <div className="flex-grow-1 p-4">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                              <div>
+                                <h6 className="fw-bold mb-1" style={{ color: '#111827' }}>{req.shelterName || 'ไม่ระบุชื่อศูนย์'}</h6>
+                                <div className="text-muted small">#{req._id.substring(req._id.length - 6).toUpperCase()} • {new Date(req.createdAt).toLocaleDateString('th-TH')}</div>
+                              </div>
+                              <div className="d-flex gap-2">
+                                <span className="badge bg-white rounded-pill px-3 py-2 border shadow-sm"
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    color: req.urgency === 'สูง' ? '#dc2626' : req.urgency === 'กลาง' ? '#d97706' : '#059669',
+                                    borderColor: req.urgency === 'สูง' ? 'rgba(239, 68, 68, 0.3)' : req.urgency === 'กลาง' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'
+                                  }}>
+                                  เร่งด่วน{req.urgency}
+                                </span>
+                                <span className="badge bg-white text-dark border rounded-pill px-3 py-2 shadow-sm" style={{ fontSize: '11px', fontWeight: 600 }}>
+                                  {req.status}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="d-flex flex-wrap gap-2">
+                              {req.items?.slice(0, 4).map((item: any, idx: number) => (
+                                <div key={idx} className="bg-light px-3 py-2 rounded-3 border d-flex gap-2 align-items-center" style={{ fontSize: '12px' }}>
+                                  <span className="fw-bold">{item.itemName}</span>
+                                  <span className="text-primary fw-bold text-nowrap">{item.quantity} {item.unit}</span>
+                                </div>
+                              ))}
+                              {req.items?.length > 4 && <div className="text-muted small align-self-center">+ อีก {req.items.length - 4} รายการ</div>}
+                            </div>
+                          </div>
+                          <div className="p-3 border-start bg-light bg-opacity-10 d-flex flex-column justify-content-center" style={{ minWidth: '150px' }}>
+                            <button className="btn btn-primary btn-sm rounded-pill fw-bold mb-2">ตรวจสอบ</button>
+                            <button className="btn btn-white btn-sm rounded-pill border fw-600">รายละเอียด</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -421,10 +539,7 @@ export default function Dashboard() {
       {showRequestModal && (
         <CreateRequestModal
           onClose={() => setShowRequestModal(false)}
-          onSuccess={() => {
-            setShowRequestModal(false);
-            // Optional: refresh dashboard data if needed
-          }}
+          onSuccess={() => setShowRequestModal(false)}
           initialShelterId={selectedShelterId}
         />
       )}
