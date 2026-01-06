@@ -42,12 +42,8 @@ export default function LoginPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#ffffff',
-        backgroundImage: `
-          linear-gradient(135deg, #f5f7fa 0%, #e3e8f0 100%),
-          repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(99, 102, 241, 0.03) 35px, rgba(99, 102, 241, 0.03) 70px),
-          repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(59, 130, 246, 0.02) 35px, rgba(59, 130, 246, 0.02) 70px)
-        `,
+        background: '#f8f9fa',
+        backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #f1f3f5 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -55,78 +51,39 @@ export default function LoginPage() {
         position: 'relative'
       }}
     >
-      {/* Decorative elements */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '500px',
-          height: '500px',
-          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.05), transparent)',
-          borderRadius: '50%',
-          opacity: 0.6,
-          top: '-150px',
-          left: '-150px',
-          animation: 'pulse 4s ease-in-out infinite'
-        }}
-      ></div>
-      <div
-        style={{
-          position: 'absolute',
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05), transparent)',
-          borderRadius: '50%',
-          opacity: 0.6,
-          bottom: '-100px',
-          right: '-100px',
-          animation: 'pulse 4s ease-in-out infinite 2s'
-        }}
-      ></div>
 
       {/* Login Card */}
       <div
         className="card border-0"
         style={{
-          maxWidth: '460px',
+          maxWidth: '480px',
           width: '90%',
-          padding: '50px 45px',
+          padding: '55px 50px',
           position: 'relative',
           zIndex: 10,
           background: '#ffffff',
-          borderRadius: '24px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.05)'
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e9ecef'
         }}
       >
         {/* Logo Section */}
-        <div className="text-center mb-4">
-          <div
-            style={{
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 20px',
-              boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
-            }}
-          >
-            <i className="bi bi-house-heart-fill" style={{ fontSize: '36px', color: '#ffffff' }}></i>
-          </div>
-          <h1 className="fw-bold mb-2" style={{ fontSize: '26px', color: '#2d3748', letterSpacing: '-0.5px' }}>
+        <div className="text-center mb-5">
+          <h1 className="fw-bold mb-2" style={{ fontSize: '28px', color: '#1e293b', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
             ระบบจัดการบริจาคสิ่งของ
           </h1>
-          <p className="text-muted mb-0" style={{ fontSize: '14px' }}>
-            EMS Donation Management System
+          <p className="text-secondary mb-0" style={{ fontSize: '13px', fontWeight: '500', letterSpacing: '0.3px' }}>
+            EMERGENCY MANAGEMENT SYSTEM
           </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleLogin}>
-          <h2 className="text-center fw-semibold mb-4" style={{ fontSize: '22px', color: '#4a5568' }}>
-            เข้าสู่ระบบ
-          </h2>
+          <div className="mb-4 pb-3" style={{ borderBottom: '2px solid #f1f3f5' }}>
+            <h2 className="text-center fw-bold mb-0" style={{ fontSize: '20px', color: '#334155', letterSpacing: '-0.2px' }}>
+              เข้าสู่ระบบ
+            </h2>
+          </div>
 
           {error && (
             <div
@@ -146,34 +103,35 @@ export default function LoginPage() {
           )}
 
           {/* Username Input */}
-          <div className="mb-3">
-            <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#4a5568' }}>
-              ชื่อผู้ใช้
+          <div className="mb-4">
+            <label className="form-label fw-semibold mb-2" style={{ fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              ชื่อผู้ใช้งาน
             </label>
             <div className="position-relative">
               <i
-                className="bi bi-person-fill position-absolute"
+                className="bi bi-person position-absolute"
                 style={{
-                  left: '16px',
+                  left: '14px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#a0aec0',
-                  fontSize: '18px'
+                  color: '#94a3b8',
+                  fontSize: '16px'
                 }}
               ></i>
               <input
                 type="text"
-                placeholder="กรอกชื่อผู้ใช้"
+                placeholder="กรอกชื่อผู้ใช้งาน"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="form-control"
                 style={{
-                  background: '#f7fafc',
-                  border: '2px solid #e2e8f0',
-                  color: '#2d3748',
-                  borderRadius: '12px',
-                  padding: '12px 16px 12px 48px',
-                  fontSize: '15px'
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e0',
+                  color: '#1e293b',
+                  borderRadius: '8px',
+                  padding: '11px 14px 11px 42px',
+                  fontSize: '14px',
+                  fontWeight: '500'
                 }}
                 required
               />
@@ -182,18 +140,18 @@ export default function LoginPage() {
 
           {/* Password Input */}
           <div className="mb-4">
-            <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#4a5568' }}>
+            <label className="form-label fw-semibold mb-2" style={{ fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               รหัสผ่าน
             </label>
             <div className="position-relative">
               <i
-                className="bi bi-lock-fill position-absolute"
+                className="bi bi-lock position-absolute"
                 style={{
-                  left: '16px',
+                  left: '14px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#a0aec0',
-                  fontSize: '18px'
+                  color: '#94a3b8',
+                  fontSize: '16px'
                 }}
               ></i>
               <input
@@ -203,12 +161,13 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-control"
                 style={{
-                  background: '#f7fafc',
-                  border: '2px solid #e2e8f0',
-                  color: '#2d3748',
-                  borderRadius: '12px',
-                  padding: '12px 16px 12px 48px',
-                  fontSize: '15px'
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e0',
+                  color: '#1e293b',
+                  borderRadius: '8px',
+                  padding: '11px 14px 11px 42px',
+                  fontSize: '14px',
+                  fontWeight: '500'
                 }}
                 required
               />
@@ -248,16 +207,17 @@ export default function LoginPage() {
           {/* Login Button */}
           <button
             type="submit"
-            className="btn btn-primary w-100 fw-semibold"
+            className="btn btn-primary w-100 fw-bold"
             disabled={loading}
             style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              background: '#1e40af',
               border: 'none',
-              padding: '14px',
-              fontSize: '16px',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(59, 130, 246, 0.3)',
-              transition: 'all 0.3s ease'
+              padding: '13px',
+              fontSize: '15px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)',
+              transition: 'all 0.2s ease',
+              letterSpacing: '0.3px'
             }}
           >
             {loading ? (
@@ -269,58 +229,47 @@ export default function LoginPage() {
               'เข้าสู่ระบบ'
             )}
           </button>
-        </form>
-      </div>
+        </form >
+      </div >
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.5;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 0.6;
-          }
-        }
-
         input::placeholder {
-          color: #a0aec0 !important;
+          color: #94a3b8 !important;
         }
 
         input:focus {
           background: #ffffff !important;
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-          color: #2d3748 !important;
+          border-color: #1e40af !important;
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08) !important;
+          color: #1e293b !important;
         }
 
         .form-check-input:checked {
-          background-color: #3b82f6 !important;
-          border-color: #3b82f6 !important;
+          background-color: #1e40af !important;
+          border-color: #1e40af !important;
         }
 
         .form-check-input:focus {
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+          border-color: #1e40af !important;
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08) !important;
         }
 
         .btn-primary:hover:not(:disabled) {
-          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4) !important;
+          background: #1e3a8a !important;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(30, 64, 175, 0.2) !important;
         }
 
         .btn-primary:active:not(:disabled) {
           transform: translateY(0);
-          box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3) !important;
+          box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15) !important;
         }
 
         .btn-primary:disabled {
-          opacity: 0.7;
+          opacity: 0.6;
           cursor: not-allowed;
         }
       `}</style>
-    </div>
+    </div >
   );
 }
