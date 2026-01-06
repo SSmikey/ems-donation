@@ -22,9 +22,6 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
   return (
     <div className={styles.toastContainer}>
       <div className={`${styles.toast} ${styles[type]}`}>
-        <span className={styles.icon}>
-          {type === 'success' ? '✅' : '❌'}
-        </span>
         <span className={styles.message}>{message}</span>
       </div>
     </div>
