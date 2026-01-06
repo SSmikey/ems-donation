@@ -5,10 +5,10 @@ import { ObjectId } from 'mongodb';
 // POST - Approve distribution request and update inventory
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> } // In Next.js 15+, params is a Promise
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const body = await request.json();
 
         // Validate ObjectId format

@@ -8,10 +8,10 @@ const ALLOWED_CANCEL_STATUSES = ['รอดำเนินการ', 'อนุ
 // POST - Cancel distribution request and restore inventory
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const body = await request.json();
 
         // Validate ObjectId format

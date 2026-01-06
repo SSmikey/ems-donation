@@ -253,6 +253,8 @@ export async function POST(request: Request) {
 
         for (const item of body.items) {
             const invItem = await inventoryColl.findOne({ _id: new ObjectId(item.inventoryId) });
+            if (!invItem) continue; // Should not happen as we checked above
+
             const prevReserved = invItem.reservedQuantity || 0;
             const newReserved = prevReserved + item.quantity;
 
@@ -272,8 +274,8 @@ export async function POST(request: Request) {
                 requestId: requestId.toString(),
                 type: 'RESERVE',
                 changeQuantity: item.quantity,
-                previousQuantity: invItem.quantity,
-                newQuantity: invItem.quantity,
+                previousQuantity: invItem.quantity || 0,
+                newQuantity: invItem.quantity || 0,
                 previousReservedQuantity: prevReserved,
                 newReservedQuantity: newReserved,
                 performedBy: {

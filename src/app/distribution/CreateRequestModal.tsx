@@ -27,7 +27,7 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
   // Form State
   const [selectedShelter, setSelectedShelter] = useState(initialShelterId || '');
   const [urgency, setUrgency] = useState('กลาง');
-  const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number }[]>([]);
+  const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number; unit: string }[]>([]);
 
   // Item Selection State
   const [selectedItem, setSelectedItem] = useState('');
@@ -88,7 +88,15 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
       return;
     }
 
-    setRequestItems([...requestItems, { itemId: item._id, name: item.itemName, quantity: itemQuantity }]);
+    setRequestItems([
+      ...requestItems,
+      {
+        itemId: item._id,
+        name: item.itemName,
+        quantity: itemQuantity,
+        unit: item.unit // Store unit for the API
+      }
+    ]);
     setSelectedItem('');
     setItemQuantity(1);
   };
@@ -111,10 +119,21 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shelterId: selectedShelter,
-          items: requestItems.map(i => ({ itemName: i.name, quantity: i.quantity })), // Adjust based on API requirement
+          items: requestItems.map(i => ({
+            inventoryId: i.itemId,
+            itemName: i.name,
+            quantity: i.quantity,
+            unit: i.unit
+          })),
           urgency,
           status: 'รอดำเนินการ',
-          requestBy: 'เจ้าหน้าที่ศูนย์'
+          requestBy: {
+            userId: 'staff-001', // Ideally should come from auth context
+            username: 'staff_user',
+            firstName: 'เจ้าหน้าที่',
+            lastName: 'หน้างาน',
+            role: 'STAF'
+          }
         })
       });
 
@@ -122,7 +141,8 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         alert('สร้างคำขอสำเร็จ');
         onSuccess();
       } else {
-        alert('เกิดข้อผิดพลาดในการสร้างคำขอ');
+        const errorData = await res.json();
+        alert('เกิดข้อผิดพลาดในการสร้างคำขอ: ' + (errorData.details?.join(', ') || errorData.error));
       }
     } catch (error) {
       console.error('Error creating request:', error);
@@ -131,7 +151,7 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
   };
 
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 2000 }}>
       <style>{`
         .modal-form-select option {
           background-color: #1a1a2e;

@@ -31,7 +31,7 @@ export default function ConfirmDialog({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: 2000,
         backdropFilter: 'blur(4px)'
       }}
       onClick={onCancel}

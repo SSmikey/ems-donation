@@ -52,10 +52,10 @@ function validateDistributionRequestUpdate(data: any) {
 // GET - Fetch single distribution request by ID
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
 
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
@@ -96,10 +96,10 @@ export async function GET(
 // PUT - Update distribution request by ID
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const body = await request.json();
 
         // Validate ObjectId format
@@ -121,7 +121,7 @@ export async function PUT(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'DistributionRequests';
+        const collectionName = 'distributionrequests';
 
         // Check if request exists
         const existingRequest = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
@@ -164,10 +164,10 @@ export async function PUT(
 // DELETE - Remove distribution request by ID
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
 
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
@@ -179,7 +179,7 @@ export async function DELETE(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'DistributionRequests';
+        const collectionName = 'distributionrequests';
 
         // Check if request exists
         const distributionRequest = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
