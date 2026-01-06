@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,25 +17,34 @@ export default function Dashboard() {
     approvedRequests: 0,
     inTransitRequests: 0,
     totalDeliveries: 0,
-    chartData: [
-      { name: 'จันทร์', requests: 0 },
-      { name: 'อังคาร', requests: 0 },
-      { name: 'พุธ', requests: 0 },
-      { name: 'พฤหัส', requests: 0 },
-      { name: 'ศุกร์', requests: 0 },
-    ]
   });
   const [categories, setCategories] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/dashboard/stats');
-        const data = await res.json();
+  // Shelters Table State
+  const [shelters, setShelters] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedSubdistrict, setSelectedSubdistrict] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
 
-        if (data.success) {
-          const { summary, inventory, chartData, distribution } = data.data;
+  // Modal State
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedShelterId, setSelectedShelterId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        // Fetch stats
+        const statsRes = await fetch('/api/dashboard/stats');
+        const statsData = await statsRes.json();
+
+        if (statsData.success) {
+          const { summary, inventory, distribution } = statsData.data;
           const byStatus = distribution?.byStatus || {};
 
           setStats(prev => ({
@@ -48,18 +57,51 @@ export default function Dashboard() {
             approvedRequests: byStatus['อนุมัติแล้ว'] || 0,
             inTransitRequests: byStatus['กำลังจัดส่ง'] || 0,
             totalDeliveries: byStatus['ส่งมอบแล้ว'] || 0,
-            chartData: chartData || prev.chartData
           }));
           setCategories(inventory.byCategory || {});
         }
+
+        // Fetch shelters for table
+        const sheltersRes = await fetch('/api/shelters');
+        const sheltersData = await sheltersRes.json();
+        if (sheltersData.success) {
+          setShelters(sheltersData.data);
+        }
       } catch (error) {
-        console.warn('Error fetching stats:', error);
+        console.warn('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchStats();
+    fetchData();
   }, []);
+
+  // Extract unique values for filters
+  const districts = [...new Set(shelters.map(s => s.district).filter(Boolean))].sort() as string[];
+  const subdistricts = [...new Set(shelters.filter(s => !selectedDistrict || s.district === selectedDistrict).map(s => s.subdistrict).filter(Boolean))].sort() as string[];
+  const types = [...new Set(shelters.map(s => s.shelterType).filter(Boolean))].sort() as string[];
+  const statuses = [...new Set(shelters.map(s => s.capacityStatus).filter(Boolean))].sort() as string[];
+
+  // Filter and Paginate Shelters
+  const filteredShelters = shelters.filter(s => {
+    const matchesSearch = !searchQuery || s.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDistrict = !selectedDistrict || s.district === selectedDistrict;
+    const matchesSubdistrict = !selectedSubdistrict || s.subdistrict === selectedSubdistrict;
+    const matchesType = !selectedType || s.shelterType === selectedType;
+    const matchesStatus = !selectedStatus || s.capacityStatus === selectedStatus;
+
+    return matchesSearch && matchesDistrict && matchesSubdistrict && matchesType && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredShelters.length / recordsPerPage);
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredShelters.slice(indexOfFirstRecord, indexOfLastRecord);
+
+  const handleCreateRequest = (shelterId: string) => {
+    setSelectedShelterId(shelterId);
+    setShowRequestModal(true);
+  };
 
   return (
     <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
@@ -144,8 +186,254 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Shelter Search Table */}
+          <div className="card border-0 shadow-sm mt-4">
+            <style>{`
+              .filter-control {
+                transition: all 0.2s ease;
+                border: 1px solid #e5e7eb !important;
+                border-radius: 10px !important;
+                height: 44px !important;
+                font-size: 14px !important;
+                background-color: #f9fafb !important;
+                color: #374151 !important;
+              }
+              .filter-control:hover {
+                border-color: #d1d5db !important;
+                background-color: #f3f4f6 !important;
+              }
+              .filter-control:focus {
+                border-color: #2563eb !important;
+                background-color: #ffffff !important;
+                box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+                outline: none !important;
+              }
+              .filter-label {
+                font-size: 12px;
+                font-weight: 600;
+                color: #6b7280;
+                margin-bottom: 6px;
+                display: block;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+              }
+            `}</style>
+            <div className="card-body p-4">
+              <h5 className="fw-bold mb-4" style={{ color: '#111827', fontSize: '18px' }}>ค้นหาศูนย์พักพิง</h5>
+
+              {/* Advanced Filters */}
+              <div className="row g-3 mb-4">
+                <div className="col-12 col-md-3">
+                  <label className="filter-label">ระบุชื่อศูนย์</label>
+                  <input
+                    type="text"
+                    className="form-control filter-control"
+                    placeholder="ค้นหาชื่อศูนย์พักพิง..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+                <div className="col-12 col-sm-6 col-md-2">
+                  <label className="filter-label">อำเภอ</label>
+                  <select
+                    className="form-select filter-control"
+                    value={selectedDistrict}
+                    onChange={(e) => { setSelectedDistrict(e.target.value); setSelectedSubdistrict(''); setCurrentPage(1); }}
+                  >
+                    <option value="">ทั้งหมด (อำเภอ)</option>
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6 col-md-2">
+                  <label className="filter-label">ตำบล</label>
+                  <select
+                    className="form-select filter-control"
+                    value={selectedSubdistrict}
+                    onChange={(e) => { setSelectedSubdistrict(e.target.value); setCurrentPage(1); }}
+                  >
+                    <option value="">ทั้งหมด (ตำบล)</option>
+                    {subdistricts.map(sd => <option key={sd} value={sd}>{sd}</option>)}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6 col-md-2">
+                  <label className="filter-label">ประเภทสถานที่</label>
+                  <select
+                    className="form-select filter-control"
+                    value={selectedType}
+                    onChange={(e) => { setSelectedType(e.target.value); setCurrentPage(1); }}
+                  >
+                    <option value="">ทั้งหมด (ประเภท)</option>
+                    {types.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6 col-md-3">
+                  <label className="filter-label">สถานะการรับรอง</label>
+                  <select
+                    className="form-select filter-control"
+                    value={selectedStatus}
+                    onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
+                  >
+                    <option value="">ทั้งหมด (สถานะ)</option>
+                    {statuses.map(st => <option key={st} value={st}>{st}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="table-responsive">
+                <table className="table align-middle">
+                  <thead className="bg-light">
+                    <tr style={{ color: '#6b7280', fontSize: '14px' }}>
+                      <th className="border-0 p-3">ชื่อศูนย์พักพิง</th>
+                      <th className="border-0 p-3">ตำบล/อำเภอ</th>
+                      <th className="border-0 p-3">ประเภท</th>
+                      <th className="border-0 p-3 text-center">สถานะ</th>
+                      <th className="border-0 p-3 text-end">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-4 text-muted">กำลังโหลดข้อมูล...</td>
+                      </tr>
+                    ) : currentRecords.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-4 text-muted">ไม่พบข้อมูลศูนย์พักพิง</td>
+                      </tr>
+                    ) : (
+                      currentRecords.map((s) => (
+                        <tr key={s._id} style={{ fontSize: '15px' }}>
+                          <td className="p-3 fw-500">{s.name}</td>
+                          <td className="p-3 text-muted">ต.{s.subdistrict} อ.{s.district}</td>
+                          <td className="p-3">{s.shelterType}</td>
+                          <td className="p-3 text-center">
+                            <span
+                              className={`badge rounded-pill px-3 py-2`}
+                              style={{
+                                backgroundColor: s.capacityStatus === 'รองรับได้' ? '#10b981' : '#f59e0b',
+                                fontSize: '12px',
+                                fontWeight: 600
+                              }}
+                            >
+                              {s.capacityStatus}
+                            </span>
+                          </td>
+                          <td className="p-3 text-end">
+                            <button
+                              onClick={() => handleCreateRequest(s._id)}
+                              className="btn btn-primary btn-sm px-3"
+                              style={{
+                                backgroundColor: '#2563eb',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontWeight: 500
+                              }}
+                            >
+                              สร้างคำขอ
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 gap-3">
+                  <div className="text-muted small order-2 order-md-1">
+                    แสดง <span className="fw-bold" style={{ color: '#374151' }}>{indexOfFirstRecord + 1}</span> ถึง{' '}
+                    <span className="fw-bold" style={{ color: '#374151' }}>{Math.min(indexOfLastRecord, filteredShelters.length)}</span> จาก{' '}
+                    <span className="fw-bold" style={{ color: '#374151' }}>{filteredShelters.length}</span> รายการ
+                  </div>
+                  <nav className="order-1 order-md-2">
+                    <ul className="pagination pagination-sm mb-0 gap-1">
+                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <button
+                          className="page-link border-0 rounded-2 px-3 py-2"
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          style={{ color: '#4b5563', background: '#f3f4f6' }}
+                        >
+                          ก่อนหน้า
+                        </button>
+                      </li>
+
+                      {/* Page Numbers with Ellipsis */}
+                      {(() => {
+                        const pages = [];
+                        const maxVisible = 5;
+                        let start = Math.max(1, currentPage - 2);
+                        let end = Math.min(totalPages, start + maxVisible - 1);
+
+                        if (end - start < maxVisible - 1) {
+                          start = Math.max(1, end - maxVisible + 1);
+                        }
+
+                        if (start > 1) {
+                          pages.push(
+                            <li key={1} className="page-item">
+                              <button className="page-link border-0 rounded-2 px-3 py-2" onClick={() => setCurrentPage(1)} style={{ color: '#4b5563' }}>1</button>
+                            </li>
+                          );
+                          if (start > 2) pages.push(<li key="e1" className="page-item disabled"><span className="page-link border-0">...</span></li>);
+                        }
+
+                        for (let i = start; i <= end; i++) {
+                          pages.push(
+                            <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
+                              <button
+                                className="page-link border-0 rounded-2 px-3 py-2"
+                                onClick={() => setCurrentPage(i)}
+                                style={currentPage === i ? { backgroundColor: '#2563eb', color: '#fff', fontWeight: 600 } : { color: '#4b5563' }}
+                              >
+                                {i}
+                              </button>
+                            </li>
+                          );
+                        }
+
+                        if (end < totalPages) {
+                          if (end < totalPages - 1) pages.push(<li key="e2" className="page-item disabled"><span className="page-link border-0">...</span></li>);
+                          pages.push(
+                            <li key={totalPages} className="page-item">
+                              <button className="page-link border-0 rounded-2 px-3 py-2" onClick={() => setCurrentPage(totalPages)} style={{ color: '#4b5563' }}>{totalPages}</button>
+                            </li>
+                          );
+                        }
+                        return pages;
+                      })()}
+
+                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <button
+                          className="page-link border-0 rounded-2 px-3 py-2"
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          style={{ color: '#4b5563', background: '#f3f4f6' }}
+                        >
+                          ถัดไป
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      {showRequestModal && (
+        <CreateRequestModal
+          onClose={() => setShowRequestModal(false)}
+          onSuccess={() => {
+            setShowRequestModal(false);
+            // Optional: refresh dashboard data if needed
+          }}
+          initialShelterId={selectedShelterId}
+        />
+      )}
     </div>
   );
 }
