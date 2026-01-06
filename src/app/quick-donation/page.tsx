@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import * as XLSX from 'xlsx';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import Toast from '@/components/Toast';
@@ -12,6 +13,9 @@ export default function QuickDonationPage() {
     const [quantity, setQuantity] = useState('');
     const [unit, setUnit] = useState('ชิ้น');
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [importedData, setImportedData] = useState<any[]>([]);
+    const [isImporting, setIsImporting] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const categories = ['อาหาร', 'น้ำดื่ม', 'ยาและเวชภัณฑ์', 'เครื่องนุ่งห่ม', 'อื่นๆ'];
 
@@ -45,6 +49,128 @@ export default function QuickDonationPage() {
         }
     };
 
+    const processFile = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                // Map ข้อมูลให้ตรงกับ Structure ของเรา (รองรับทั้ง Header ไทยและอังกฤษ)
+                const mappedData = jsonData.map((row: any) => ({
+                    category: String(row['หมวดหมู่'] || row['Category'] || 'อื่นๆ').trim(),
+                    itemName: String(row['ชื่อรายการ'] || row['ItemName'] || '').trim(),
+                    quantity: Number(row['จำนวน'] || row['Quantity']) || 0,
+                    unit: String(row['หน่วย'] || row['Unit'] || 'ชิ้น').trim()
+                })).filter(item => item.itemName); // กรองแถวที่ไม่มีชื่อออก
+
+                setImportedData(mappedData);
+                setIsImporting(true);
+                setToast({ message: `อ่านไฟล์สำเร็จ พบข้อมูล ${mappedData.length} รายการ`, type: 'success' });
+            } catch (error) {
+                console.error('Excel read error:', error);
+                setToast({ message: 'เกิดข้อผิดพลาดในการอ่านไฟล์ Excel', type: 'error' });
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) processFile(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+            processFile(file);
+        } else {
+            setToast({ message: 'กรุณาอัปโหลดไฟล์ Excel (.xlsx, .xls) เท่านั้น', type: 'error' });
+        }
+    };
+
+    const downloadTemplate = () => {
+        const ws = XLSX.utils.json_to_sheet([
+            { 'หมวดหมู่': 'อาหาร', 'ชื่อรายการ': 'ข้าวสาร', 'จำนวน': 10, 'หน่วย': 'กิโลกรัม' },
+            { 'หมวดหมู่': 'น้ำดื่ม', 'ชื่อรายการ': 'น้ำเปล่าแพ็คโหล', 'จำนวน': 50, 'หน่วย': 'แพ็ค' },
+            { 'หมวดหมู่': 'ยาและเวชภัณฑ์', 'ชื่อรายการ': 'หน้ากากอนามัย', 'จำนวน': 100, 'หน่วย': 'กล่อง' }
+        ]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Template");
+        XLSX.writeFile(wb, "donation_template.xlsx");
+    };
+
+    const handleBulkSubmit = async () => {
+        let successCount = 0;
+        let failCount = 0;
+        let duplicateCount = 0;
+        let lastErrorMessage = '';
+
+        // Loop บันทึกทีละรายการ (หรือจะปรับเป็น Bulk API ทีเดียวก็ได้ถ้า Backend รองรับ)
+        for (const item of importedData) {
+            try {
+                // 1. ตรวจสอบข้อมูลเบื้องต้นก่อนส่ง (Client-side Validation)
+                if (item.quantity <= 0) {
+                    console.warn('ข้ามรายการเนื่องจากจำนวนไม่ถูกต้อง:', item);
+                    failCount++;
+                    lastErrorMessage = `สินค้า "${item.itemName}" จำนวนต้องมากกว่า 0`;
+                    continue;
+                }
+
+                const res = await fetch('/api/inventory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                });
+
+                if (res.ok) {
+                    successCount++;
+                } else {
+                    // 2. อ่าน Error จาก Server ให้ละเอียดขึ้น
+                    const errorData = await res.json().catch(() => ({ error: 'Unknown Error' }));
+                    const errorMessage = errorData.error || errorData.message || 'ข้อมูลไม่ถูกต้องตามเงื่อนไขของระบบ';
+
+                    if (errorMessage.toLowerCase().includes('duplicate')) {
+                        duplicateCount++;
+                    } else {
+                        console.error('Server rejected:', JSON.stringify(item), 'Reason:', JSON.stringify(errorData));
+                        failCount++;
+                        lastErrorMessage = errorMessage;
+                    }
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                failCount++;
+                lastErrorMessage = 'ไม่สามารถเชื่อมต่อ Server ได้';
+            }
+        }
+
+        setToast({ 
+            message: `ผลการนำเข้า: สำเร็จ ${successCount}, ข้าม(ซ้ำ) ${duplicateCount}, ล้มเหลว ${failCount} ${failCount > 0 ? `(ตัวอย่าง: ${lastErrorMessage})` : ''}`, 
+            type: failCount === 0 ? 'success' : 'error' 
+        });
+
+        if (failCount === 0) {
+            setImportedData([]);
+            setIsImporting(false);
+        }
+    };
+
     return (
         <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
             <Sidebar isOpen={sidebarOpen} />
@@ -52,14 +178,94 @@ export default function QuickDonationPage() {
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
                 <div className="flex-grow-1 overflow-y-auto d-flex justify-content-center align-items-start p-4" style={{ paddingTop: '40px', backgroundColor: '#f8f9fa' }}>
-                    <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: '600px', background: '#ffffff', border: '1px solid #dee2e6' }}>
+                    <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: isImporting ? '900px' : '600px', background: '#ffffff', border: '1px solid #dee2e6', transition: 'max-width 0.3s' }}>
                         <div className="card-body p-5">
                             <div className="text-center mb-4">
                                 <h2 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#111827' }}>บันทึกของเข้าด่วน (Quick Donation)</h2>
                                 <p style={{ color: '#868e96', marginBottom: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
+                                
+                                {/* ส่วน Drag & Drop Import Excel */}
+                                {!isImporting && (
+                                    <div 
+                                        className="mt-4 p-4 text-center"
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        style={{ 
+                                            border: `2px dashed ${isDragging ? '#198754' : '#dee2e6'}`, 
+                                            borderRadius: '16px',
+                                            backgroundColor: isDragging ? '#f0fff4' : '#ffffff',
+                                            transition: 'all 0.2s ease',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <i className="bi bi-cloud-upload" style={{ fontSize: '32px', color: isDragging ? '#198754' : '#adb5bd' }}></i>
+                                        <h5 className="mt-2 mb-1" style={{ fontSize: '16px', color: '#495057' }}>ลากไฟล์ Excel มาวางที่นี่</h5>
+                                        <p className="text-muted small mb-3">หรือคลิกเพื่อเลือกไฟล์</p>
+                                        
+                                        <label className="btn btn-outline-success btn-sm px-4" style={{ borderRadius: '20px' }}>
+                                            เลือกไฟล์
+                                            <input type="file" accept=".xlsx, .xls" hidden onChange={handleFileUpload} />
+                                        </label>
+
+                                        <div className="mt-3">
+                                            <button onClick={downloadTemplate} className="btn btn-link btn-sm text-decoration-none text-muted" style={{ fontSize: '12px' }}>
+                                                <i className="bi bi-download me-1"></i> ดาวน์โหลดแบบฟอร์มตัวอย่าง
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            <form onSubmit={handleSubmit}>
+                            {isImporting ? (
+                                // ส่วนแสดงผลตาราง Preview ข้อมูลจาก Excel
+                                <div>
+                                    <div className="table-responsive mb-4" style={{ maxHeight: '400px' }}>
+                                        <table className="table table-bordered table-hover">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>หมวดหมู่</th>
+                                                    <th>ชื่อรายการ</th>
+                                                    <th>จำนวน</th>
+                                                    <th>หน่วย</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {importedData.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>{item.category}</td>
+                                                        <td>{item.itemName}</td>
+                                                        <td>{item.quantity}</td>
+                                                        <td>{item.unit}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="d-flex gap-2">
+                                        <button 
+                                            className="btn btn-success w-100 fw-bold" 
+                                            onClick={handleBulkSubmit}
+                                            style={{ padding: '16px', fontSize: '18px', borderRadius: '12px' }}
+                                        >
+                                            ยืนยันนำเข้า ({importedData.length})
+                                        </button>
+                                        <button 
+                                            className="btn btn-light w-100 fw-bold text-muted" 
+                                            onClick={() => { setIsImporting(false); setImportedData([]); }}
+                                            style={{ padding: '16px', fontSize: '18px', borderRadius: '12px' }}
+                                        >
+                                            ยกเลิก
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                // ฟอร์มเดิมสำหรับการกรอกทีละรายการ
+                                <>
+                                <div className="d-flex align-items-center my-4">
+                                    <span className="text-muted small w-100 text-center">--- หรือ กรอกข้อมูลด้วยตัวเอง ---</span>
+                                </div>
+                                <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
                                     <label className="form-label" style={{ color: '#495057', fontSize: '14px' }}>
                                         เลือกหมวดหมู่
@@ -147,6 +353,8 @@ export default function QuickDonationPage() {
                                     ยืนยันการบันทึก (Confirm)
                                 </button>
                             </form>
+                            </>
+                            )}
                         </div>
                     </div>
                 </div>

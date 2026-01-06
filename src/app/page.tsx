@@ -42,7 +42,8 @@ export default function LoginPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        background: '#f8f9fa',
+        backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #f1f3f5 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -50,110 +51,127 @@ export default function LoginPage() {
         position: 'relative'
       }}
     >
-      {/* Decorative elements */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, #00d4ff, transparent)',
-          borderRadius: '50%',
-          opacity: 0.15,
-          top: '-100px',
-          left: '-100px'
-        }}
-      ></div>
-      <div
-        style={{
-          position: 'absolute',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, #c084fc, transparent)',
-          borderRadius: '50%',
-          opacity: 0.15,
-          bottom: '-50px',
-          left: '-50px'
-        }}
-      ></div>
-      <div
-        style={{
-          position: 'absolute',
-          width: '350px',
-          height: '350px',
-          background: 'radial-gradient(circle, #00d4ff, transparent)',
-          borderRadius: '50%',
-          opacity: 0.15,
-          bottom: '-100px',
-          right: '-100px'
-        }}
-      ></div>
 
       {/* Login Card */}
       <div
-        className="card shadow-lg border-0"
+        className="card border-0"
         style={{
-          maxWidth: '420px',
-          width: '100%',
-          padding: '60px 50px',
+          maxWidth: '480px',
+          width: '90%',
+          padding: '55px 50px',
           position: 'relative',
           zIndex: 10,
-          background: 'rgba(22, 33, 62, 0.9)',
-          backdropFilter: 'blur(10px)'
+          background: '#ffffff',
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e9ecef'
         }}
       >
         {/* Logo Section */}
         <div className="text-center mb-5">
-          <h1 className="fw-bold" style={{ fontSize: '28px', color: '#ffffff', letterSpacing: '0.5px', margin: 0 }}>
-            ems-donation
+          <h1 className="fw-bold mb-2" style={{ fontSize: '28px', color: '#1e293b', letterSpacing: '-0.3px', lineHeight: '1.2' }}>
+            ระบบจัดการบริจาคสิ่งของ
           </h1>
+          <p className="text-secondary mb-0" style={{ fontSize: '13px', fontWeight: '500', letterSpacing: '0.3px' }}>
+            EMERGENCY MANAGEMENT SYSTEM
+          </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleLogin}>
-          <h2 className="text-center fw-normal mb-4" style={{ fontSize: '24px', color: '#ffffff', letterSpacing: '0.5px' }}>
-            Login
-          </h2>
+          <div className="mb-4 pb-3" style={{ borderBottom: '2px solid #f1f3f5' }}>
+            <h2 className="text-center fw-bold mb-0" style={{ fontSize: '20px', color: '#334155', letterSpacing: '-0.2px' }}>
+              เข้าสู่ระบบ
+            </h2>
+          </div>
 
           {error && (
-            <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+            <div
+              className="alert alert-danger d-flex align-items-center mb-4"
+              role="alert"
+              style={{
+                borderRadius: '12px',
+                border: 'none',
+                background: '#fee2e2',
+                color: '#991b1b',
+                fontSize: '14px'
+              }}
+            >
+              <i className="bi bi-exclamation-circle-fill me-2"></i>
               <span>{error}</span>
             </div>
           )}
 
           {/* Username Input */}
-          <div className="mb-3">
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="form-control"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
-                borderRadius: '10px'
-              }}
-              required
-            />
+          <div className="mb-4">
+            <label className="form-label fw-semibold mb-2" style={{ fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              ชื่อผู้ใช้งาน
+            </label>
+            <div className="position-relative">
+              <i
+                className="bi bi-person position-absolute"
+                style={{
+                  left: '14px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#94a3b8',
+                  fontSize: '16px'
+                }}
+              ></i>
+              <input
+                type="text"
+                placeholder="กรอกชื่อผู้ใช้งาน"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="form-control"
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e0',
+                  color: '#1e293b',
+                  borderRadius: '8px',
+                  padding: '11px 14px 11px 42px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                required
+              />
+            </div>
           </div>
 
           {/* Password Input */}
           <div className="mb-4">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-control"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
-                borderRadius: '10px'
-              }}
-              required
-            />
+            <label className="form-label fw-semibold mb-2" style={{ fontSize: '13px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              รหัสผ่าน
+            </label>
+            <div className="position-relative">
+              <i
+                className="bi bi-lock position-absolute"
+                style={{
+                  left: '14px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#94a3b8',
+                  fontSize: '16px'
+                }}
+              ></i>
+              <input
+                type="password"
+                placeholder="กรอกรหัสผ่าน"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-control"
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e0',
+                  color: '#1e293b',
+                  borderRadius: '8px',
+                  padding: '11px 14px 11px 42px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                required
+              />
+            </div>
           </div>
 
           {/* Remember Me */}
@@ -166,11 +184,22 @@ export default function LoginPage() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 style={{
-                  accentColor: 'rgba(255, 255, 255, 0.6)'
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '6px',
+                  border: '2px solid #cbd5e0'
                 }}
               />
-              <label className="form-check-label" htmlFor="rememberMe" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Remember me?
+              <label
+                className="form-check-label"
+                htmlFor="rememberMe"
+                style={{
+                  color: '#718096',
+                  fontSize: '14px',
+                  marginLeft: '8px'
+                }}
+              >
+                จดจำการเข้าสู่ระบบ
               </label>
             </div>
           </div>
@@ -181,47 +210,66 @@ export default function LoginPage() {
             className="btn btn-primary w-100 fw-bold"
             disabled={loading}
             style={{
-              background: 'linear-gradient(135deg, #00d4ff 0%, #0099cc 100%)',
+              background: '#1e40af',
               border: 'none',
-              padding: '14px',
-              fontSize: '16px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+              padding: '13px',
+              fontSize: '15px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)',
+              transition: 'all 0.2s ease',
+              letterSpacing: '0.3px'
             }}
           >
-            {loading ? 'กำลังเข้าสู่ระบบ...' : 'Login'}
+            {loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                กำลังเข้าสู่ระบบ...
+              </>
+            ) : (
+              'เข้าสู่ระบบ'
+            )}
           </button>
-        </form>
-      </div>
+        </form >
+      </div >
 
       <style>{`
         input::placeholder {
-          color: rgba(255, 255, 255, 0.5) !important;
+          color: #94a3b8 !important;
         }
 
         input:focus {
-          background: rgba(255, 255, 255, 0.12) !important;
-          border-color: rgba(255, 255, 255, 0.4) !important;
-          box-shadow: none !important;
-          color: #ffffff !important;
+          background: #ffffff !important;
+          border-color: #1e40af !important;
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08) !important;
+          color: #1e293b !important;
+        }
+
+        .form-check-input:checked {
+          background-color: #1e40af !important;
+          border-color: #1e40af !important;
+        }
+
+        .form-check-input:focus {
+          border-color: #1e40af !important;
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08) !important;
         }
 
         .btn-primary:hover:not(:disabled) {
-          background: linear-gradient(135deg, #00e5ff 0%, #00aadd 100%) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
+          background: #1e3a8a !important;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(30, 64, 175, 0.2) !important;
         }
 
         .btn-primary:active:not(:disabled) {
           transform: translateY(0);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+          box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15) !important;
         }
 
         .btn-primary:disabled {
-          opacity: 0.7;
+          opacity: 0.6;
           cursor: not-allowed;
         }
       `}</style>
-    </div>
+    </div >
   );
 }

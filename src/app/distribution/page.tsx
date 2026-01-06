@@ -89,7 +89,6 @@ export default function DistributionPage() {
         if (!confirmDialog) return;
 
         try {
-            // Updated to use system user info for approval
             const res = await fetch(`/api/distribution-requests/${confirmDialog.requestId}/approve`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -159,19 +158,19 @@ export default function DistributionPage() {
     const getUrgencyBadgeClass = (urgency: string) => {
         switch (urgency) {
             case 'สูง': return 'badge bg-danger';
-            case 'กลาง': return 'badge bg-warning';
+            case 'กลาง': return 'badge bg-warning text-dark';
             default: return 'badge bg-info';
         }
     };
 
     const getStatusBadgeClass = (status: string) => {
         switch (status) {
-            case 'รอดำเนินการ': return 'badge bg-warning';
-            case 'อนุมัติแล้ว': return 'badge bg-info';
-            case 'กำลังจัดส่ง': return 'badge bg-primary';
-            case 'ส่งมอบแล้ว': return 'badge bg-success';
-            case 'ยกเลิกแล้ว': return 'badge bg-secondary';
-            default: return 'badge bg-secondary';
+            case 'รอดำเนินการ': return 'badge bg-warning text-white fw-semibold';
+            case 'อนุมัติแล้ว': return 'badge bg-info text-white fw-semibold';
+            case 'กำลังจัดส่ง': return 'badge bg-primary text-white fw-semibold';
+            case 'ส่งมอบแล้ว': return 'badge bg-success text-white fw-semibold';
+            case 'ยกเลิกแล้ว': return 'badge bg-secondary text-white fw-semibold';
+            default: return 'badge bg-secondary text-white fw-semibold';
         }
     };
 
@@ -185,152 +184,364 @@ export default function DistributionPage() {
         return true;
     });
 
+    // สถิติคำขอ
+    const stats = {
+        total: requests.length,
+        pending: requests.filter(r => r.status === 'รอดำเนินการ').length,
+        approved: requests.filter(r => r.status === 'อนุมัติแล้ว').length,
+        completed: requests.filter(r => r.status === 'ส่งมอบแล้ว').length
+    };
+
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#212529' }}>
-                            รายการคำขอเบิกสิ่งของ (Distribution Requests)
-                        </h1>
-                        <button
-                            className="btn btn-primary fw-bold"
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            + สร้างคำขอใหม่
-                        </button>
+                <div className="flex-grow-1 overflow-y-auto p-4">
+                    {/* Header Section with Card */}
+                    <div className="card border-0 shadow-sm mb-4">
+                        <div className="card-body py-4">
+                            <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <h1 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#2c3e50' }}>
+                                        รายการคำขอเบิกสิ่งของ
+                                    </h1>
+                                    <p className="text-muted mb-0">
+                                        <i className="bi bi-clipboard-check me-2"></i>
+                                        Distribution Requests Management
+                                    </p>
+                                </div>
+                                <button
+                                    className="btn btn-primary btn-lg fw-semibold shadow-sm"
+                                    style={{ borderRadius: '10px', padding: '12px 30px' }}
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    <i className="bi bi-plus-circle me-2"></i>
+                                    สร้างคำขอใหม่
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
+                    {/* Statistics Cards */}
                     <div className="row g-3 mb-4">
-                        <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: '#495057' }}>สถานะ</label>
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <option value="all">ทั้งหมด</option>
-                                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
-                                <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
-                                <option value="ยกเลิกแล้ว">ยกเลิกแล้ว</option>
-                            </select>
+                        <div className="col-12 col-sm-6 col-lg-3">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #6c757d' }}>
+                                <div className="card-body">
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>คำขอทั้งหมด</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.total}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
+                                </div>
+                            </div>
                         </div>
-
-                        <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: '#495057' }}>ความเร่งด่วน</label>
-                            <select
-                                className="form-select"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
-                                value={filterUrgency}
-                                onChange={(e) => setFilterUrgency(e.target.value)}
-                            >
-                                <option value="all">ทั้งหมด</option>
-                                <option value="สูง">สูง</option>
-                                <option value="กลาง">กลาง</option>
-                                <option value="ต่ำ">ต่ำ</option>
-                            </select>
+                        <div className="col-12 col-sm-6 col-lg-3">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #fbbf24' }}>
+                                <div className="card-body">
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>รอดำเนินการ</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.pending}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
+                                </div>
+                            </div>
                         </div>
-
-                        <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: '#495057' }}>วันที่</label>
-                            <input
-                                type="date"
-                                className="form-control"
-                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
-                                value={filterDate}
-                                onChange={(e) => setFilterDate(e.target.value)}
-                            />
+                        <div className="col-12 col-sm-6 col-lg-3">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #3b82f6' }}>
+                                <div className="card-body">
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>อนุมัติแล้ว</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.approved}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-12 col-sm-6 col-lg-3">
+                            <div className="card border-0 shadow-sm h-100" style={{ borderLeft: '4px solid #4ade80' }}>
+                                <div className="card-body">
+                                    <p className="text-muted mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>ส่งมอบแล้ว</p>
+                                    <h2 className="fw-bold mb-1" style={{ fontSize: '28px', color: '#111827' }}>{stats.completed}</h2>
+                                    <span className="text-muted" style={{ fontSize: '13px' }}>รายการ</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Filter Section with Card */}
+                    <div className="card border-0 shadow-sm mb-4">
+                        <div className="card-body">
+                            <h6 className="fw-bold mb-3 text-secondary">
+                                <i className="bi bi-funnel me-2"></i>
+                                ตัวกรองข้อมูล
+                            </h6>
+                            <div className="row g-3">
+                                <div className="col-12 col-md-4">
+                                    <label className="form-label small fw-semibold text-secondary mb-2">
+                                        <i className="bi bi-info-circle me-1"></i>
+                                        สถานะคำขอ
+                                    </label>
+                                    <select
+                                        className="form-select form-select-lg"
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
+                                            borderRadius: '10px',
+                                            fontSize: '15px'
+                                        }}
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                    >
+                                        <option value="all">ทั้งหมด</option>
+                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
+                                        <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
+                                        <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
+                                        <option value="ยกเลิกแล้ว">ยกเลิกแล้ว</option>
+                                    </select>
+                                </div>
+
+                                <div className="col-12 col-md-4">
+                                    <label className="form-label small fw-semibold text-secondary mb-2">
+                                        <i className="bi bi-exclamation-triangle me-1"></i>
+                                        ความเร่งด่วน
+                                    </label>
+                                    <select
+                                        className="form-select form-select-lg"
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
+                                            borderRadius: '10px',
+                                            fontSize: '15px'
+                                        }}
+                                        value={filterUrgency}
+                                        onChange={(e) => setFilterUrgency(e.target.value)}
+                                    >
+                                        <option value="all">ทั้งหมด</option>
+                                        <option value="สูง">สูง</option>
+                                        <option value="กลาง">กลาง</option>
+                                        <option value="ต่ำ">ต่ำ</option>
+                                    </select>
+                                </div>
+
+                                <div className="col-12 col-md-4">
+                                    <label className="form-label small fw-semibold text-secondary mb-2">
+                                        <i className="bi bi-calendar me-1"></i>
+                                        วันที่สร้างคำขอ
+                                    </label>
+                                    <input
+                                        type="date"
+                                        className="form-control form-control-lg"
+                                        style={{
+                                            background: '#ffffff',
+                                            border: '2px solid #e9ecef',
+                                            borderRadius: '10px',
+                                            fontSize: '15px'
+                                        }}
+                                        value={filterDate}
+                                        onChange={(e) => setFilterDate(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Table Section with Card */}
                     {loading ? (
-                        <p style={{ color: '#868e96' }}>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
+                        <div className="card border-0 shadow-sm">
+                            <div className="card-body text-center py-5">
+                                <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+                                    <span className="visually-hidden">กำลังโหลด...</span>
+                                </div>
+                                <p className="text-muted mb-0">กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
+                            </div>
+                        </div>
                     ) : (
                         <>
-                            <div className="table-responsive">
-                                <table className="table table-hover align-middle" style={{ backgroundColor: '#ffffff', borderColor: '#dee2e6' }}>
-                                    <thead style={{ borderColor: '#dee2e6', backgroundColor: '#f8f9fa' }}>
-                                        <tr>
-                                            <th style={{ color: '#495057' }}>เลขที่คำขอ</th>
-                                            <th style={{ color: '#495057' }}>ศูนย์พักพิง</th>
-                                            <th style={{ color: '#495057' }}>สินค้าที่ขอ</th>
-                                            <th style={{ color: '#495057' }}>ความเร่งด่วน</th>
-                                            <th style={{ color: '#495057' }}>สถานะ</th>
-                                            <th style={{ color: '#495057' }}>วันที่สร้าง</th>
-                                            <th style={{ color: '#495057' }}>จัดการ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style={{ borderColor: '#dee2e6' }}>
-                                        {filteredRequests.map((req) => (
-                                            <tr
-                                                key={req._id}
-                                                id={`request-${req._id}`}
-                                                style={{
-                                                    borderColor: '#dee2e6',
-                                                    opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1,
-                                                    backgroundColor: highlightedId === req._id ? 'rgba(37, 99, 235, 0.05)' : 'transparent',
-                                                    borderLeft: highlightedId === req._id ? '4px solid #2563eb' : 'none',
-                                                    transition: 'all 0.3s ease'
-                                                }}
-                                            >
-                                                <td style={{ fontWeight: highlightedId === req._id ? '700' : '500', color: highlightedId === req._id ? '#2563eb' : '#212529' }}>
-                                                    {highlightedId === req._id && <span className="me-1">📌</span>}
-                                                    REQ-{req._id.slice(-4)}
-                                                </td>
-                                                <td style={{ color: '#495057' }}>{req.shelterName}</td>
-                                                <td>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                        {req.items.map((item, idx) => (
-                                                            <span key={idx} style={{ fontSize: '0.9rem', color: '#495057' }}>{item.itemName} x{item.quantity}</span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className={getUrgencyBadgeClass(req.urgency)}>
-                                                        {req.urgency}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span className={getStatusBadgeClass(req.status)}>
-                                                        {req.status}
-                                                    </span>
-                                                </td>
-                                                <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
-                                                <td>
-                                                    <div className="d-flex gap-2">
-                                                        {req.status === 'รอดำเนินการ' && (
-                                                            <button
-                                                                className="btn btn-sm btn-success"
-                                                                onClick={() => handleApproveRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                            >
-                                                                อนุมัติ
-                                                            </button>
-                                                        )}
-                                                        {['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง'].includes(req.status) && (
-                                                            <button
-                                                                className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => handleCancelRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                            >
-                                                                ยกเลิก
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div className="card border-0 shadow-sm">
+                                <div className="card-body p-0">
+                                    <div className="table-responsive">
+                                        <table className="table table-hover align-middle mb-0">
+                                            <thead style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+                                                <tr>
+                                                    <th className="py-3 ps-4" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-hash me-2"></i>
+                                                        เลขที่คำขอ
+                                                    </th>
+                                                    <th className="py-3" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-building me-2"></i>
+                                                        ศูนย์พักพิง
+                                                    </th>
+                                                    <th className="py-3" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-box-seam me-2"></i>
+                                                        สินค้าที่ขอ
+                                                    </th>
+                                                    <th className="py-3" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-exclamation-triangle me-2"></i>
+                                                        ความเร่งด่วน
+                                                    </th>
+                                                    <th className="py-3" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-info-circle me-2"></i>
+                                                        สถานะ
+                                                    </th>
+                                                    <th className="py-3" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-calendar-event me-2"></i>
+                                                        วันที่สร้าง
+                                                    </th>
+                                                    <th className="py-3 pe-4 text-end" style={{ color: '#495057', fontWeight: '600', fontSize: '14px' }}>
+                                                        <i className="bi bi-gear me-2"></i>
+                                                        จัดการ
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredRequests.map((req) => (
+                                                    <tr
+                                                        key={req._id}
+                                                        style={{
+                                                            borderBottom: '1px solid #f1f3f5',
+                                                            opacity: req.status === 'ยกเลิกแล้ว' ? 0.6 : 1
+                                                        }}
+                                                    >
+                                                        <td className="ps-4 py-3">
+                                                            <span className="badge bg-light text-primary border border-primary" style={{ fontSize: '13px', padding: '6px 12px', fontWeight: '600' }}>
+                                                                REQ-{req._id.slice(-4)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3">
+                                                            <span className="fw-semibold" style={{ color: '#2c3e50', fontSize: '15px' }}>
+                                                                {req.shelterName}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3">
+                                                            <div className="d-flex flex-column gap-1">
+                                                                {req.items.map((item, idx) => (
+                                                                    <span key={idx} className="badge bg-light text-dark border" style={{ fontSize: '12px', padding: '5px 10px', width: 'fit-content' }}>
+                                                                        {item.itemName} × {item.quantity}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-3">
+                                                            <span className={getUrgencyBadgeClass(req.urgency)} style={{ fontSize: '13px', padding: '6px 12px', fontWeight: '500' }}>
+                                                                <i className={`bi ${req.urgency === 'สูง' ? 'bi-exclamation-circle' : req.urgency === 'กลาง' ? 'bi-dash-circle' : 'bi-info-circle'} me-1`}></i>
+                                                                {req.urgency}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3">
+                                                            <span className={getStatusBadgeClass(req.status)} style={{ fontSize: '13px', padding: '6px 12px', fontWeight: '500' }}>
+                                                                {req.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3">
+                                                            <span style={{ color: '#6c757d', fontSize: '14px' }}>
+                                                                {new Date(req.createdAt).toLocaleDateString('th-TH', {
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric'
+                                                                })}
+                                                            </span>
+                                                        </td>
+                                                        <td className="pe-4 py-3">
+                                                            <div className="d-flex gap-2 justify-content-end">
+                                                                {req.status === 'รอดำเนินการ' && (
+                                                                    <button
+                                                                        className="btn btn-success btn-sm"
+                                                                        style={{
+                                                                            borderRadius: '8px',
+                                                                            padding: '6px 16px',
+                                                                            fontWeight: '500',
+                                                                            fontSize: '13px'
+                                                                        }}
+                                                                        onClick={() => handleApproveRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                                    >
+                                                                        <i className="bi bi-check-circle me-1"></i>
+                                                                        อนุมัติ
+                                                                    </button>
+                                                                )}
+                                                                {['รอดำเนินการ', 'อนุมัติแล้ว', 'กำลังจัดส่ง'].includes(req.status) && (
+                                                                    <button
+                                                                        className="btn btn-outline-danger btn-sm"
+                                                                        style={{
+                                                                            borderRadius: '8px',
+                                                                            padding: '6px 16px',
+                                                                            fontWeight: '500',
+                                                                            fontSize: '13px'
+                                                                        }}
+                                                                        onClick={() => handleCancelRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                                    >
+                                                                        <i className="bi bi-x-circle me-1"></i>
+                                                                        ยกเลิก
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
 
+                            {filteredRequests.length > 0 && (
+                                <div className="card shadow-sm border-0 mt-4">
+                                    <div className="card-body">
+                                        <nav aria-label="Page navigation">
+                                            <ul className="pagination justify-content-center mb-0">
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        หน้าแรก
+                                                    </button>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        ก่อนหน้า
+                                                    </button>
+                                                </li>
+                                                <li className="page-item active">
+                                                    <span
+                                                        className="page-link border-0 bg-primary me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 20px', fontWeight: '500' }}
+                                                    >
+                                                        หน้า 1 / 1 ({filteredRequests.length} รายการ)
+                                                    </span>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0 me-2"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        ถัดไป
+                                                    </button>
+                                                </li>
+                                                <li className="page-item disabled">
+                                                    <button
+                                                        className="page-link border-0"
+                                                        style={{ borderRadius: '8px', padding: '8px 16px' }}
+                                                        disabled
+                                                    >
+                                                        หน้าสุดท้าย
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            )}
+
                             {filteredRequests.length === 0 && (
-                                <div className="text-center" style={{ marginTop: '50px', color: '#868e96' }}>
-                                    <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
+                                <div className="card border-0 shadow-sm mt-4">
+                                    <div className="card-body text-center py-5">
+                                        <i className="bi bi-inbox" style={{ fontSize: '48px', color: '#adb5bd' }}></i>
+                                        <p className="text-muted mt-3 mb-0">ไม่พบรายการคำขอเบิกสิ่งของ</p>
+                                        <p className="text-muted small">ลองปรับเปลี่ยนตัวกรองหรือสร้างคำขอใหม่</p>
+                                    </div>
                                 </div>
                             )}
                         </>
