@@ -48,8 +48,25 @@ function validateDistributionRequest(data: any, isUpdate = false) {
             errors.push(`urgency must be one of: ${VALID_URGENCIES.join(', ')}`);
         }
 
-        if (!data.requestBy || typeof data.requestBy !== 'string' || data.requestBy.trim() === '') {
-            errors.push('requestBy is required and must be a non-empty string');
+        if (!data.requestBy || typeof data.requestBy !== 'object') {
+            errors.push('requestBy is required and must be a user object');
+        } else {
+            // Validate user object fields
+            if (!data.requestBy.userId || typeof data.requestBy.userId !== 'string') {
+                errors.push('requestBy.userId is required');
+            }
+            if (!data.requestBy.username || typeof data.requestBy.username !== 'string') {
+                errors.push('requestBy.username is required');
+            }
+            if (!data.requestBy.firstName || typeof data.requestBy.firstName !== 'string') {
+                errors.push('requestBy.firstName is required');
+            }
+            if (!data.requestBy.lastName || typeof data.requestBy.lastName !== 'string') {
+                errors.push('requestBy.lastName is required');
+            }
+            if (!data.requestBy.role || typeof data.requestBy.role !== 'string') {
+                errors.push('requestBy.role is required');
+            }
         }
     } else {
         // For updates, validate only if fields are provided

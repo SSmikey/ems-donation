@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-// PUT - Approve distribution request and update inventory
-export async function PUT(
+// POST - Approve distribution request and update inventory
+export async function POST(
     request: Request,
     { params }: { params: { id: string } }
 ) {
@@ -19,11 +19,21 @@ export async function PUT(
             }, { status: 400 });
         }
 
-        // Validate approvedBy field
-        if (!body.approvedBy || typeof body.approvedBy !== 'string' || body.approvedBy.trim() === '') {
+        // Validate approvedBy field as user object
+        if (!body.approvedBy || typeof body.approvedBy !== 'object') {
             return NextResponse.json({
                 error: 'Validation failed',
-                details: ['approvedBy is required and must be a non-empty string']
+                details: ['approvedBy is required and must be a user object with userId, username, firstName, lastName, role, and approvedAt fields']
+            }, { status: 400 });
+        }
+
+        // Validate user object fields
+        const requiredFields = ['userId', 'username', 'firstName', 'lastName', 'role', 'approvedAt'];
+        const missingFields = requiredFields.filter(field => !body.approvedBy[field]);
+        if (missingFields.length > 0) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: [`approvedBy is missing required fields: ${missingFields.join(', ')}`]
             }, { status: 400 });
         }
 

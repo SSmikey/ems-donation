@@ -226,7 +226,7 @@ export async function DELETE(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'OperationCenters';
+        const collectionName = 'operationcenters'; // Lowercase for consistency
 
         // Check if shelter exists
         const shelter = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
@@ -235,6 +235,19 @@ export async function DELETE(request: Request) {
                 error: 'Shelter not found',
                 details: `No shelter found with ID: ${id}`
             }, { status: 404 });
+        }
+
+        // Check for related distribution requests (Foreign Key Validation)
+        const relatedRequests = await db.collection('distributionrequests').countDocuments({
+            shelterId: id
+        });
+
+        if (relatedRequests > 0) {
+            return NextResponse.json({
+                error: 'Cannot delete shelter',
+                details: `This shelter has ${relatedRequests} active distribution request(s). Please delete or reassign them first.`,
+                relatedRequestsCount: relatedRequests
+            }, { status: 409 }); // 409 Conflict
         }
 
         const result = await db.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
