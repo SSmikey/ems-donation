@@ -1,13 +1,8 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Global CSS - Bootstrap Compatible */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #f8f9fa;
+  --foreground: #212529;
 }
 
 html,
@@ -17,10 +12,11 @@ body {
   height: 100%;
 }
 
+/* Use Bootstrap's font stack */
 body {
+  font-family: var(--font-sarabun), system-ui, -apple-system, sans-serif;
   color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sarabun);
+  background-color: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -30,41 +26,394 @@ h1, h2, h3, h4, h5, h6,
 .header,
 .title,
 .heading {
-  font-family: var(--font-prompt);
+  font-family: var(--font-prompt), sans-serif;
 }
 
-/* Scrollbar styling */
+/* Ensure Bootstrap resets work properly */
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Custom scrollbar styling (keep from original) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: #cbd5e0;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #94a3b8;
 }
 
+/* Firefox scrollbar */
 * {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  scrollbar-color: #cbd5e0 transparent;
+  scrollbar-width: thin;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* ============================================
+   Bootstrap 5 Custom Theme Enhancements
+   Modern Gray Dashboard with Thai Font Support
+   ============================================ */
+
+/* ---- Color Variables for Custom Use ---- */
+:root {
+  --primary: #6366f1;
+  --secondary: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --gray-50: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-500: #adb5bd;
+  --gray-600: #868e96;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+  --sidebar-bg: #1e293b;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* ---- Custom Sidebar Styling ---- */
+.sidebar-dark {
+  background-color: var(--sidebar-bg);
+  color: #e2e8f0;
+}
+
+.sidebar-dark .nav-link {
+  color: #cbd5e0;
+  transition: all 0.3s ease;
+}
+
+.sidebar-dark .nav-link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-dark .nav-link.active {
+  color: #ffffff;
+  background-color: rgba(99, 102, 241, 0.1);
+  border-left: 3px solid var(--primary);
+  padding-left: calc(1rem - 3px);
+}
+
+.sidebar-dark .nav-section-title {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ---- Custom Card Styling ---- */
+.card {
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.card .card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* ---- Stat Card (Dashboard) ---- */
+.stat-card {
+  position: relative;
+  border: none;
+  overflow: hidden;
+}
+
+.stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-card .stat-label {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.stat-card .stat-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: var(--primary);
+}
+
+.stat-card.accent-success .stat-accent {
+  background-color: var(--success);
+}
+
+.stat-card.accent-danger .stat-accent {
+  background-color: var(--danger);
+}
+
+.stat-card.accent-warning .stat-accent {
+  background-color: var(--warning);
+}
+
+/* ---- Table Enhancements ---- */
+.table {
+  font-size: 0.95rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-color: var(--gray-200);
+  font-weight: 600;
+  color: var(--gray-700);
+  padding: 0.75rem;
+}
+
+.table tbody td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  border-color: var(--gray-200);
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* ---- Button Enhancements ---- */
+.btn {
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-sm {
+  font-size: 0.8125rem;
+}
+
+.btn-lg {
+  font-size: 1.0625rem;
+}
+
+/* ---- Form Control Enhancements ---- */
+.form-control,
+.form-select {
+  border-color: var(--gray-300);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: #f8f9fa;
+  color: var(--gray-600);
+}
+
+/* ---- Modal Enhancements ---- */
+.modal-content {
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* ---- Navbar Enhancements ---- */
+.navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.navbar .navbar-brand {
+  font-weight: 700;
+  color: var(--gray-900) !important;
+  font-size: 1.25rem;
+}
+
+.navbar .nav-link {
+  color: var(--gray-700) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+  color: var(--primary) !important;
+}
+
+.navbar .nav-link.active {
+  color: var(--primary) !important;
+}
+
+/* ---- Badge Styling ---- */
+.badge {
+  font-weight: 500;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.badge.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--success) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--warning) !important;
+  color: #ffffff;
+}
+
+.badge.bg-info {
+  background-color: var(--info) !important;
+}
+
+/* ---- Progress Bar Enhancements ---- */
+.progress {
+  background-color: var(--gray-200);
+  height: 0.5rem;
+  border-radius: 1rem;
+}
+
+.progress .progress-bar {
+  background-color: var(--primary);
+}
+
+/* ---- Text Color Utilities ---- */
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-secondary {
+  color: var(--secondary) !important;
+}
+
+.text-success {
+  color: var(--success) !important;
+}
+
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.text-warning {
+  color: var(--warning) !important;
+}
+
+.text-info {
+  color: var(--info) !important;
+}
+
+/* ---- Background Color Utilities ---- */
+.bg-light-primary {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.bg-light-success {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.bg-light-danger {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.bg-light-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.bg-light-info {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* ---- Responsive Adjustments ---- */
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.875rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.5rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* ---- Print Styles ---- */
+@media print {
+  .sidebar-dark,
+  .navbar,
+  .btn {
+    display: none;
+  }
+
+  body {
+    background-color: #ffffff;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid var(--gray-200);
   }
 }

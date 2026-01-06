@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Prompt, Sarabun } from "next/font/google";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 
 const prompt = Prompt({
