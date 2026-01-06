@@ -31,13 +31,14 @@ export async function GET() {
         const inventoryByCategory = inventoryItems.reduce((acc: any, item) => {
             const category = item.category || 'อื่นๆ';
             if (!acc[category]) {
-                acc[category] = { count: 0, totalQuantity: 0 };
+                acc[category] = { count: 0, totalQuantity: 0, totalReservedQuantity: 0 };
             }
             acc[category].count += 1;
             acc[category].totalQuantity += item.quantity;
+            acc[category].totalReservedQuantity += (item.reservedQuantity || 0);
             return acc;
         }, defaultCategories.reduce((acc: any, cat) => {
-            acc[cat] = { count: 0, totalQuantity: 0 };
+            acc[cat] = { count: 0, totalQuantity: 0, totalReservedQuantity: 0 };
             return acc;
         }, {}));
 

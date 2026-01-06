@@ -155,6 +155,7 @@ export default function Dashboard() {
               {Object.keys(categories).length > 0 ? (
                 Object.entries(categories).map(([name, data]: [string, any]) => {
                   const totalQty = data.totalQuantity;
+                  const reservedQty = data.totalReservedQuantity || 0;
 
                   // Map specific colors to categories for consistency and variety
                   const categoryColorMap: any = {
@@ -166,13 +167,18 @@ export default function Dashboard() {
                   };
 
                   const color = categoryColorMap[name] || 'cyan';
-                  const progress = (totalQty / 50000) * 100;
+
+                  // Progress is the % of available items (Total - Reserved) / Total
+                  const progress = totalQty > 0
+                    ? ((totalQty - reservedQty) / totalQty) * 100
+                    : 100;
 
                   return (
                     <div key={name} className="col">
                       <StatCard
                         title={name}
                         value={totalQty.toLocaleString()}
+                        subtitle={`จองแล้ว: ${reservedQty.toLocaleString()}`}
                         color={color as any}
                         progress={progress}
                       />

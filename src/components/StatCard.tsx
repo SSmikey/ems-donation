@@ -1,6 +1,7 @@
 interface StatCardProps {
   title: string;
   value: string;
+  subtitle?: string;
   color: 'cyan' | 'purple' | 'red' | 'green' | 'gray' | 'blue' | 'orange' | 'pink' | 'indigo';
   progress?: number;
 }
@@ -20,6 +21,7 @@ const colorMap = {
 export default function StatCard({
   title,
   value,
+  subtitle,
   color,
   progress,
 }: StatCardProps) {
@@ -44,21 +46,28 @@ export default function StatCard({
     >
       <div className="card-body d-flex flex-column justify-content-between">
         <div>
-          <h6 className="text-uppercase fw-700 mb-3" style={{ fontSize: '12px', letterSpacing: '0.8px', color: '#6b7280' }}>
+          <h6 className="text-uppercase fw-700 mb-3" style={{ fontSize: '11px', letterSpacing: '0.8px', color: '#6b7280' }}>
             {title}
           </h6>
         </div>
         <div>
-          <p className="display-6 fw-bold mb-0" style={{ fontSize: '28px', color: '#111827' }}>
-            {value}
-          </p>
+          <div className="d-flex align-items-baseline gap-2">
+            <p className="display-6 fw-bold mb-0" style={{ fontSize: '28px', color: '#111827' }}>
+              {value}
+            </p>
+            {subtitle && (
+              <span className="fw-500" style={{ fontSize: '13px', color: '#ef4444' }}>
+                {subtitle}
+              </span>
+            )}
+          </div>
           {progress !== undefined && (
             <div className="mt-3">
               <div className="progress" style={{ height: '6px', backgroundColor: '#f3f4f6', borderRadius: '3px' }}>
                 <div
                   className="progress-bar"
                   style={{
-                    width: `${Math.min(100, progress)}%`,
+                    width: `${Math.max(0, Math.min(100, progress))}%`,
                     backgroundColor: colorMap[color],
                     borderRadius: '3px',
                     transition: 'width 1s ease-in-out'
@@ -66,7 +75,9 @@ export default function StatCard({
                 />
               </div>
               <div className="d-flex justify-content-between mt-1">
-                <span style={{ fontSize: '10px', color: '#9ca3af' }}>{progress.toFixed(1)}% ของเป้าหมาย</span>
+                <span className="fw-600" style={{ fontSize: '10px', color: '#6b7280' }}>
+                  {progress.toFixed(1)}% พัสดุคงเหลือ
+                </span>
               </div>
             </div>
           )}
