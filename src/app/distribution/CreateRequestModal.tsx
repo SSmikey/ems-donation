@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import FormSelect from '@/components/FormSelect';
 
 interface Shelter {
   _id: string;
@@ -12,6 +13,7 @@ interface InventoryItem {
   itemName: string;
   quantity: number;
   unit: string;
+  category: string;
 }
 
 interface CreateRequestModalProps {
@@ -23,15 +25,15 @@ interface CreateRequestModalProps {
 export default function CreateRequestModal({ onClose, onSuccess, initialShelterId }: CreateRequestModalProps) {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Form State
   const [selectedShelter, setSelectedShelter] = useState(initialShelterId || '');
   const [urgency, setUrgency] = useState('กลาง');
-  const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number; unit: string }[]>([]);
+  const [requestItems, setRequestItems] = useState<{ itemId: string; name: string; quantity: number; unit: string; maxQuantity: number }[]>([]);
 
-  // Item Selection State
-  const [selectedItem, setSelectedItem] = useState('');
-  const [itemQuantity, setItemQuantity] = useState(1);
+  // Category Selection
+  const [activeCategory, setActiveCategory] = useState<string>('ทั้งหมด');
 
   useEffect(() => {
     if (initialShelterId) {
@@ -40,13 +42,10 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
   }, [initialShelterId]);
 
   useEffect(() => {
+    setLoading(true);
     // Fetch Shelters
-    fetch('/api/shelters')
-      .then(async res => {
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) return res.json();
-        throw new Error('Not JSON');
-      })
+    const fetchShelters = fetch('/api/shelters')
+      .then(res => res.json())
       .then(data => {
         if (data.success || data.data) setShelters(data.data || data);
       })
@@ -59,52 +58,51 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
       });
 
     // Fetch Inventory
-    fetch('/api/inventory')
-      .then(async res => {
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) return res.json();
-        throw new Error('Not JSON');
-      })
+    const fetchInventory = fetch('/api/inventory')
+      .then(res => res.json())
       .then(data => {
         if (data.success) setInventory(data.data);
       })
       .catch(err => {
         console.warn('Using mock inventory:', err);
         setInventory([
-          { _id: 'i1', itemName: 'ข้าวสาร (Mock)', quantity: 100, unit: 'kg' },
-          { _id: 'i2', itemName: 'น้ำดื่ม (Mock)', quantity: 500, unit: 'pack' }
+          { _id: 'i1', itemName: 'ข้าวสาร', quantity: 100, unit: 'kg', category: 'อาหาร' },
+          { _id: 'i2', itemName: 'น้ำดื่ม', quantity: 500, unit: 'แพ็ค', category: 'น้ำดื่ม' },
+          { _id: 'i3', itemName: 'พาราเซตามอล', quantity: 50, unit: 'กระปุก', category: 'ยาและเวชภัณฑ์' },
+          { _id: 'i4', itemName: 'ผ้าห่ม', quantity: 30, unit: 'ผืน', category: 'เครื่องนุ่งห่ม' },
         ]);
       });
+
+    Promise.all([fetchShelters, fetchInventory]).finally(() => setLoading(false));
   }, []);
 
-  const handleAddItem = () => {
-    if (!selectedItem || itemQuantity <= 0) return;
+  const categories = ['ทั้งหมด', ...new Set(inventory.map(item => item.category))];
 
-    const item = inventory.find(i => i._id === selectedItem);
-    if (!item) return;
-
-    if (itemQuantity > item.quantity) {
-      alert(`สินค้าในคลังมีเพียง ${item.quantity} ${item.unit}`);
-      return;
-    }
+  const handleAddItem = (item: InventoryItem) => {
+    if (requestItems.find(i => i.itemId === item._id)) return;
 
     setRequestItems([
       ...requestItems,
       {
         itemId: item._id,
         name: item.itemName,
-        quantity: itemQuantity,
-        unit: item.unit // Store unit for the API
+        quantity: 1,
+        unit: item.unit,
+        maxQuantity: item.quantity
       }
     ]);
-    setSelectedItem('');
-    setItemQuantity(1);
+  };
+
+  const handleUpdateQuantity = (index: number, qty: number) => {
+    const newItems = [...requestItems];
+    const max = newItems[index].maxQuantity;
+    const finalQty = Math.max(1, Math.min(qty, max));
+    newItems[index].quantity = finalQty;
+    setRequestItems(newItems);
   };
 
   const handleRemoveItem = (index: number) => {
-    const newItems = [...requestItems];
-    newItems.splice(index, 1);
-    setRequestItems(newItems);
+    setRequestItems(requestItems.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -127,13 +125,7 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
           })),
           urgency,
           status: 'รอดำเนินการ',
-          requestBy: {
-            userId: 'staff-001', // Ideally should come from auth context
-            username: 'staff_user',
-            firstName: 'เจ้าหน้าที่',
-            lastName: 'หน้างาน',
-            role: 'STAF'
-          }
+          requestDate: new Date().toISOString()
         })
       });
 
@@ -150,108 +142,209 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
     }
   };
 
+  const filteredInventory = activeCategory === 'ทั้งหมด'
+    ? inventory
+    : inventory.filter(item => item.category === activeCategory);
+
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 2000 }}>
-      <style>{`
-        .modal-form-select option {
-          background-color: #1a1a2e;
-          color: #ffffff;
-          padding: 8px;
-        }
-        .modal-form-select option:hover {
-          background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-          background-color: #16213e;
-        }
-        .modal-form-select option:checked {
-          background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-          background-color: #16213e;
-        }
-        .modal-form-input {
-          border: 1px solid rgba(0, 212, 255, 0.3) !important;
-          background-color: rgba(255, 255, 255, 0.05) !important;
-          color: #ffffff !important;
-        }
-        .modal-form-input:focus {
-          border-color: #00d4ff !important;
-          background-color: rgba(255, 255, 255, 0.08) !important;
-          color: #ffffff !important;
-        }
-      `}</style>
-      <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '600px', backgroundColor: '#1a1a2e', borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
-        <div className="card-body p-4">
-          <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.3rem', color: '#ffffff' }}>สร้างคำขอเบิกของใหม่</h2>
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 2000, backdropFilter: 'blur(4px)' }}>
+      <div className="card shadow-2xl border-0 overflow-hidden" style={{ width: '95%', maxWidth: '900px', backgroundColor: '#ffffff', borderRadius: '16px' }}>
+        <div className="card-header border-0 p-4 d-flex justify-content-between align-items-center" style={{ backgroundColor: '#ffffff' }}>
+          <h2 className="mb-0 fw-bold" style={{ fontSize: '1.5rem', color: '#111827' }}>สร้างคำขอเบิกของใหม่</h2>
+          <button onClick={onClose} className="btn-close shadow-none"></button>
+        </div>
 
-          <div className="mb-3">
-            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ศูนย์พักพิง:</label>
-            <select className="form-select modal-form-input" value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
-              <option value="">-- เลือกศูนย์พักพิง --</option>
-              {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ความเร่งด่วน:</label>
-            <select className="form-select modal-form-input" value={urgency} onChange={e => setUrgency(e.target.value)}>
-              <option value="ต่ำ">ต่ำ</option>
-              <option value="กลาง">กลาง</option>
-              <option value="สูง">สูง</option>
-            </select>
-          </div>
-
-          <div className="border rounded p-3 mb-3" style={{ borderColor: 'rgba(0, 212, 255, 0.2)', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
-            <h3 className="fw-600 mb-3" style={{ fontSize: '1rem', color: '#ffffff' }}>เพิ่มรายการสินค้า</h3>
-            <div className="d-flex gap-2 mb-3">
-              <select className="form-select modal-form-input flex-grow-1" value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
-                <option value="">-- เลือกสินค้า --</option>
-                {inventory.map(i => (
-                  <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                className="form-control modal-form-input"
-                style={{ maxWidth: '100px' }}
-                value={itemQuantity}
-                onChange={e => setItemQuantity(Number(e.target.value))}
-                min="1"
+        <div className="card-body p-4 pt-0" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+          <div className="row g-4 mb-4">
+            <div className="col-md-8">
+              <FormSelect
+                label="ศูนย์พักพิง"
+                value={selectedShelter}
+                onChange={setSelectedShelter}
+                options={shelters.map(s => ({ value: s._id, label: s.name }))}
+                placeholder="-- เลือกศูนย์พักพิง --"
               />
-              <button
-                onClick={handleAddItem}
-                className="btn fw-600 text-nowrap"
-                style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' }}
-              >
-                เพิ่ม
-              </button>
+            </div>
+            <div className="col-md-4">
+              <FormSelect
+                label="ความเร่งด่วน"
+                value={urgency}
+                onChange={setUrgency}
+                options={[
+                  { value: 'ต่ำ', label: 'ต่ำ' },
+                  { value: 'กลาง', label: 'กลาง' },
+                  { value: 'สูง', label: 'สูง' }
+                ]}
+              />
+            </div>
+          </div>
+
+          <div className="row g-4">
+            {/* Inventory Selection Section */}
+            <div className="col-lg-6">
+              <div className="p-3 bg-light rounded-4 h-100">
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#374151', fontSize: '1.1rem' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 8V21H3V8"></path>
+                    <path d="M1 3H23V8H1V3Z"></path>
+                    <path d="M10 12H14"></path>
+                  </svg>
+                  เลือกสินค้าในคลัง
+                </h5>
+
+                {/* Category Tabs */}
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`btn btn-sm px-3 py-2 rounded-pill transition-all ${activeCategory === cat ? 'btn-primary' : 'btn-white border'}`}
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        backgroundColor: activeCategory === cat ? '#2563eb' : '#ffffff',
+                        borderColor: activeCategory === cat ? '#2563eb' : '#e5e7eb',
+                        color: activeCategory === cat ? '#ffffff' : '#4b5563'
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="inventory-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxHeight: '350px', overflowY: 'auto', paddingRight: '5px' }}>
+                  {loading ? (
+                    <div className="col-span-2 text-center py-4 text-muted small text-uppercase letter-spacing-wide">กำลังโหลดคลังสินค้า...</div>
+                  ) : filteredInventory.map(item => {
+                    const isInBasket = requestItems.some(ri => ri.itemId === item._id);
+                    return (
+                      <div
+                        key={item._id}
+                        className={`p-3 rounded-3 border transition-all ${isInBasket ? 'opacity-50 pointer-events-none bg-light' : 'bg-white shadow-sm hov-lift cursor-pointer'}`}
+                        onClick={() => !isInBasket && handleAddItem(item)}
+                        style={{ border: '1px solid #e5e7eb' }}
+                      >
+                        <div className="small text-muted mb-1" style={{ fontSize: '11px', fontWeight: 600 }}>{item.category}</div>
+                        <div className="fw-bold mb-1" style={{ fontSize: '14px', color: '#111827' }}>{item.itemName}</div>
+                        <div className="text-primary fw-600" style={{ fontSize: '12px' }}>{item.quantity} {item.unit}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Selected Items List */}
-            <ul className="list-unstyled">
-              {requestItems.map((item, idx) => (
-                <li key={idx} className="d-flex justify-content-between align-items-center py-2 border-bottom" style={{ borderBottomColor: 'rgba(0, 212, 255, 0.1)', color: 'rgba(255, 255, 255, 0.8)' }}>
-                  <span>{item.name} x {item.quantity}</span>
-                  <button onClick={() => handleRemoveItem(idx)} className="btn btn-sm" style={{ color: '#ff6b6b', border: 'none', background: 'none', padding: 0 }}>ลบ</button>
-                </li>
-              ))}
-            </ul>
+            {/* Basket Section */}
+            <div className="col-lg-6">
+              <div className="p-3 border rounded-4 h-100 d-flex flex-column" style={{ borderColor: '#e5e7eb' }}>
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#374151', fontSize: '1.1rem' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  ตะกร้าคำขอ ({requestItems.length} รายการ)
+                </h5>
+
+                <div className="flex-grow-1 overflow-auto mb-3" style={{ maxHeight: '350px' }}>
+                  {requestItems.length === 0 ? (
+                    <div className="text-center py-5 text-muted">
+                      <div className="mb-2">⚠️</div>
+                      <div className="small fw-500">กรุณาเลือกสินค้าที่ต้องการด้านซ้าย</div>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-sm align-middle mb-0">
+                        <thead className="bg-light">
+                          <tr>
+                            <th className="border-0 p-2 small">สินค้า</th>
+                            <th className="border-0 p-2 small text-center" style={{ width: '100px' }}>จำนวน</th>
+                            <th className="border-0 p-2" style={{ width: '40px' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {requestItems.map((item, idx) => (
+                            <tr key={item.itemId}>
+                              <td className="p-2">
+                                <div className="fw-600 mb-0" style={{ fontSize: '13px' }}>{item.name}</div>
+                                <div className="text-muted" style={{ fontSize: '11px' }}>คงเหลือ {item.maxQuantity} {item.unit}</div>
+                              </td>
+                              <td className="p-2">
+                                <div className="input-group input-group-sm rounded-2 overflow-hidden border">
+                                  <button className="btn btn-white border-0 px-2" onClick={() => handleUpdateQuantity(idx, item.quantity - 1)}>-</button>
+                                  <input
+                                    type="number"
+                                    className="form-control border-0 text-center p-0 shadow-none fw-600"
+                                    value={item.quantity}
+                                    onChange={(e) => handleUpdateQuantity(idx, Number(e.target.value))}
+                                    style={{ width: '40px', fontSize: '13px' }}
+                                  />
+                                  <button className="btn btn-white border-0 px-2" onClick={() => handleUpdateQuantity(idx, item.quantity + 1)}>+</button>
+                                </div>
+                              </td>
+                              <td className="p-2 text-end">
+                                <button className="btn btn-link text-danger p-0 shadow-none" onClick={() => handleRemoveItem(idx)}>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="d-flex justify-content-end gap-2 mt-4">
+          <div className="d-flex justify-content-end gap-3 mt-5">
             <button
               onClick={onClose}
-              className="btn btn-outline-light"
+              className="btn btn-white border px-4 py-2 rounded-3 fw-600 transition-all hover-bg-light"
+              style={{ color: '#4b5563' }}
             >
               ยกเลิก
             </button>
             <button
               onClick={handleSubmit}
-              className="btn fw-600 text-nowrap"
-              style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' }}
+              disabled={requestItems.length === 0}
+              className="btn btn-primary px-4 py-2 rounded-3 fw-bold shadow-sm transition-all hov-lift"
+              style={{ backgroundColor: '#2563eb', border: 'none' }}
             >
-              ยืนยันการสร้าง
+              ยืนยันการสร้างคำขอ
             </button>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .hov-lift {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hov-lift:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+        .btn-white:hover {
+          background-color: #f9fafb !important;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        .inventory-grid::-webkit-scrollbar {
+          width: 5px;
+        }
+        .inventory-grid::-webkit-scrollbar-thumb {
+          background: #e5e7eb;
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 }
