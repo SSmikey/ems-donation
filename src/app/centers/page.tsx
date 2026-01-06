@@ -113,6 +113,8 @@ export default function CentersPage() {
     )).sort() as string[];
     const uniqueTypes = Array.from(new Set(shelters.map(s => s.shelterType).filter(Boolean))).sort() as string[];
 
+    const isFiltered = !!(filterName || filterDistrict || filterSubdistrict || filterType || filterStatus !== 'all');
+
     // Pagination logic
     const totalPages = Math.ceil(filteredShelters.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -223,46 +225,64 @@ export default function CentersPage() {
                                         </tr>
                                     </thead>
                                     <tbody style={{ borderColor: '#dee2e6' }}>
-                                        {paginatedShelters.map((s) => (
-                                            <tr key={s._id} style={{ borderColor: '#dee2e6' }}>
-                                                <td style={{ fontWeight: '500', color: '#212529' }}>{s.name}</td>
-                                                <td style={{ color: '#495057' }}>ต.{s.subdistrict} อ.{s.district}</td>
-                                                <td style={{ color: '#495057' }}>{s.shelterType}</td>
-                                                <td style={{ color: '#495057' }}>{s.phoneNumbers?.[0] || '-'}</td>
-                                                <td style={{ color: '#495057' }}>{s.responsible?.[0]?.firstName || '-'}</td>
-                                                <td>
-                                                    <span className={getStatusBadgeClass(s.capacityStatus)}>
-                                                        {s.capacityStatus || 'ปกติ'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="d-flex gap-2">
-                                                        <button
-                                                            className="btn btn-sm btn-warning"
-                                                            title="แก้ไข"
-                                                            onClick={() => {
-                                                                setEditingShelter(s);
-                                                                setIsModalOpen(true);
-                                                            }}
-                                                        >
-                                                            แก้ไข
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-sm btn-danger"
-                                                            title="ลบ"
-                                                            onClick={() => s._id && handleDelete(s._id, s.name)}
-                                                        >
-                                                            ลบ
-                                                        </button>
+                                        {!isFiltered ? (
+                                            <tr>
+                                                <td colSpan={7} className="text-center p-5">
+                                                    <div className="mb-2">
+                                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <circle cx="11" cy="11" r="8"></circle>
+                                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                                        </svg>
                                                     </div>
+                                                    <div className="text-muted fw-500">กรุณาพิมพ์ชื่อหรือเลือกตัวกรองเพื่อเรียกดูข้อมูลศูนย์พักพิง</div>
                                                 </td>
                                             </tr>
-                                        ))}
+                                        ) : paginatedShelters.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="text-center p-5 text-muted">ไม่พบข้อมูลศูนย์พักพิงที่ตรงตามเงื่อนไข</td>
+                                            </tr>
+                                        ) : (
+                                            paginatedShelters.map((s) => (
+                                                <tr key={s._id} style={{ borderColor: '#dee2e6' }}>
+                                                    <td style={{ fontWeight: '500', color: '#212529' }}>{s.name}</td>
+                                                    <td style={{ color: '#495057' }}>ต.{s.subdistrict} อ.{s.district}</td>
+                                                    <td style={{ color: '#495057' }}>{s.shelterType}</td>
+                                                    <td style={{ color: '#495057' }}>{s.phoneNumbers?.[0] || '-'}</td>
+                                                    <td style={{ color: '#495057' }}>{s.responsible?.[0]?.firstName || '-'}</td>
+                                                    <td>
+                                                        <span className={getStatusBadgeClass(s.capacityStatus)}>
+                                                            {s.capacityStatus || 'ปกติ'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-flex gap-2">
+                                                            <button
+                                                                className="btn btn-sm btn-warning"
+                                                                title="แก้ไข"
+                                                                onClick={() => {
+                                                                    setEditingShelter(s);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                แก้ไข
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-sm btn-danger"
+                                                                title="ลบ"
+                                                                onClick={() => s._id && handleDelete(s._id, s.name)}
+                                                            >
+                                                                ลบ
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {filteredShelters.length === 0 ? null : (
+                            {isFiltered && filteredShelters.length === 0 ? null : isFiltered && (
                                 <nav aria-label="Page navigation">
                                     <ul className="pagination justify-content-center">
                                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>

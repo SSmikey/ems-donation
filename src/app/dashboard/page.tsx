@@ -94,6 +94,8 @@ export default function Dashboard() {
     return matchesSearch && matchesDistrict && matchesSubdistrict && matchesType && matchesStatus;
   });
 
+  const isFiltered = !!(searchQuery || selectedDistrict || selectedSubdistrict || selectedType || selectedStatus);
+
   const totalPages = Math.ceil(filteredShelters.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -278,11 +280,26 @@ export default function Dashboard() {
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan={5} className="text-center p-4 text-muted">กำลังโหลดข้อมูล...</td>
+                        <td colSpan={5} className="text-center p-5 text-muted">
+                          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+                          กำลังโหลดข้อมูล...
+                        </td>
+                      </tr>
+                    ) : !isFiltered ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-5">
+                          <div className="mb-2">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="11" cy="11" r="8"></circle>
+                              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                          </div>
+                          <div className="text-muted fw-500">กรุณาพิมพ์ชื่อหรือเลือกตัวกรองเพื่อเรียกดูข้อมูลศูนย์พักพิง</div>
+                        </td>
                       </tr>
                     ) : currentRecords.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center p-4 text-muted">ไม่พบข้อมูลศูนย์พักพิง</td>
+                        <td colSpan={5} className="text-center p-5 text-muted">ไม่พบข้อมูลศูนย์พักพิงที่ตรงตามเงื่อนไข</td>
                       </tr>
                     ) : (
                       currentRecords.map((s) => (
@@ -324,7 +341,7 @@ export default function Dashboard() {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {isFiltered && totalPages > 1 && (
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 gap-3">
                   <div className="text-muted small order-2 order-md-1">
                     แสดง <span className="fw-bold" style={{ color: '#374151' }}>{indexOfFirstRecord + 1}</span> ถึง{' '}
