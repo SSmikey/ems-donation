@@ -35,10 +35,10 @@ function validateInventoryUpdate(data: any) {
 // GET - Fetch single inventory item by ID
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
 
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
@@ -79,10 +79,10 @@ export async function GET(
 // PUT - Update inventory item by ID
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const body = await request.json();
 
         // Validate ObjectId format
@@ -104,7 +104,7 @@ export async function PUT(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'Inventory';
+        const collectionName = 'inventory';
 
         // Prepare update data (exclude _id)
         const updateData: any = { ...body };
@@ -175,10 +175,10 @@ export async function PUT(
 // DELETE - Remove inventory item by ID
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = params.id;
+        const { id } = await params;
 
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
@@ -190,7 +190,7 @@ export async function DELETE(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'Inventory';
+        const collectionName = 'inventory';
 
         // Check if item exists
         const item = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
