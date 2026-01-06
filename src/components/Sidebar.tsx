@@ -61,8 +61,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       }}
     >
       {/* Logo */}
-      <div className="d-flex align-items-center px-3 mb-4" style={{ cursor: 'pointer' }}>
-        <span className="h5 mb-0 fw-bold" style={{ color: '#111827' }}>ems-donation</span>
+      <div className="d-flex align-items-center px-4 mb-5" style={{ cursor: 'pointer' }}>
+        <span className="h4 mb-0 fw-bold" style={{ color: '#111827', letterSpacing: '-0.5px' }}>ems-donation</span>
       </div>
 
       {/* Navigation */}
@@ -70,11 +70,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         {menuItems.map((section) => (
           <div key={section.section} className="px-2">
             <h6
-              className="nav-section-title text-uppercase fw-bold ms-2 mb-2"
+              className="nav-section-title text-uppercase fw-bold ms-3 mb-3"
               style={{
                 fontSize: '11px',
-                letterSpacing: '1px',
-                color: 'rgba(255, 255, 255, 0.5)',
+                letterSpacing: '1.2px',
+                color: '#8e94a0',
+                marginTop: '10px',
+                opacity: 0.8
               }}
             >
               {section.section}
@@ -84,29 +86,31 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <li key={item.href} className="mb-2">
                   <a
                     href={item.href}
-                    className={`nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-2 text-decoration-none ${isActive(item.href) ? 'active' : ''
+                    className={`nav-link d-flex align-items-center gap-3 py-2 px-3 mx-2 rounded-3 text-decoration-none ${isActive(item.href) ? 'active' : ''
                       }`}
                     suppressHydrationWarning
                     style={{
-                      color: isActive(item.href) ? '#6366f1' : '#495057',
+                      color: isActive(item.href) ? '#ffffff' : '#1f2937',
                       backgroundColor: isActive(item.href)
-                        ? '#f0f4ff'
+                        ? '#4f46e5'
                         : 'transparent',
-                      borderLeft: isActive(item.href) ? '3px solid #6366f1' : 'none',
-                      paddingLeft: isActive(item.href) ? 'calc(0.75rem - 3px)' : '0.75rem',
-                      fontSize: '0.95rem',
-                      fontWeight: isActive(item.href) ? '500' : '400',
-                      transition: 'all 0.2s ease',
+                      fontSize: '14.5px',
+                      fontWeight: isActive(item.href) ? '600' : '500',
+                      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                      border: isActive(item.href) ? '1px solid #4338ca' : '1px solid transparent',
+                      boxShadow: isActive(item.href)
+                        ? '0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1)'
+                        : 'none',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive(item.href)) {
-                        e.currentTarget.style.color = '#6366f1';
-                        e.currentTarget.style.backgroundColor = '#f8f9fa';
+                        e.currentTarget.style.color = '#4f46e5';
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive(item.href)) {
-                        e.currentTarget.style.color = '#495057';
+                        e.currentTarget.style.color = '#1f2937';
                         e.currentTarget.style.backgroundColor = 'transparent';
                       }
                     }}
