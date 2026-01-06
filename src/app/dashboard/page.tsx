@@ -113,8 +113,8 @@ export default function Dashboard() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats.chartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
-                          <XAxis dataKey="name" stroke="#868e96" />
-                          <YAxis stroke="#868e96" />
+                          <XAxis dataKey="name" stroke="#374151" tick={{ fontSize: 12 }} />
+                          <YAxis stroke="#374151" tick={{ fontSize: 12 }} />
                           <Tooltip
                             contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #dee2e6', color: '#212529' }}
                           />
@@ -129,7 +129,7 @@ export default function Dashboard() {
             <div className="col-12 col-lg-6">
               <div className="card shadow-sm" style={{ background: '#ffffff', border: '1px solid #e9ecef' }}>
                 <div className="card-body">
-                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#212529' }}>
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#111827' }}>
                     รายการพัสดุแยกตามหมวดหมู่
                   </h5>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -141,11 +141,11 @@ export default function Dashboard() {
 
                         return (
                           <div key={name} className="d-flex align-items-center gap-2">
-                            <span style={{ minWidth: '80px', fontSize: '14px', color: '#495057' }}>{name}</span>
+                            <span style={{ minWidth: '80px', fontSize: '14px', fontWeight: '500', color: '#111827' }}>{name}</span>
                             <div style={{ flex: 1, height: '8px', background: '#e9ecef', borderRadius: '4px', overflow: 'hidden' }}>
                               <div style={{ width: `${percent}%`, height: '100%', backgroundColor: color, borderRadius: '4px' }}></div>
                             </div>
-                            <span style={{ width: '40px', fontSize: '14px', textAlign: 'right', color: '#868e96' }}>{totalQty}</span>
+                            <span style={{ width: '40px', fontSize: '14px', textAlign: 'right', fontWeight: '600', color: '#374151' }}>{totalQty}</span>
                           </div>
                         );
                       })

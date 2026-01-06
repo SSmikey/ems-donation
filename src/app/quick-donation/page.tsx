@@ -46,7 +46,7 @@ export default function QuickDonationPage() {
     };
 
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
@@ -55,7 +55,7 @@ export default function QuickDonationPage() {
                     <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: '600px', background: '#ffffff', border: '1px solid #dee2e6' }}>
                         <div className="card-body p-5">
                             <div className="text-center mb-4">
-                                <h2 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#212529' }}>บันทึกของเข้าด่วน (Quick Donation)</h2>
+                                <h2 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#111827' }}>บันทึกของเข้าด่วน (Quick Donation)</h2>
                                 <p style={{ color: '#868e96', marginBottom: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
                             </div>
 
@@ -90,7 +90,7 @@ export default function QuickDonationPage() {
                                         style={{
                                             background: '#ffffff',
                                             border: '1px solid #dee2e6',
-                                            color: '#212529',
+                                            color: '#111827',
                                             borderRadius: '12px'
                                         }}
                                         value={itemName}
@@ -111,7 +111,7 @@ export default function QuickDonationPage() {
                                             style={{
                                                 background: '#ffffff',
                                                 border: '1px solid #dee2e6',
-                                                color: '#212529',
+                                                color: '#111827',
                                                 borderRadius: '12px'
                                             }}
                                             value={quantity}
