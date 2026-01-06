@@ -25,11 +25,19 @@ function validateDistributionRequest(data: any, isUpdate = false) {
         } else {
             // Validate each item
             data.items.forEach((item: any, index: number) => {
+                if (!item.inventoryId || typeof item.inventoryId !== 'string' || item.inventoryId.trim() === '') {
+                    errors.push(`items[${index}].inventoryId is required and must be a non-empty string`);
+                } else if (!ObjectId.isValid(item.inventoryId)) {
+                    errors.push(`items[${index}].inventoryId must be a valid MongoDB ObjectId`);
+                }
                 if (!item.itemName || typeof item.itemName !== 'string' || item.itemName.trim() === '') {
                     errors.push(`items[${index}].itemName is required and must be a non-empty string`);
                 }
                 if (item.quantity === undefined || typeof item.quantity !== 'number' || item.quantity <= 0) {
                     errors.push(`items[${index}].quantity must be a positive number`);
+                }
+                if (!item.unit || typeof item.unit !== 'string' || item.unit.trim() === '') {
+                    errors.push(`items[${index}].unit is required and must be a non-empty string`);
                 }
             });
         }
@@ -71,7 +79,7 @@ export async function GET(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'DistributionRequests';
+        const collectionName = 'distributionrequests'; // Lowercase for consistency
 
         // Build query filter
         const filter: any = {};
@@ -102,7 +110,7 @@ export async function GET(request: Request) {
             },
             {
                 $lookup: {
-                    from: 'OperationCenters',
+                    from: 'operationcenters', // Lowercase for consistency
                     localField: 'shelterObjId',
                     foreignField: '_id',
                     as: 'shelterInfo'
@@ -170,10 +178,10 @@ export async function POST(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'DistributionRequests';
+        const collectionName = 'distributionrequests'; // Lowercase for consistency
 
         // Verify that the shelter exists
-        const shelter = await db.collection('OperationCenters').findOne({
+        const shelter = await db.collection('operationcenters').findOne({
             _id: new ObjectId(body.shelterId)
         });
 
@@ -192,8 +200,8 @@ export async function POST(request: Request) {
             urgency: body.urgency,
             requestBy: body.requestBy,
             approvedBy: null,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            createdAt: new Date().toISOString(), // ISO 8601 format
+            updatedAt: new Date().toISOString() // ISO 8601 format
         };
 
         const result = await db.collection(collectionName).insertOne(newRequest);

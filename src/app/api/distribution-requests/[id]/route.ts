@@ -28,11 +28,19 @@ function validateDistributionRequestUpdate(data: any) {
             errors.push('items must be a non-empty array');
         } else {
             data.items.forEach((item: any, index: number) => {
+                if (!item.inventoryId || typeof item.inventoryId !== 'string' || item.inventoryId.trim() === '') {
+                    errors.push(`items[${index}].inventoryId is required and must be a non-empty string`);
+                } else if (!ObjectId.isValid(item.inventoryId)) {
+                    errors.push(`items[${index}].inventoryId must be a valid MongoDB ObjectId`);
+                }
                 if (!item.itemName || typeof item.itemName !== 'string' || item.itemName.trim() === '') {
                     errors.push(`items[${index}].itemName is required and must be a non-empty string`);
                 }
                 if (item.quantity === undefined || typeof item.quantity !== 'number' || item.quantity <= 0) {
                     errors.push(`items[${index}].quantity must be a positive number`);
+                }
+                if (!item.unit || typeof item.unit !== 'string' || item.unit.trim() === '') {
+                    errors.push(`items[${index}].unit is required and must be a non-empty string`);
                 }
             });
         }
@@ -59,7 +67,7 @@ export async function GET(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'DistributionRequests';
+        const collectionName = 'distributionrequests'; // Lowercase for consistency
 
         const distributionRequest = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
 
@@ -127,7 +135,7 @@ export async function PUT(
         // Prepare update data (exclude _id)
         const updateData: any = { ...body };
         delete updateData._id;
-        updateData.updatedAt = new Date();
+        updateData.updatedAt = new Date().toISOString(); // ISO 8601 format
 
         const result = await db.collection(collectionName).updateOne(
             { _id: new ObjectId(id) },

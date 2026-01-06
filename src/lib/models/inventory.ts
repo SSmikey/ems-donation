@@ -4,5 +4,5 @@ export interface InventoryItem {
     category: 'อาหาร' | 'ยาและเวชภัณฑ์' | 'เครื่องนุ่งห่ม' | 'น้ำดื่ม' | 'อื่นๆ';
     quantity: number;
     unit: string;
-    lastUpdated: Date;
+    lastUpdated: string; // ISO 8601 format
 }

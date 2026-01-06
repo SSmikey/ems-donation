@@ -31,7 +31,7 @@ export async function PUT(
         const db = client.db('ems-donation');
 
         // 1. Check if distribution request exists
-        const distributionRequest = await db.collection('DistributionRequests').findOne({
+        const distributionRequest = await db.collection('distributionrequests').findOne({
             _id: new ObjectId(id)
         });
 
@@ -55,13 +55,18 @@ export async function PUT(
         const inventoryUpdates: any[] = [];
 
         for (const item of distributionRequest.items) {
-            // Find inventory item by name (case-insensitive)
-            const inventoryItem = await db.collection('Inventory').findOne({
-                itemName: { $regex: new RegExp(`^${item.itemName}$`, 'i') }
+            // Find inventory item by ID (direct lookup - no regex injection risk)
+            if (!item.inventoryId || !ObjectId.isValid(item.inventoryId)) {
+                stockCheckErrors.push(`Invalid inventory ID for item "${item.itemName}"`);
+                continue;
+            }
+
+            const inventoryItem = await db.collection('inventory').findOne({
+                _id: new ObjectId(item.inventoryId)
             });
 
             if (!inventoryItem) {
-                stockCheckErrors.push(`Item "${item.itemName}" not found in inventory`);
+                stockCheckErrors.push(`Item "${item.itemName}" (ID: ${item.inventoryId}) not found in inventory`);
                 continue;
             }
 
@@ -94,12 +99,12 @@ export async function PUT(
 
         // 5. Update inventory quantities (reduce stock)
         for (const update of inventoryUpdates) {
-            await db.collection('Inventory').updateOne(
+            await db.collection('inventory').updateOne(
                 { _id: update._id },
                 {
                     $set: {
                         quantity: update.newQuantity,
-                        lastUpdated: new Date()
+                        lastUpdated: new Date().toISOString() // ISO 8601 format
                     }
                 }
             );
@@ -108,13 +113,13 @@ export async function PUT(
         }
 
         // 6. Update distribution request status
-        const result = await db.collection('DistributionRequests').updateOne(
+        const result = await db.collection('distributionrequests').updateOne(
             { _id: new ObjectId(id) },
             {
                 $set: {
                     status: 'อนุมัติแล้ว',
                     approvedBy: body.approvedBy,
-                    updatedAt: new Date()
+                    updatedAt: new Date().toISOString() // ISO 8601 format
                 }
             }
         );
@@ -122,7 +127,7 @@ export async function PUT(
         console.log(`Successfully approved distribution request with ID: ${id}`);
 
         // Fetch updated request
-        const updatedRequest = await db.collection('DistributionRequests').findOne({
+        const updatedRequest = await db.collection('distributionrequests').findOne({
             _id: new ObjectId(id)
         });
 

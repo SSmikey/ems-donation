@@ -54,7 +54,7 @@ export async function GET() {
     try {
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'OperationCenters';
+        const collectionName = 'operationcenters'; // Lowercase for consistency
 
         const shelters = await db.collection(collectionName).find({}).toArray();
 

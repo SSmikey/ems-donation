@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
+import { escapeRegExp } from '@/lib/utils/regex';
 
 // Valid inventory categories
 const VALID_CATEGORIES = ['อาหาร', 'ยาและเวชภัณฑ์', 'เครื่องนุ่งห่ม', 'น้ำดื่ม', 'อื่นๆ'];
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'Inventory';
+        const collectionName = 'inventory'; // Lowercase for consistency
 
         // Build query filter
         const filter: any = {};
@@ -58,7 +59,8 @@ export async function GET(request: Request) {
             filter.category = category;
         }
         if (search) {
-            filter.itemName = { $regex: search, $options: 'i' }; // Case-insensitive search
+            // Use escapeRegExp to prevent regex injection
+            filter.itemName = { $regex: escapeRegExp(search), $options: 'i' };
         }
 
         // Fetch items with pagination
@@ -110,7 +112,7 @@ export async function POST(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'Inventory';
+        const collectionName = 'inventory'; // Lowercase for consistency
 
         // Check for duplicate item (same itemName and category)
         const existingItem = await db.collection(collectionName).findOne({
@@ -132,7 +134,7 @@ export async function POST(request: Request) {
             category: body.category,
             quantity: body.quantity,
             unit: body.unit,
-            lastUpdated: new Date()
+            lastUpdated: new Date().toISOString() // ISO 8601 format
         };
 
         const result = await db.collection(collectionName).insertOne(newItem);

@@ -50,7 +50,7 @@ export async function GET(
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'Inventory';
+        const collectionName = 'inventory'; // Lowercase for consistency
 
         const item = await db.collection(collectionName).findOne({ _id: new ObjectId(id) });
 
@@ -109,7 +109,7 @@ export async function PUT(
         // Prepare update data (exclude _id)
         const updateData: any = { ...body };
         delete updateData._id;
-        updateData.lastUpdated = new Date();
+        updateData.lastUpdated = new Date().toISOString(); // ISO 8601 format
 
         // Check if trying to create duplicate (if itemName or category is being changed)
         if (updateData.itemName || updateData.category) {
