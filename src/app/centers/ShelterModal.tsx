@@ -85,58 +85,62 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
     };
 
     return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}>
             <style>{`
                 .shelter-modal-select option {
-                    background-color: #1a1a2e;
-                    color: #ffffff;
-                    padding: 8px;
+                    background-color: #ffffff;
+                    color: #212529;
+                    padding: 10px;
+                    font-size: 15px;
                 }
                 .shelter-modal-select option:hover {
-                    background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-                    background-color: #16213e;
+                    background-color: #f8f9fa;
+                    color: #0d6efd;
                 }
                 .shelter-modal-select option:checked {
-                    background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-                    background-color: #16213e;
+                    background-color: #e7f1ff;
+                    color: #0d6efd;
+                    font-weight: 600;
                 }
                 .shelter-modal-input {
-                    border: 1px solid rgba(0, 212, 255, 0.3) !important;
-                    background-color: rgba(255, 255, 255, 0.05) !important;
-                    color: #ffffff !important;
+                    border: 1px solid #dee2e6 !important;
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
+                    font-size: 15px;
                 }
                 .shelter-modal-input:focus {
-                    border-color: #00d4ff !important;
-                    background-color: rgba(255, 255, 255, 0.08) !important;
-                    color: #ffffff !important;
+                    border-color: #0d6efd !important;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
                 }
             `}</style>
-            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#1a1a2e', borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
+            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '600px', backgroundColor: '#ffffff', borderRadius: '12px' }}>
                 <div className="card-body p-4">
-                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.3rem', color: '#ffffff' }}>
+                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '24px', color: '#111827' }}>
                         {shelter ? 'แก้ไขข้อมูลศูนย์พักพิง' : 'เพิ่มศูนย์พักพิงใหม่'}
                     </h2>
 
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ชื่อศูนย์พักพิง</label>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>ชื่อศูนย์พักพิง</label>
                             <input className="form-control shelter-modal-input" value={name} onChange={e => setName(e.target.value)} required />
                         </div>
 
                         <div className="row g-2 mb-3">
                             <div className="col-6">
-                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>อำเภอ</label>
+                                <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>อำเภอ</label>
                                 <input className="form-control shelter-modal-input" value={district} onChange={e => setDistrict(e.target.value)} required />
                             </div>
                             <div className="col-6">
-                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ตำบล</label>
+                                <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>ตำบล</label>
                                 <input className="form-control shelter-modal-input" value={subdistrict} onChange={e => setSubdistrict(e.target.value)} required />
                             </div>
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ประเภทศูนย์</label>
-                            <select className="form-select shelter-modal-input" value={shelterType} onChange={e => setShelterType(e.target.value)}>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>ประเภทศูนย์</label>
+                            <select className="form-select shelter-modal-input shelter-modal-select" value={shelterType} onChange={e => setShelterType(e.target.value)}>
                                 <option value="ศูนย์พักพิงหลัก">ศูนย์พักพิงหลัก</option>
                                 <option value="ศูนย์พักพิงชั่วคราว">ศูนย์พักพิงชั่วคราว</option>
                                 <option value="โรงพยาบาลสนาม">โรงพยาบาลสนาม</option>
@@ -144,8 +148,8 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>สถานะความจุ</label>
-                            <select className="form-select shelter-modal-input" value={capacityStatus} onChange={e => setCapacityStatus(e.target.value)}>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>สถานะความจุ</label>
+                            <select className="form-select shelter-modal-input shelter-modal-select" value={capacityStatus} onChange={e => setCapacityStatus(e.target.value)}>
                                 <option value="รองรับได้">รองรับได้</option>
                                 <option value="ใกล้เต็ม">ใกล้เต็ม</option>
                                 <option value="เต็มแล้ว">เต็มแล้ว</option>
@@ -153,7 +157,7 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>เบอร์โทรศัพท์</label>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>เบอร์โทรศัพท์</label>
                             <input
                                 type="tel"
                                 className="form-control shelter-modal-input"
@@ -164,7 +168,7 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                         </div>
 
                         <div className="mb-4">
-                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ผู้ดูแล</label>
+                            <label className="form-label fw-semibold mb-2" style={{ color: '#495057', fontSize: '14px' }}>ผู้ดูแล</label>
                             <input
                                 type="text"
                                 className="form-control shelter-modal-input"
@@ -175,10 +179,10 @@ export default function ShelterModal({ shelter, onClose, onSuccess }: ShelterMod
                         </div>
 
                         <div className="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" onClick={onClose} className="btn btn-outline-light">
+                            <button type="button" onClick={onClose} className="btn btn-outline-secondary px-4" style={{ fontSize: '15px' }}>
                                 ยกเลิก
                             </button>
-                            <button type="submit" disabled={loading} className="btn fw-600 text-nowrap" style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' }}>
+                            <button type="submit" disabled={loading} className="btn btn-primary px-4" style={{ fontSize: '15px' }}>
                                 {loading ? 'กำลังบันทึก...' : 'บันทึก'}
                             </button>
                         </div>
