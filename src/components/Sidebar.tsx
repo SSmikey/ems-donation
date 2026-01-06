@@ -53,14 +53,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         top: 0,
         overflowY: 'auto',
         padding: '25px 0',
-        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
         transition: 'all 0.3s ease',
         transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
       }}
     >
       {/* Logo */}
       <div className="d-flex align-items-center px-3 mb-4" style={{ cursor: 'pointer' }}>
-        <span className="h5 mb-0 fw-bold text-white">ems-donation</span>
+        <span className="h5 mb-0 fw-bold" style={{ color: '#212529' }}>ems-donation</span>
       </div>
 
       {/* Navigation */}
@@ -87,9 +86,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     }`}
                     suppressHydrationWarning
                     style={{
-                      color: isActive(item.href) ? '#ffffff' : 'rgba(205, 213, 224, 0.8)',
+                      color: isActive(item.href) ? '#6366f1' : '#495057',
                       backgroundColor: isActive(item.href)
-                        ? 'rgba(99, 102, 241, 0.1)'
+                        ? '#f0f4ff'
                         : 'transparent',
                       borderLeft: isActive(item.href) ? '3px solid #6366f1' : 'none',
                       paddingLeft: isActive(item.href) ? 'calc(0.75rem - 3px)' : '0.75rem',
@@ -99,13 +98,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive(item.href)) {
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.color = '#6366f1';
+                        e.currentTarget.style.backgroundColor = '#f8f9fa';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive(item.href)) {
-                        e.currentTarget.style.color = 'rgba(205, 213, 224, 0.8)';
+                        e.currentTarget.style.color = '#495057';
                         e.currentTarget.style.backgroundColor = 'transparent';
                       }
                     }}

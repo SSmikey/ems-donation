@@ -46,22 +46,22 @@ export default function QuickDonationPage() {
     };
 
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className="flex-grow-1 overflow-y-auto d-flex justify-content-center align-items-start p-4" style={{ paddingTop: '40px' }}>
-                    <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: '600px', background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(20px)' }}>
+                <div className="flex-grow-1 overflow-y-auto d-flex justify-content-center align-items-start p-4" style={{ paddingTop: '40px', backgroundColor: '#f8f9fa' }}>
+                    <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: '600px', background: '#ffffff', border: '1px solid #dee2e6' }}>
                         <div className="card-body p-5">
                             <div className="text-center mb-4">
-                                <h2 className="fw-bold mb-2" style={{ fontSize: '24px' }}>⚡ บันทึกของเข้าด่วน (Quick Donation)</h2>
-                                <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
+                                <h2 className="fw-bold mb-2" style={{ fontSize: '24px', color: '#212529' }}>บันทึกของเข้าด่วน (Quick Donation)</h2>
+                                <p style={{ color: '#868e96', marginBottom: 0 }}>รับของบริจาคเข้าสต็อกส่วนกลางอย่างรวดเร็ว</p>
                             </div>
 
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
+                                    <label className="form-label" style={{ color: '#495057', fontSize: '14px' }}>
                                         เลือกหมวดหมู่
                                     </label>
                                     <div className="d-flex gap-2 flex-wrap">
@@ -69,7 +69,7 @@ export default function QuickDonationPage() {
                                             <button
                                                 key={cat}
                                                 type="button"
-                                                className={category === cat ? 'btn btn-success btn-sm' : 'btn btn-outline-light btn-sm'}
+                                                className={category === cat ? 'btn btn-success btn-sm' : 'btn btn-outline-secondary btn-sm'}
                                                 onClick={() => setCategory(cat)}
                                                 style={{ borderRadius: '20px', fontSize: '13px' }}
                                             >
@@ -80,7 +80,7 @@ export default function QuickDonationPage() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                                    <label className="form-label" style={{ color: '#495057' }}>
                                         ชื่อรายการสิ่งของ
                                     </label>
                                     <input
@@ -88,9 +88,9 @@ export default function QuickDonationPage() {
                                         placeholder="เช่น ข้าวสาร, ยาแก้ปวด..."
                                         className="form-control"
                                         style={{
-                                            background: 'rgba(0, 0, 0, 0.2)',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                                            color: '#fff',
+                                            background: '#ffffff',
+                                            border: '1px solid #dee2e6',
+                                            color: '#212529',
                                             borderRadius: '12px'
                                         }}
                                         value={itemName}
@@ -101,7 +101,7 @@ export default function QuickDonationPage() {
 
                                 <div className="row g-3 mb-3">
                                     <div className="col-8">
-                                        <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                                        <label className="form-label" style={{ color: '#495057' }}>
                                             จำนวน
                                         </label>
                                         <input
@@ -109,9 +109,9 @@ export default function QuickDonationPage() {
                                             placeholder="0"
                                             className="form-control"
                                             style={{
-                                                background: 'rgba(0, 0, 0, 0.2)',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                color: '#fff',
+                                                background: '#ffffff',
+                                                border: '1px solid #dee2e6',
+                                                color: '#212529',
                                                 borderRadius: '12px'
                                             }}
                                             value={quantity}
@@ -120,15 +120,15 @@ export default function QuickDonationPage() {
                                         />
                                     </div>
                                     <div className="col-4">
-                                        <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                                        <label className="form-label" style={{ color: '#495057' }}>
                                             หน่วย
                                         </label>
                                         <select
                                             className="form-select"
                                             style={{
-                                                background: 'rgba(0, 0, 0, 0.2)',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                color: '#fff',
+                                                background: '#ffffff',
+                                                border: '1px solid #dee2e6',
+                                                color: '#212529',
                                                 borderRadius: '12px'
                                             }}
                                             value={unit}

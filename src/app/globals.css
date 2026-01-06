@@ -1,7 +1,7 @@
 /* Global CSS - Bootstrap Compatible */
 
 :root {
-  --background: #f8f9fa;
+  --background: #ffffff;
   --foreground: #212529;
 }
 
@@ -90,29 +90,30 @@ a {
 
 /* ---- Custom Sidebar Styling ---- */
 .sidebar-dark {
-  background-color: var(--sidebar-bg);
-  color: #e2e8f0;
+  background-color: #ffffff;
+  color: #212529;
+  border-right: 1px solid #e9ecef;
 }
 
 .sidebar-dark .nav-link {
-  color: #cbd5e0;
+  color: #495057;
   transition: all 0.3s ease;
 }
 
 .sidebar-dark .nav-link:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.05);
+  color: #6366f1;
+  background-color: #f8f9fa;
 }
 
 .sidebar-dark .nav-link.active {
-  color: #ffffff;
-  background-color: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  background-color: #f0f4ff;
   border-left: 3px solid var(--primary);
   padding-left: calc(1rem - 3px);
 }
 
 .sidebar-dark .nav-section-title {
-  color: #94a3b8;
+  color: #868e96;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -133,12 +134,12 @@ a {
 }
 
 .card .card-header {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-bottom: 1px solid var(--gray-200);
 }
 
 .card .card-footer {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-top: 1px solid var(--gray-200);
 }
 
@@ -188,7 +189,7 @@ a {
 }
 
 .table thead th {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-color: var(--gray-200);
   font-weight: 600;
   color: var(--gray-700);
@@ -247,7 +248,7 @@ a {
 
 .form-control:disabled,
 .form-select:disabled {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   color: var(--gray-600);
 }
 
@@ -258,12 +259,12 @@ a {
 }
 
 .modal-header {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-bottom: 1px solid var(--gray-200);
 }
 
 .modal-footer {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-top: 1px solid var(--gray-200);
 }
 

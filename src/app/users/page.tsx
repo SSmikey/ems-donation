@@ -74,18 +74,18 @@ export default function UsersPage() {
     };
 
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className="flex-grow-1 overflow-y-auto p-4">
+                <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '5px' }}>
+                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '5px', color: '#212529' }}>
                                 จัดการผู้ใช้งาน (User Management)
                             </h1>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                            <p style={{ color: '#868e96', margin: 0 }}>
                                 ดูแลจัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง
                             </p>
                         </div>
@@ -96,31 +96,31 @@ export default function UsersPage() {
 
                     <div>
                         {loading ? (
-                            <p className="text-center" style={{ paddingTop: '20px' }}>กำลังโหลดข้อมูล...</p>
+                            <p className="text-center" style={{ paddingTop: '20px', color: '#868e96' }}>กำลังโหลดข้อมูล...</p>
                         ) : (
                             <div className="table-responsive">
-                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                <table className="table table-hover align-middle" style={{ backgroundColor: '#ffffff', borderColor: '#dee2e6' }}>
+                                    <thead style={{ borderColor: '#dee2e6', backgroundColor: '#f8f9fa' }}>
                                         <tr>
-                                            <th>ชื่อ-นามสกุล</th>
-                                            <th>Username</th>
-                                            <th>สิทธิ์ (Role)</th>
-                                            <th>สถานะ</th>
-                                            <th>จัดการ</th>
+                                            <th style={{ color: '#495057' }}>ชื่อ-นามสกุล</th>
+                                            <th style={{ color: '#495057' }}>Username</th>
+                                            <th style={{ color: '#495057' }}>สิทธิ์ (Role)</th>
+                                            <th style={{ color: '#495057' }}>สถานะ</th>
+                                            <th style={{ color: '#495057' }}>จัดการ</th>
                                         </tr>
                                     </thead>
-                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <tbody style={{ borderColor: '#dee2e6' }}>
                                         {users.map((user) => (
-                                            <tr key={user._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                                <td>{user.firstName} {user.lastName}</td>
-                                                <td>{user.username}</td>
+                                            <tr key={user._id} style={{ borderColor: '#dee2e6' }}>
+                                                <td style={{ color: '#212529' }}>{user.firstName} {user.lastName}</td>
+                                                <td style={{ color: '#495057' }}>{user.username}</td>
                                                 <td>
                                                     <span className={user.role === 'admin' ? 'badge bg-danger' : 'badge bg-info'}>
                                                         {user.role.toUpperCase()}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span style={{ color: (user.status || 'active') === 'active' ? '#4ade80' : '#9ca3af' }}>
+                                                    <span style={{ color: (user.status || 'active') === 'active' ? '#10b981' : '#9ca3af' }}>
                                                         ● {(user.status || 'active') === 'active' ? 'ใช้งานปกติ' : 'ระงับการใช้งาน'}
                                                     </span>
                                                 </td>

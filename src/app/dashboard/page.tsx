@@ -51,12 +51,12 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
+    <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
       <Sidebar isOpen={sidebarOpen} />
       <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <div className="flex-grow-1 overflow-y-auto p-4" style={{ paddingTop: '30px', paddingBottom: '30px' }}>
+        <div className="flex-grow-1 overflow-y-auto p-4" style={{ paddingTop: '30px', paddingBottom: '30px', backgroundColor: '#f8f9fa' }}>
           {/* Page Title */}
           <div className="mb-5">
             <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '12px' }}>
@@ -99,26 +99,26 @@ export default function Dashboard() {
           {/* Resource Status and Items Section */}
           <div className="row g-3">
             <div className="col-12 col-lg-6">
-              <div className="card shadow-sm border-0" style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
+              <div className="card shadow-sm" style={{ background: '#ffffff', border: '1px solid #e9ecef' }}>
                 <div className="card-body">
-                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px' }}>
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#212529' }}>
                     สถิติการเบิกจ่ายรายวัน
                   </h5>
                   <div style={{ width: '100%', height: '300px', minWidth: 0 }}>
                     {loading ? (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#868e96' }}>
                         กำลังโหลดข้อมูล...
                       </div>
                     ) : (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats.chartData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                          <XAxis dataKey="name" stroke="#ccc" />
-                          <YAxis stroke="#ccc" />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
+                          <XAxis dataKey="name" stroke="#868e96" />
+                          <YAxis stroke="#868e96" />
                           <Tooltip
-                            contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }}
+                            contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #dee2e6', color: '#212529' }}
                           />
-                          <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
+                          <Bar dataKey="requests" fill="#6366f1" name="จำนวนคำขอ" />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -127,9 +127,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="col-12 col-lg-6">
-              <div className="card shadow-sm border-0" style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
+              <div className="card shadow-sm" style={{ background: '#ffffff', border: '1px solid #e9ecef' }}>
                 <div className="card-body">
-                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px' }}>
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#212529' }}>
                     รายการพัสดุแยกตามหมวดหมู่
                   </h5>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -137,20 +137,20 @@ export default function Dashboard() {
                       Object.entries(categories).map(([name, data]: [string, any]) => {
                         const totalQty = data.totalQuantity;
                         const percent = Math.min(100, (totalQty / 200) * 100);
-                        const color = totalQty < 20 ? '#ef4444' : totalQty < 50 ? '#fbbf24' : '#4ade80';
+                        const color = totalQty < 20 ? '#ef4444' : totalQty < 50 ? '#f59e0b' : '#10b981';
 
                         return (
                           <div key={name} className="d-flex align-items-center gap-2">
-                            <span style={{ minWidth: '80px', fontSize: '14px' }}>{name}</span>
-                            <div style={{ flex: 1, height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                            <span style={{ minWidth: '80px', fontSize: '14px', color: '#495057' }}>{name}</span>
+                            <div style={{ flex: 1, height: '8px', background: '#e9ecef', borderRadius: '4px', overflow: 'hidden' }}>
                               <div style={{ width: `${percent}%`, height: '100%', backgroundColor: color, borderRadius: '4px' }}></div>
                             </div>
-                            <span style={{ width: '40px', fontSize: '14px', textAlign: 'right', opacity: 0.8 }}>{totalQty}</span>
+                            <span style={{ width: '40px', fontSize: '14px', textAlign: 'right', color: '#868e96' }}>{totalQty}</span>
                           </div>
                         );
                       })
                     ) : (
-                      <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '20px', margin: 0 }}>
+                      <p style={{ color: '#adb5bd', textAlign: 'center', marginTop: '20px', margin: 0 }}>
                         ไม่มีข้อมูลหมวดหมู่
                       </p>
                     )}

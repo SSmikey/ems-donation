@@ -102,13 +102,13 @@ export default function CreateRequestPage() {
     };
 
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className="flex-grow-1 overflow-y-auto p-4">
-                    <h1 className="fw-bold mb-4" style={{ fontSize: '32px', margin: 0 }}>
+                <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
+                    <h1 className="fw-bold mb-4" style={{ fontSize: '32px', margin: 0, color: '#212529' }}>
                         สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)
                     </h1>
 
@@ -118,7 +118,7 @@ export default function CreateRequestPage() {
                                 type="text"
                                 placeholder="ชื่อศูนย์พักพิง..."
                                 className="form-control"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterName}
                                 onChange={(e) => setFilterName(e.target.value)}
                             />
@@ -126,7 +126,7 @@ export default function CreateRequestPage() {
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterDistrict}
                                 onChange={(e) => setFilterDistrict(e.target.value)}
                             >
@@ -139,7 +139,7 @@ export default function CreateRequestPage() {
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterSubdistrict}
                                 onChange={(e) => setFilterSubdistrict(e.target.value)}
                                 disabled={!filterDistrict}
@@ -153,7 +153,7 @@ export default function CreateRequestPage() {
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterType}
                                 onChange={(e) => setFilterType(e.target.value)}
                             >
@@ -166,7 +166,7 @@ export default function CreateRequestPage() {
                         <div className="col-12 col-sm-6 col-md-4 col-lg-3">
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                             >
@@ -179,26 +179,26 @@ export default function CreateRequestPage() {
                     </div>
 
                     {loading ? (
-                        <p>กำลังโหลดข้อมูลศูนย์พักพิง...</p>
+                        <p style={{ color: '#868e96' }}>กำลังโหลดข้อมูลศูนย์พักพิง...</p>
                     ) : (
                         <>
                             <div className="table-responsive mb-3">
-                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                <table className="table table-hover align-middle" style={{ backgroundColor: '#ffffff', borderColor: '#dee2e6' }}>
+                                    <thead style={{ borderColor: '#dee2e6', backgroundColor: '#f8f9fa' }}>
                                         <tr>
-                                            <th>ชื่อศูนย์พักพิง</th>
-                                            <th>ตำบล/อำเภอ</th>
-                                            <th>ประเภท</th>
-                                            <th>สถานะ</th>
-                                            <th>จัดการ</th>
+                                            <th style={{ color: '#495057' }}>ชื่อศูนย์พักพิง</th>
+                                            <th style={{ color: '#495057' }}>ตำบล/อำเภอ</th>
+                                            <th style={{ color: '#495057' }}>ประเภท</th>
+                                            <th style={{ color: '#495057' }}>สถานะ</th>
+                                            <th style={{ color: '#495057' }}>จัดการ</th>
                                         </tr>
                                     </thead>
-                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <tbody style={{ borderColor: '#dee2e6' }}>
                                         {paginatedShelters.map((s) => (
-                                            <tr key={s._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                                <td style={{ fontWeight: '500' }}>{s.name}</td>
-                                                <td>ต.{s.subdistrict} อ.{s.district}</td>
-                                                <td>{s.shelterType}</td>
+                                            <tr key={s._id} style={{ borderColor: '#dee2e6' }}>
+                                                <td style={{ fontWeight: '500', color: '#212529' }}>{s.name}</td>
+                                                <td style={{ color: '#495057' }}>ต.{s.subdistrict} อ.{s.district}</td>
+                                                <td style={{ color: '#495057' }}>{s.shelterType}</td>
                                                 <td>
                                                     <span className={getStatusBadgeClass((s as any).capacityStatus)}>
                                                         {(s as any).capacityStatus || 'ปกติ'}

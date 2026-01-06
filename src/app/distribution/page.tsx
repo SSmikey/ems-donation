@@ -120,14 +120,14 @@ export default function DistributionPage() {
     });
 
     return (
-        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#212529' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className="flex-grow-1 overflow-y-auto p-4">
+                <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0 }}>
+                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#212529' }}>
                             รายการคำขอเบิกสิ่งของ (Distribution Requests)
                         </h1>
                         <button
@@ -140,10 +140,10 @@ export default function DistributionPage() {
 
                     <div className="row g-3 mb-4">
                         <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>สถานะ</label>
+                            <label className="form-label" style={{ color: '#495057' }}>สถานะ</label>
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                             >
@@ -156,10 +156,10 @@ export default function DistributionPage() {
                         </div>
 
                         <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>ความเร่งด่วน</label>
+                            <label className="form-label" style={{ color: '#495057' }}>ความเร่งด่วน</label>
                             <select
                                 className="form-select"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterUrgency}
                                 onChange={(e) => setFilterUrgency(e.target.value)}
                             >
@@ -171,11 +171,11 @@ export default function DistributionPage() {
                         </div>
 
                         <div className="col-12 col-md-4">
-                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>วันที่</label>
+                            <label className="form-label" style={{ color: '#495057' }}>วันที่</label>
                             <input
                                 type="date"
                                 className="form-control"
-                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px' }}
                                 value={filterDate}
                                 onChange={(e) => setFilterDate(e.target.value)}
                             />
@@ -183,31 +183,31 @@ export default function DistributionPage() {
                     </div>
 
                     {loading ? (
-                        <p>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
+                        <p style={{ color: '#868e96' }}>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
                     ) : (
                         <>
                             <div className="table-responsive">
-                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                <table className="table table-hover align-middle" style={{ backgroundColor: '#ffffff', borderColor: '#dee2e6' }}>
+                                    <thead style={{ borderColor: '#dee2e6', backgroundColor: '#f8f9fa' }}>
                                         <tr>
-                                            <th>เลขที่คำขอ</th>
-                                            <th>ศูนย์พักพิง</th>
-                                            <th>สินค้าที่ขอ</th>
-                                            <th>ความเร่งด่วน</th>
-                                            <th>สถานะ</th>
-                                            <th>วันที่สร้าง</th>
-                                            <th>จัดการ</th>
+                                            <th style={{ color: '#495057' }}>เลขที่คำขอ</th>
+                                            <th style={{ color: '#495057' }}>ศูนย์พักพิง</th>
+                                            <th style={{ color: '#495057' }}>สินค้าที่ขอ</th>
+                                            <th style={{ color: '#495057' }}>ความเร่งด่วน</th>
+                                            <th style={{ color: '#495057' }}>สถานะ</th>
+                                            <th style={{ color: '#495057' }}>วันที่สร้าง</th>
+                                            <th style={{ color: '#495057' }}>จัดการ</th>
                                         </tr>
                                     </thead>
-                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <tbody style={{ borderColor: '#dee2e6' }}>
                                         {filteredRequests.map((req) => (
-                                            <tr key={req._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                                                <td style={{ fontWeight: '500' }}>REQ-{req._id.slice(-4)}</td>
-                                                <td>{req.shelterName}</td>
+                                            <tr key={req._id} style={{ borderColor: '#dee2e6' }}>
+                                                <td style={{ fontWeight: '500', color: '#212529' }}>REQ-{req._id.slice(-4)}</td>
+                                                <td style={{ color: '#495057' }}>{req.shelterName}</td>
                                                 <td>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                         {req.items.map((item, idx) => (
-                                                            <span key={idx} style={{ fontSize: '0.9rem' }}>{item.itemName} x{item.quantity}</span>
+                                                            <span key={idx} style={{ fontSize: '0.9rem', color: '#495057' }}>{item.itemName} x{item.quantity}</span>
                                                         ))}
                                                     </div>
                                                 </td>
