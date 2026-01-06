@@ -61,11 +61,6 @@ export default function Dashboard() {
           {/* Page Title */}
           <div className={styles.pageHeader}>
             <h1>Donation Dashboard</h1>
-            <div className={styles.breadcrumb}>
-              <span>หน้าหลัก</span>
-              <span className={styles.separator}>&gt;</span>
-              <span>แผงควบคุม</span>
-            </div>
           </div>
 
           {/* Statistics Row */}

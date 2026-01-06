@@ -85,7 +85,6 @@ export default function WarehousePage() {
                     <div className={styles.pageHeader}>
                         <div>
                             <h1>คลังสินค้าส่วนกลาง (Central Warehouse)</h1>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>จัดการสต็อกสิ่งของบริจาคและทรัพยากรทั้งหมด</p>
                         </div>
                         <div className={styles.actionButtons}>
                             <button
