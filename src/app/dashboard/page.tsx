@@ -76,7 +76,7 @@ export default function Dashboard() {
                 <StatCard
                   title="จำนวนศูนย์พักพิงทั้งหมด"
                   value={loading ? '...' : stats.shelterCount.toLocaleString()}
-                  color="cyan"
+                  color="blue"
                 />
               </div>
               <div className="col-12 col-sm-6 col-xl-3">
@@ -103,16 +103,24 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Items by Category as StatCards */}
           <div className="mb-4">
             <h5 className="fw-bold mb-3" style={{ color: '#374151' }}>จำนวนพัสดุคงคลังแยกตามหมวดหมู่</h5>
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
               {Object.keys(categories).length > 0 ? (
                 Object.entries(categories).map(([name, data]: [string, any]) => {
                   const totalQty = data.totalQuantity;
-                  // Color logic: Red if low, Green if healthy, Purple/Cyan as middle, Gray for "อื่นๆ"
-                  let color: 'red' | 'purple' | 'green' | 'gray' = totalQty < 100 ? 'red' : totalQty < 500 ? 'purple' : 'green';
-                  if (name === 'อื่นๆ') color = 'gray';
 
+                  // Map specific colors to categories for consistency and variety
+                  const categoryColorMap: any = {
+                    'อาหาร': 'green',
+                    'ยาและเวชภัณฑ์': 'orange',
+                    'เครื่องนุ่งห่ม': 'pink',
+                    'น้ำดื่ม': 'indigo',
+                    'อื่นๆ': 'gray'
+                  };
+
+                  const color = categoryColorMap[name] || 'cyan';
                   const progress = (totalQty / 50000) * 100;
 
                   return (
@@ -120,7 +128,7 @@ export default function Dashboard() {
                       <StatCard
                         title={name}
                         value={totalQty.toLocaleString()}
-                        color={color}
+                        color={color as any}
                         progress={progress}
                       />
                     </div>
@@ -136,61 +144,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Daily Distribution Chart - Full Width */}
-          <div className="row g-3">
-            <div className="col-12">
-              <div className="card shadow-sm" style={{ background: '#ffffff', border: '1px solid #e9ecef' }}>
-                <div className="card-body">
-                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#111827' }}>
-                    สถิติการเบิกจ่ายรายวัน (ย้อนหลัง 7 วัน)
-                  </h5>
-                  <div style={{ width: '100%', height: '350px', minWidth: 0 }}>
-                    {loading ? (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#868e96' }}>
-                        กำลังโหลดข้อมูล...
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={stats.chartData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" vertical={false} />
-                          <XAxis
-                            dataKey="name"
-                            stroke="#374151"
-                            tick={{ fontSize: 13, fontWeight: 500 }}
-                            axisLine={false}
-                            tickLine={false}
-                          />
-                          <YAxis
-                            stroke="#374151"
-                            tick={{ fontSize: 12 }}
-                            axisLine={false}
-                            tickLine={false}
-                          />
-                          <Tooltip
-                            cursor={{ fill: '#f3f4f6' }}
-                            contentStyle={{
-                              backgroundColor: '#ffffff',
-                              border: 'none',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                              borderRadius: '8px',
-                              color: '#212529'
-                            }}
-                          />
-                          <Bar
-                            dataKey="requests"
-                            fill="#00d4ff"
-                            name="จำนวนคำขอ"
-                            radius={[4, 4, 0, 0]}
-                            barSize={40}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

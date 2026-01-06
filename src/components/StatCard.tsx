@@ -1,7 +1,7 @@
 interface StatCardProps {
   title: string;
   value: string;
-  color: 'cyan' | 'purple' | 'red' | 'green' | 'gray';
+  color: 'cyan' | 'purple' | 'red' | 'green' | 'gray' | 'blue' | 'orange' | 'pink' | 'indigo';
   progress?: number;
 }
 
@@ -10,7 +10,11 @@ const colorMap = {
   purple: '#c084fc',
   red: '#f87171',
   green: '#10b981',
-  gray: '#9ca3af'
+  gray: '#9ca3af',
+  blue: '#3b82f6',
+  orange: '#f59e0b',
+  pink: '#ec4899',
+  indigo: '#6366f1'
 };
 
 export default function StatCard({
