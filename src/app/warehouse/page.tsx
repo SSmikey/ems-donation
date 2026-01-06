@@ -83,7 +83,7 @@ export default function WarehousePage() {
                 <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#212529' }}>
+                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#111827' }}>
                                 คลังสินค้าส่วนกลาง (Central Warehouse)
                             </h1>
                         </div>

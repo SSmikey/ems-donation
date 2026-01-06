@@ -130,7 +130,7 @@ export default function CentersPage() {
 
                 <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#212529' }}>
+                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, color: '#111827' }}>
                             จัดการศูนย์พักพิง ({shelters.length} แห่ง)
                         </h1>
                         <button

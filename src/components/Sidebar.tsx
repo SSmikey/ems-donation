@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     >
       {/* Logo */}
       <div className="d-flex align-items-center px-3 mb-4" style={{ cursor: 'pointer' }}>
-        <span className="h5 mb-0 fw-bold" style={{ color: '#212529' }}>ems-donation</span>
+        <span className="h5 mb-0 fw-bold" style={{ color: '#111827' }}>ems-donation</span>
       </div>
 
       {/* Navigation */}

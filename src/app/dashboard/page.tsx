@@ -59,7 +59,7 @@ export default function Dashboard() {
         <div className="flex-grow-1 overflow-y-auto p-4" style={{ paddingTop: '30px', paddingBottom: '30px', backgroundColor: '#f8f9fa' }}>
           {/* Page Title */}
           <div className="mb-5">
-            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '12px' }}>
+            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '12px', color: '#111827' }}>
               Donation Dashboard
             </h1>
           </div>
@@ -101,7 +101,7 @@ export default function Dashboard() {
             <div className="col-12 col-lg-6">
               <div className="card shadow-sm" style={{ background: '#ffffff', border: '1px solid #e9ecef' }}>
                 <div className="card-body">
-                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#212529' }}>
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px', color: '#111827' }}>
                     สถิติการเบิกจ่ายรายวัน
                   </h5>
                   <div style={{ width: '100%', height: '300px', minWidth: 0 }}>

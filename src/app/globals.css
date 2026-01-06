@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #212529;
+  --foreground: #111827;
 }
 
 html,
@@ -84,14 +84,14 @@ a {
   --gray-600: #868e96;
   --gray-700: #495057;
   --gray-800: #343a40;
-  --gray-900: #212529;
+  --gray-900: #111827;
   --sidebar-bg: #1e293b;
 }
 
 /* ---- Custom Sidebar Styling ---- */
 .sidebar-dark {
   background-color: #ffffff;
-  color: #212529;
+  color: #111827;
   border-right: 1px solid #e9ecef;
 }
 

@@ -82,7 +82,7 @@ export default function UsersPage() {
                 <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '5px', color: '#212529' }}>
+                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '5px', color: '#111827' }}>
                                 จัดการผู้ใช้งาน (User Management)
                             </h1>
                             <p style={{ color: '#868e96', margin: 0 }}>
