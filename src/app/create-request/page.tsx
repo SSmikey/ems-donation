@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import styles from './create-request.module.css';
 import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 import Toast from '@/components/Toast';
 
@@ -88,12 +87,12 @@ export default function CreateRequestPage() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedShelters = filteredShelters.slice(startIndex, startIndex + itemsPerPage);
 
-    const getStatusClass = (status: string) => {
+    const getStatusBadgeClass = (status: string) => {
         switch (status) {
-            case 'รองรับได้': return styles.statusNormal;
-            case 'ใกล้เต็ม': return styles.statusWarn;
-            case 'เต็มแล้ว': return styles.statusCritical;
-            default: return styles.statusNormal;
+            case 'รองรับได้': return 'badge bg-success';
+            case 'ใกล้เต็ม': return 'badge bg-warning';
+            case 'เต็มแล้ว': return 'badge bg-danger';
+            default: return 'badge bg-secondary';
         }
     };
 
@@ -103,158 +102,156 @@ export default function CreateRequestPage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)</h1>
-                    </div>
+                <div className="flex-grow-1 overflow-y-auto p-4">
+                    <h1 className="fw-bold mb-4" style={{ fontSize: '32px', margin: 0 }}>
+                        สร้างคำขอเบิกสิ่งของ ({shelters.length} แห่ง)
+                    </h1>
 
-                    <div className={styles.searchSection}>
-                        <style>{`
-                            select option {
-                                background-color: #1a1a2e;
-                                color: #ffffff;
-                                padding: 8px;
-                            }
-                            select option:hover {
-                                background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-                                background-color: #16213e;
-                            }
-                            select option:checked {
-                                background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-                                background-color: #16213e;
-                            }
-                        `}</style>
-                        <input
-                            type="text"
-                            placeholder="ชื่อศูนย์พักพิง..."
-                            className={styles.searchInput}
-                            value={filterName}
-                            onChange={(e) => setFilterName(e.target.value)}
-                        />
-                        <select
-                            className={styles.filterSelect}
-                            value={filterDistrict}
-                            onChange={(e) => setFilterDistrict(e.target.value)}
-                        >
-                            <option value="">ทั้งหมด (อำเภอ)</option>
-                            {uniqueDistricts.map(district => (
-                                <option key={district} value={district}>{district}</option>
-                            ))}
-                        </select>
-                        <select
-                            className={styles.filterSelect}
-                            value={filterSubdistrict}
-                            onChange={(e) => setFilterSubdistrict(e.target.value)}
-                            disabled={!filterDistrict}
-                        >
-                            <option value="">ทั้งหมด (ตำบล)</option>
-                            {uniqueSubdistricts.map(subdistrict => (
-                                <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
-                            ))}
-                        </select>
-                        <select
-                            className={styles.filterSelect}
-                            value={filterType}
-                            onChange={(e) => setFilterType(e.target.value)}
-                        >
-                            <option value="">ทั้งหมด (ประเภท)</option>
-                            {uniqueTypes.map(type => (
-                                <option key={type} value={type}>{type}</option>
-                            ))}
-                        </select>
-                        <select
-                            className={styles.filterSelect}
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value)}
-                        >
-                            <option value="all">ทั้งหมด (สถานะ)</option>
-                            <option value="รองรับได้">รองรับได้</option>
-                            <option value="ใกล้เต็ม">ใกล้เต็ม</option>
-                            <option value="เต็มแล้ว">เต็มแล้ว</option>
-                        </select>
+                    <div className="row g-2 mb-4">
+                        <div className="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <input
+                                type="text"
+                                placeholder="ชื่อศูนย์พักพิง..."
+                                className="form-control"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                value={filterName}
+                                onChange={(e) => setFilterName(e.target.value)}
+                            />
+                        </div>
+                        <div className="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <select
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                value={filterDistrict}
+                                onChange={(e) => setFilterDistrict(e.target.value)}
+                            >
+                                <option value="">ทั้งหมด (อำเภอ)</option>
+                                {uniqueDistricts.map(district => (
+                                    <option key={district} value={district}>{district}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <select
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                value={filterSubdistrict}
+                                onChange={(e) => setFilterSubdistrict(e.target.value)}
+                                disabled={!filterDistrict}
+                            >
+                                <option value="">ทั้งหมด (ตำบล)</option>
+                                {uniqueSubdistricts.map(subdistrict => (
+                                    <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <select
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                            >
+                                <option value="">ทั้งหมด (ประเภท)</option>
+                                {uniqueTypes.map(type => (
+                                    <option key={type} value={type}>{type}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <select
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <option value="all">ทั้งหมด (สถานะ)</option>
+                                <option value="รองรับได้">รองรับได้</option>
+                                <option value="ใกล้เต็ม">ใกล้เต็ม</option>
+                                <option value="เต็มแล้ว">เต็มแล้ว</option>
+                            </select>
+                        </div>
                     </div>
 
                     {loading ? (
                         <p>กำลังโหลดข้อมูลศูนย์พักพิง...</p>
                     ) : (
                         <>
-                            <table className={styles.sheltersTable}>
-                                <thead>
-                                    <tr>
-                                        <th>ชื่อศูนย์พักพิง</th>
-                                        <th>ตำบล/อำเภอ</th>
-                                        <th>ประเภท</th>
-                                        <th>สถานะ</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {paginatedShelters.map((s) => (
-                                        <tr key={s._id}>
-                                            <td className={styles.nameCell}>{s.name}</td>
-                                            <td>ต.{s.subdistrict} อ.{s.district}</td>
-                                            <td>{s.shelterType}</td>
-                                            <td>
-                                                <span className={`${styles.statusBadge} ${getStatusClass((s as any).capacityStatus)}`}>
-                                                    {(s as any).capacityStatus || 'ปกติ'}
-                                                </span>
-                                            </td>
-                                            <td className={styles.actionsCell}>
-                                                <button
-                                                    className={styles.createBtn}
-                                                    onClick={() => handleCreateRequest(s._id)}
-                                                >
-                                                    สร้างคำขอ
-                                                </button>
-                                            </td>
+                            <div className="table-responsive mb-3">
+                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        <tr>
+                                            <th>ชื่อศูนย์พักพิง</th>
+                                            <th>ตำบล/อำเภอ</th>
+                                            <th>ประเภท</th>
+                                            <th>สถานะ</th>
+                                            <th>จัดการ</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                        {paginatedShelters.map((s) => (
+                                            <tr key={s._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                                <td style={{ fontWeight: '500' }}>{s.name}</td>
+                                                <td>ต.{s.subdistrict} อ.{s.district}</td>
+                                                <td>{s.shelterType}</td>
+                                                <td>
+                                                    <span className={getStatusBadgeClass((s as any).capacityStatus)}>
+                                                        {(s as any).capacityStatus || 'ปกติ'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-primary"
+                                                        onClick={() => handleCreateRequest(s._id)}
+                                                    >
+                                                        สร้างคำขอ
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
 
                             {filteredShelters.length === 0 ? (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="text-center" style={{ marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
                                     <p>ไม่พบข้อมูลศูนย์ที่ตรงกับการค้นหา</p>
                                 </div>
                             ) : (
-                                <div className={styles.paginationContainer}>
-                                    <button
-                                        className={styles.paginationBtn}
-                                        onClick={() => setCurrentPage(1)}
-                                        disabled={currentPage === 1}
-                                    >
-                                        ⇤ หน้าแรก
-                                    </button>
-                                    <button
-                                        className={styles.paginationBtn}
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                    >
-                                        ← ก่อนหน้า
-                                    </button>
-                                    <div className={styles.pageInfo}>
-                                        หน้า {currentPage} จาก {totalPages} ({filteredShelters.length} รายการ)
-                                    </div>
-                                    <button
-                                        className={styles.paginationBtn}
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        ถัดไป →
-                                    </button>
-                                    <button
-                                        className={styles.paginationBtn}
-                                        onClick={() => setCurrentPage(totalPages)}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        หน้าสุดท้าย ⇥
-                                    </button>
-                                </div>
+                                <nav aria-label="Page navigation">
+                                    <ul className="pagination justify-content-center">
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                                                ⇤ หน้าแรก
+                                            </button>
+                                        </li>
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                                                ← ก่อนหน้า
+                                            </button>
+                                        </li>
+                                        <li className="page-item active">
+                                            <span className="page-link">
+                                                หน้า {currentPage} จาก {totalPages} ({filteredShelters.length} รายการ)
+                                            </span>
+                                        </li>
+                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+                                                ถัดไป →
+                                            </button>
+                                        </li>
+                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                                                หน้าสุดท้าย ⇥
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
                             )}
                         </>
                     )}
@@ -283,6 +280,14 @@ export default function CreateRequestPage() {
                     onClose={() => setToast(null)}
                 />
             )}
+
+            <style>{`
+                select option {
+                    background-color: #1a1a2e;
+                    color: #ffffff;
+                    padding: 8px;
+                }
+            `}</style>
         </div>
     );
 }

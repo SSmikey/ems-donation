@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import styles from './warehouse.module.css';
 import Toast from '@/components/Toast';
 import InventoryModal from './InventoryModal';
 
@@ -76,19 +75,21 @@ export default function WarehousePage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
+                <div className="flex-grow-1 overflow-y-auto p-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h1>คลังสินค้าส่วนกลาง (Central Warehouse)</h1>
+                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0 }}>
+                                คลังสินค้าส่วนกลาง (Central Warehouse)
+                            </h1>
                         </div>
-                        <div className={styles.actionButtons}>
+                        <div>
                             <button
-                                className={styles.primaryButton}
+                                className="btn btn-primary fw-bold"
                                 onClick={() => {
                                     setEditingItem(null);
                                     setIsModalOpen(true);
@@ -99,21 +100,23 @@ export default function WarehousePage() {
                         </div>
                     </div>
 
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterGroup} style={{ flex: 1 }}>
-                            <label>ค้นหาสินค้า</label>
+                    <div className="row g-3 mb-4">
+                        <div className="col-12 col-md-8">
+                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>ค้นหาสินค้า</label>
                             <input
                                 type="text"
                                 placeholder="ค้นหาชื่อสินค้า..."
-                                className={styles.inputField}
+                                className="form-control"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className={styles.filterGroup}>
-                            <label>หมวดหมู่</label>
+                        <div className="col-12 col-md-4">
+                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>หมวดหมู่</label>
                             <select
-                                className={styles.inputField}
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
                                 value={categoryFilter}
                                 onChange={(e) => setCategoryFilter(e.target.value)}
                             >
@@ -127,74 +130,79 @@ export default function WarehousePage() {
                     </div>
 
                     {loading ? (
-                        <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
+                        <div className="text-center" style={{ marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
                             <p>กำลังโหลดข้อมูลคลังสินค้า...</p>
                         </div>
                     ) : (
                         <>
-                            <table className={styles.inventoryTable}>
-                                <thead>
-                                    <tr>
-                                        <th>ชื่อสินค้า</th>
-                                        <th>หมวดหมู่</th>
-                                        <th>จำนวนคงเหลือ</th>
-                                        <th>หน่วย</th>
-                                        <th>สถานะสต็อก</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredItems.map(item => {
-                                        const status = getStatusInfo(item.quantity);
-                                        return (
-                                            <tr key={item._id}>
-                                                <td style={{ fontWeight: '500' }}>{item.itemName}</td>
-                                                <td><span className={styles.categoryTag}>{item.category}</span></td>
-                                                <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
-                                                <td>{item.unit}</td>
-                                                <td>
-                                                    <div className={styles.stockLevel}>
-                                                        <div className={styles.levelBar}>
-                                                            <div
-                                                                className={styles.levelFill}
-                                                                style={{
-                                                                    width: status.percent,
-                                                                    backgroundColor: status.color
-                                                                }}
-                                                            ></div>
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        <tr>
+                                            <th>ชื่อสินค้า</th>
+                                            <th>หมวดหมู่</th>
+                                            <th>จำนวนคงเหลือ</th>
+                                            <th>หน่วย</th>
+                                            <th>สถานะสต็อก</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                        {filteredItems.map(item => {
+                                            const status = getStatusInfo(item.quantity);
+                                            return (
+                                                <tr key={item._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                                    <td style={{ fontWeight: '500' }}>{item.itemName}</td>
+                                                    <td>
+                                                        <span className="badge bg-secondary">{item.category}</span>
+                                                    </td>
+                                                    <td style={{ color: status.color, fontWeight: '600' }}>{item.quantity.toLocaleString()}</td>
+                                                    <td>{item.unit}</td>
+                                                    <td>
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <div style={{ flex: 1, height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden', minWidth: '60px' }}>
+                                                                <div
+                                                                    style={{
+                                                                        width: status.percent,
+                                                                        height: '100%',
+                                                                        backgroundColor: status.color,
+                                                                        borderRadius: '4px'
+                                                                    }}
+                                                                ></div>
+                                                            </div>
+                                                            <span style={{ fontSize: '12px', minWidth: '60px' }}>{status.label}</span>
                                                         </div>
-                                                        <span style={{ fontSize: '12px' }}>{status.label}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className={styles.actions}>
-                                                        <button
-                                                            className={styles.editBtn}
-                                                            title="แก้ไข"
-                                                            onClick={() => {
-                                                                setEditingItem(item);
-                                                                setIsModalOpen(true);
-                                                            }}
-                                                        >
-                                                            แก้ไข
-                                                        </button>
-                                                        <button
-                                                            className={styles.deleteBtn}
-                                                            title="ลบ"
-                                                            onClick={() => handleDelete(item._id, item.itemName)}
-                                                        >
-                                                            ลบ
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-flex gap-2">
+                                                            <button
+                                                                className="btn btn-sm btn-warning"
+                                                                title="แก้ไข"
+                                                                onClick={() => {
+                                                                    setEditingItem(item);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                แก้ไข
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-sm btn-danger"
+                                                                title="ลบ"
+                                                                onClick={() => handleDelete(item._id, item.itemName)}
+                                                            >
+                                                                ลบ
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
 
                             {filteredItems.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
+                                <div className="text-center" style={{ marginTop: '50px', color: 'rgba(255,255,255,0.4)' }}>
                                     <p>ไม่พบรายการสินค้าที่ต้องการ</p>
                                 </div>
                             )}

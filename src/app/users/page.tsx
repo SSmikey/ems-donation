@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import styles from './users.module.css';
 import Toast from '@/components/Toast';
 import CreateUserModal from './CreateUserModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -75,68 +74,69 @@ export default function UsersPage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
+                <div className="flex-grow-1 overflow-y-auto p-4">
+                    <div className="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <h1>จัดการผู้ใช้งาน (User Management)</h1>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>
+                            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '5px' }}>
+                                จัดการผู้ใช้งาน (User Management)
+                            </h1>
+                            <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>
                                 ดูแลจัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง
                             </p>
                         </div>
-                        <button className={styles.addButton} onClick={() => setIsModalOpen(true)}>
+                        <button className="btn btn-primary fw-bold" onClick={() => setIsModalOpen(true)}>
                             + เพิ่มผู้ใช้งาน
                         </button>
                     </div>
 
-                    <div className={styles.tableContainer}>
+                    <div>
                         {loading ? (
-                            <p style={{ padding: '20px', textAlign: 'center' }}>กำลังโหลดข้อมูล...</p>
+                            <p className="text-center" style={{ paddingTop: '20px' }}>กำลังโหลดข้อมูล...</p>
                         ) : (
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>ชื่อ-นามสกุล</th>
-                                        <th>Username</th>
-                                        <th>สิทธิ์ (Role)</th>
-                                        <th>สถานะ</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.map((user) => (
-                                        <tr key={user._id}>
-                                            <td>{user.firstName} {user.lastName}</td>
-                                            <td>{user.username}</td>
-                                            <td>
-                                                <span className={styles.roleBadge} style={{
-                                                    backgroundColor: user.role === 'admin' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                                    color: user.role === 'admin' ? '#f472b6' : '#60a5fa'
-                                                }}>
-                                                    {user.role.toUpperCase()}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span style={{ color: (user.status || 'active') === 'active' ? '#4ade80' : '#9ca3af' }}>
-                                                    ● {(user.status || 'active') === 'active' ? 'ใช้งานปกติ' : 'ระงับการใช้งาน'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    onClick={() => handleDelete(user._id, user.username)}
-                                                    style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}
-                                                >
-                                                    ลบ
-                                                </button>
-                                            </td>
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        <tr>
+                                            <th>ชื่อ-นามสกุล</th>
+                                            <th>Username</th>
+                                            <th>สิทธิ์ (Role)</th>
+                                            <th>สถานะ</th>
+                                            <th>จัดการ</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                        {users.map((user) => (
+                                            <tr key={user._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                                <td>{user.firstName} {user.lastName}</td>
+                                                <td>{user.username}</td>
+                                                <td>
+                                                    <span className={user.role === 'admin' ? 'badge bg-danger' : 'badge bg-info'}>
+                                                        {user.role.toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span style={{ color: (user.status || 'active') === 'active' ? '#4ade80' : '#9ca3af' }}>
+                                                        ● {(user.status || 'active') === 'active' ? 'ใช้งานปกติ' : 'ระงับการใช้งาน'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-danger"
+                                                        onClick={() => handleDelete(user._id, user.username)}
+                                                    >
+                                                        ลบ
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
                 </div>

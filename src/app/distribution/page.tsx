@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import styles from './distribution.module.css';
 import CreateRequestModal from './CreateRequestModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -92,11 +91,21 @@ export default function DistributionPage() {
         }
     };
 
-    const getUrgencyClass = (urgency: string) => {
+    const getUrgencyBadgeClass = (urgency: string) => {
         switch (urgency) {
-            case 'สูง': return styles.urgencyHigh;
-            case 'กลาง': return styles.urgencyMedium;
-            default: return styles.urgencyLow;
+            case 'สูง': return 'badge bg-danger';
+            case 'กลาง': return 'badge bg-warning';
+            default: return 'badge bg-info';
+        }
+    };
+
+    const getStatusBadgeClass = (status: string) => {
+        switch (status) {
+            case 'รอดำเนินการ': return 'badge bg-warning';
+            case 'อนุมัติแล้ว': return 'badge bg-info';
+            case 'กำลังจัดส่ง': return 'badge bg-primary';
+            case 'ส่งมอบแล้ว': return 'badge bg-success';
+            default: return 'badge bg-secondary';
         }
     };
 
@@ -111,35 +120,30 @@ export default function DistributionPage() {
     });
 
     return (
-        <div className={styles.container}>
+        <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
             <Sidebar isOpen={sidebarOpen} />
-            <div className={styles.mainContent}>
+            <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
                 <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-                <div className={styles.contentArea}>
-                    <div className={styles.pageHeader}>
-                        <h1>รายการคำขอเบิกสิ่งของ (Distribution Requests)</h1>
+                <div className="flex-grow-1 overflow-y-auto p-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0 }}>
+                            รายการคำขอเบิกสิ่งของ (Distribution Requests)
+                        </h1>
                         <button
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer'
-                            }}
+                            className="btn btn-primary fw-bold"
                             onClick={() => setIsModalOpen(true)}
                         >
                             + สร้างคำขอใหม่
                         </button>
                     </div>
 
-                    <div className={styles.filterSection}>
-                        <div className={styles.filterGroup}>
-                            <label>สถานะ</label>
+                    <div className="row g-3 mb-4">
+                        <div className="col-12 col-md-4">
+                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>สถานะ</label>
                             <select
-                                className={styles.filterSelect}
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
                             >
@@ -151,10 +155,11 @@ export default function DistributionPage() {
                             </select>
                         </div>
 
-                        <div className={styles.filterGroup}>
-                            <label>ความเร่งด่วน</label>
+                        <div className="col-12 col-md-4">
+                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>ความเร่งด่วน</label>
                             <select
-                                className={styles.filterSelect}
+                                className="form-select"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
                                 value={filterUrgency}
                                 onChange={(e) => setFilterUrgency(e.target.value)}
                             >
@@ -165,11 +170,12 @@ export default function DistributionPage() {
                             </select>
                         </div>
 
-                        <div className={styles.filterGroup}>
-                            <label>วันที่</label>
+                        <div className="col-12 col-md-4">
+                            <label className="form-label" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>วันที่</label>
                             <input
                                 type="date"
-                                className={styles.filterSelect}
+                                className="form-control"
+                                style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
                                 value={filterDate}
                                 onChange={(e) => setFilterDate(e.target.value)}
                             />
@@ -180,56 +186,60 @@ export default function DistributionPage() {
                         <p>กำลังโหลดข้อมูลคำขอเบิกสิ่งของ...</p>
                     ) : (
                         <>
-                            <table className={styles.requestsTable}>
-                                <thead>
-                                    <tr>
-                                        <th>เลขที่คำขอ</th>
-                                        <th>ศูนย์พักพิง</th>
-                                        <th>สินค้าที่ขอ</th>
-                                        <th>ความเร่งด่วน</th>
-                                        <th>สถานะ</th>
-                                        <th>วันที่สร้าง</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredRequests.map((req) => (
-                                        <tr key={req._id}>
-                                            <td className={styles.requestId}>REQ-{req._id.slice(-4)}</td>
-                                            <td>{req.shelterName}</td>
-                                            <td>
-                                                <div className={styles.itemsList}>
-                                                    {req.items.map((item, idx) => (
-                                                        <div key={idx}>{item.itemName} x{item.quantity}</div>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className={`${styles.urgencyBadge} ${getUrgencyClass(req.urgency)}`}>
-                                                    {req.urgency}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={styles.statusBadge}>{req.status}</span>
-                                            </td>
-                                            <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
-                                            <td className={styles.actionsCell}>
-                                                {req.status === 'รอดำเนินการ' && (
-                                                    <button
-                                                        className={styles.createBtn}
-                                                        onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
-                                                    >
-                                                        อนุมัติคำขอ
-                                                    </button>
-                                                )}
-                                            </td>
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                    <thead style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        <tr>
+                                            <th>เลขที่คำขอ</th>
+                                            <th>ศูนย์พักพิง</th>
+                                            <th>สินค้าที่ขอ</th>
+                                            <th>ความเร่งด่วน</th>
+                                            <th>สถานะ</th>
+                                            <th>วันที่สร้าง</th>
+                                            <th>จัดการ</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                        {filteredRequests.map((req) => (
+                                            <tr key={req._id} style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                                                <td style={{ fontWeight: '500' }}>REQ-{req._id.slice(-4)}</td>
+                                                <td>{req.shelterName}</td>
+                                                <td>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                        {req.items.map((item, idx) => (
+                                                            <span key={idx} style={{ fontSize: '0.9rem' }}>{item.itemName} x{item.quantity}</span>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className={getUrgencyBadgeClass(req.urgency)}>
+                                                        {req.urgency}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className={getStatusBadgeClass(req.status)}>
+                                                        {req.status}
+                                                    </span>
+                                                </td>
+                                                <td>{new Date(req.createdAt).toLocaleDateString('th-TH')}</td>
+                                                <td>
+                                                    {req.status === 'รอดำเนินการ' && (
+                                                        <button
+                                                            className="btn btn-sm btn-success"
+                                                            onClick={() => handleCreateRequest(req._id, req.shelterName || 'ศูนย์พักพิง')}
+                                                        >
+                                                            อนุมัติคำขอ
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
 
                             {filteredRequests.length === 0 && (
-                                <div style={{ textAlign: 'center', marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="text-center" style={{ marginTop: '50px', color: 'rgba(255,255,255,0.5)' }}>
                                     <p>ไม่พบรายการคำขอเบิกสิ่งของ</p>
                                 </div>
                             )}

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCard from '@/components/StatCard';
-import styles from './dashboard.module.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export default function Dashboard() {
@@ -52,87 +51,111 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div className="d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#ffffff' }}>
       <Sidebar isOpen={sidebarOpen} />
-      <div className={styles.mainContent}>
+      <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <div className={styles.contentArea}>
+        <div className="flex-grow-1 overflow-y-auto p-4" style={{ paddingTop: '30px', paddingBottom: '30px' }}>
           {/* Page Title */}
-          <div className={styles.pageHeader}>
-            <h1>Donation Dashboard</h1>
+          <div className="mb-5">
+            <h1 className="fw-bold" style={{ fontSize: '32px', margin: 0, marginBottom: '12px' }}>
+              Donation Dashboard
+            </h1>
           </div>
 
-          {/* Statistics Row */}
-          <div className={styles.statsGrid}>
-            <StatCard
-              title="จำนวนศูนย์พักพิงทั้งหมด"
-              value={loading ? '...' : stats.shelterCount.toLocaleString()}
-              color="cyan"
-            />
-            <StatCard
-              title="รายการสินค้าในคลัง"
-              value={loading ? '...' : stats.totalInventoryItems.toLocaleString()}
-              color="cyan"
-            />
-            <StatCard
-              title="คำขอรอดำเนินการ"
-              value={loading ? '...' : stats.pendingRequests.toLocaleString()}
-              color="purple"
-            />
-            <StatCard
-              title="สินค้าใกล้หมด (Low Stock)"
-              value={loading ? '...' : stats.lowStockCount.toLocaleString()}
-              color="red"
-            />
+          {/* Statistics Row - Bootstrap Grid */}
+          <div className="row g-3 mb-4">
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard
+                title="จำนวนศูนย์พักพิงทั้งหมด"
+                value={loading ? '...' : stats.shelterCount.toLocaleString()}
+                color="cyan"
+              />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard
+                title="รายการสินค้าในคลัง"
+                value={loading ? '...' : stats.totalInventoryItems.toLocaleString()}
+                color="cyan"
+              />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard
+                title="คำขอรอดำเนินการ"
+                value={loading ? '...' : stats.pendingRequests.toLocaleString()}
+                color="purple"
+              />
+            </div>
+            <div className="col-12 col-sm-6 col-xl-3">
+              <StatCard
+                title="สินค้าใกล้หมด (Low Stock)"
+                value={loading ? '...' : stats.lowStockCount.toLocaleString()}
+                color="red"
+              />
+            </div>
           </div>
 
           {/* Resource Status and Items Section */}
-          <div className={styles.socialGrid}>
-            <div className={styles.customCard}>
-              <h3 className={styles.cardTitle}>สถิติการเบิกจ่ายรายวัน</h3>
-              <div style={{ width: '100%', height: '300px', minWidth: 0 }}>
-                {loading ? (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
-                    กำลังโหลดข้อมูล...
+          <div className="row g-3">
+            <div className="col-12 col-lg-6">
+              <div className="card shadow-sm border-0" style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
+                <div className="card-body">
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px' }}>
+                    สถิติการเบิกจ่ายรายวัน
+                  </h5>
+                  <div style={{ width: '100%', height: '300px', minWidth: 0 }}>
+                    {loading ? (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                        กำลังโหลดข้อมูล...
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={stats.chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                          <XAxis dataKey="name" stroke="#ccc" />
+                          <YAxis stroke="#ccc" />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }}
+                          />
+                          <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                      <XAxis dataKey="name" stroke="#ccc" />
-                      <YAxis stroke="#ccc" />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }}
-                      />
-                      <Bar dataKey="requests" fill="#8884d8" name="จำนวนคำขอ" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
+                </div>
               </div>
             </div>
-            <div className={styles.customCard}>
-              <h3 className={styles.cardTitle}>รายการพัสดุแยกตามหมวดหมู่</h3>
-              <div className={styles.neededItems}>
-                {Object.keys(categories).length > 0 ? (
-                  Object.entries(categories).map(([name, data]: [string, any]) => {
-                    const totalQty = data.totalQuantity;
-                    const percent = Math.min(100, (totalQty / 200) * 100);
-                    const color = totalQty < 20 ? '#ef4444' : totalQty < 50 ? '#fbbf24' : '#4ade80';
+            <div className="col-12 col-lg-6">
+              <div className="card shadow-sm border-0" style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
+                <div className="card-body">
+                  <h5 className="card-title fw-bold mb-3" style={{ fontSize: '18px' }}>
+                    รายการพัสดุแยกตามหมวดหมู่
+                  </h5>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {Object.keys(categories).length > 0 ? (
+                      Object.entries(categories).map(([name, data]: [string, any]) => {
+                        const totalQty = data.totalQuantity;
+                        const percent = Math.min(100, (totalQty / 200) * 100);
+                        const color = totalQty < 20 ? '#ef4444' : totalQty < 50 ? '#fbbf24' : '#4ade80';
 
-                    return (
-                      <div key={name} className={styles.itemRow}>
-                        <span style={{ minWidth: '80px' }}>{name}</span>
-                        <div className={styles.progressBase}>
-                          <div className={styles.progressFill} style={{ width: `${percent}%`, backgroundColor: color }}></div>
-                        </div>
-                        <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>{totalQty}</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '20px' }}>ไม่มีข้อมูลหมวดหมู่</p>
-                )}
+                        return (
+                          <div key={name} className="d-flex align-items-center gap-2">
+                            <span style={{ minWidth: '80px', fontSize: '14px' }}>{name}</span>
+                            <div style={{ flex: 1, height: '8px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                              <div style={{ width: `${percent}%`, height: '100%', backgroundColor: color, borderRadius: '4px' }}></div>
+                            </div>
+                            <span style={{ width: '40px', fontSize: '14px', textAlign: 'right', opacity: 0.8 }}>{totalQty}</span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '20px', margin: 0 }}>
+                        ไม่มีข้อมูลหมวดหมู่
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
