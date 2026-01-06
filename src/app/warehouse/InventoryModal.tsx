@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect } from 'react';
 
 interface InventoryItem {
     _id: string;
@@ -70,130 +70,114 @@ export default function InventoryModal({ item, onClose, onSuccess }: InventoryMo
         }
     };
 
-    // Style constants
-    const modalOverlayStyle: CSSProperties = {
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-    };
-
-    const modalContentStyle: CSSProperties = {
-        backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '500px',
-        color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
-    };
-
-    const inputStyle: CSSProperties = {
-        width: '100%', padding: '12px', marginBottom: '16px',
-        border: '1px solid rgba(0, 212, 255, 0.3)',
-        borderRadius: '8px',
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        color: '#ffffff',
-        fontSize: '0.95rem'
-    };
-
-    const labelStyle: CSSProperties = {
-        display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
-        color: 'rgba(255, 255, 255, 0.8)'
-    };
-
-    const selectStyle: CSSProperties = {
-        ...inputStyle,
-    };
-
     return (
-        <div style={modalOverlayStyle}>
-            <div style={modalContentStyle}>
-                <style>{`
-                    select option {
-                        background-color: #1a1a2e;
-                        color: #ffffff;
-                        padding: 8px;
-                    }
-                    select option:hover {
-                        background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-                        background-color: #16213e;
-                    }
-                    select option:checked {
-                        background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-                        background-color: #16213e;
-                    }
-                `}</style>
-                <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>
-                    {item ? 'แก้ไขรายการสินค้า' : 'เพิ่มรายการสินค้าใหม่'}
-                </h2>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
+            <style>{`
+                .modal-form-select option {
+                    background-color: #1a1a2e;
+                    color: #ffffff;
+                    padding: 8px;
+                }
+                .modal-form-select option:hover {
+                    background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+                    background-color: #16213e;
+                }
+                .modal-form-select option:checked {
+                    background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+                    background-color: #16213e;
+                }
+                .modal-form-input {
+                    border: 1px solid rgba(0, 212, 255, 0.3) !important;
+                    background-color: rgba(255, 255, 255, 0.05) !important;
+                    color: #ffffff !important;
+                }
+                .modal-form-input:focus {
+                    border-color: #00d4ff !important;
+                    background-color: rgba(255, 255, 255, 0.08) !important;
+                    color: #ffffff !important;
+                }
+            `}</style>
+            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#1a1a2e', borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
+                <div className="card-body p-4">
+                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.3rem', color: '#ffffff' }}>
+                        {item ? 'แก้ไขรายการสินค้า' : 'เพิ่มรายการสินค้าใหม่'}
+                    </h2>
 
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label style={labelStyle}>ชื่อรายการสิ่งของ</label>
-                        <input
-                            type="text"
-                            style={inputStyle}
-                            value={itemName}
-                            onChange={(e) => setItemName(e.target.value)}
-                            required
-                            placeholder="เช่น ข้าวสาร, หน้ากากอนามัย..."
-                        />
-                    </div>
-
-                    <div>
-                        <label style={labelStyle}>หมวดหมู่</label>
-                        <select
-                            style={selectStyle}
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                        >
-                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                        </select>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={labelStyle}>จำนวน</label>
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ชื่อรายการสิ่งของ</label>
                             <input
-                                type="number"
-                                style={inputStyle}
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
+                                type="text"
+                                className="form-control modal-form-input"
+                                value={itemName}
+                                onChange={(e) => setItemName(e.target.value)}
                                 required
-                                min="0"
+                                placeholder="เช่น ข้าวสาร, หน้ากากอนามัย..."
                             />
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <label style={labelStyle}>หน่วย</label>
+
+                        <div className="mb-3">
+                            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>หมวดหมู่</label>
                             <select
-                                style={selectStyle}
-                                value={unit}
-                                onChange={(e) => setUnit(e.target.value)}
+                                className="form-select modal-form-input"
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
                             >
-                                <option value="ชิ้น">ชิ้น</option>
-                                <option value="ถุง">ถุง</option>
-                                <option value="แพ็ค">แพ็ค</option>
-                                <option value="กล่อง">กล่อง</option>
-                                <option value="กิโลกรัม">กิโลกรัม</option>
-                                <option value="ผืน">ผืน</option>
+                                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                             </select>
                         </div>
-                    </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}
-                        >
-                            ยกเลิก
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            style={{
-                                padding: '10px 24px', background: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px',
-                                fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', opacity: loading ? 0.7 : 1
-                            }}
-                        >
-                            {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-                        </button>
-                    </div>
-                </form>
+                        <div className="row g-2 mb-3">
+                            <div className="col-6">
+                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>จำนวน</label>
+                                <input
+                                    type="number"
+                                    className="form-control modal-form-input"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(e.target.value)}
+                                    required
+                                    min="0"
+                                />
+                            </div>
+                            <div className="col-6">
+                                <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>หน่วย</label>
+                                <select
+                                    className="form-select modal-form-input"
+                                    value={unit}
+                                    onChange={(e) => setUnit(e.target.value)}
+                                >
+                                    <option value="ชิ้น">ชิ้น</option>
+                                    <option value="ถุง">ถุง</option>
+                                    <option value="แพ็ค">แพ็ค</option>
+                                    <option value="กล่อง">กล่อง</option>
+                                    <option value="กิโลกรัม">กิโลกรัม</option>
+                                    <option value="ผืน">ผืน</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="d-flex justify-content-end gap-2 mt-4">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="btn btn-outline-light"
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn fw-600"
+                                style={{
+                                    backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none',
+                                    opacity: loading ? 0.7 : 1
+                                }}
+                            >
+                                {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

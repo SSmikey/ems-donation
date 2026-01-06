@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Shelter {
   _id: string;
@@ -130,120 +130,106 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
     }
   };
 
-  // Inline styles for modal
-  const modalOverlayStyle: CSSProperties = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-  };
-
-  const modalContentStyle: CSSProperties = {
-    backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '600px',
-    color: '#ffffff', border: '1px solid rgba(0, 212, 255, 0.2)'
-  };
-
-  const inputStyle: CSSProperties = {
-    width: '100%', padding: '12px', marginBottom: '16px',
-    border: '1px solid rgba(0, 212, 255, 0.3)',
-    borderRadius: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    color: '#ffffff',
-    fontSize: '0.95rem'
-  };
-
-  const labelStyle: CSSProperties = {
-    display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem',
-    color: 'rgba(255, 255, 255, 0.8)'
-  };
-
-  const selectStyle: CSSProperties = {
-    ...inputStyle,
-  };
-
   return (
-    <div style={modalOverlayStyle}>
-      <div style={modalContentStyle}>
-        <style>{`
-          select option {
-            background-color: #1a1a2e;
-            color: #ffffff;
-            padding: 8px;
-          }
-          select option:hover {
-            background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
-            background-color: #16213e;
-          }
-          select option:checked {
-            background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
-            background-color: #16213e;
-          }
-        `}</style>
-        <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', fontWeight: 'bold', color: '#ffffff' }}>สร้างคำขอเบิกของใหม่</h2>
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }}>
+      <style>{`
+        .modal-form-select option {
+          background-color: #1a1a2e;
+          color: #ffffff;
+          padding: 8px;
+        }
+        .modal-form-select option:hover {
+          background: linear-gradient(rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.2));
+          background-color: #16213e;
+        }
+        .modal-form-select option:checked {
+          background: linear-gradient(rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.3));
+          background-color: #16213e;
+        }
+        .modal-form-input {
+          border: 1px solid rgba(0, 212, 255, 0.3) !important;
+          background-color: rgba(255, 255, 255, 0.05) !important;
+          color: #ffffff !important;
+        }
+        .modal-form-input:focus {
+          border-color: #00d4ff !important;
+          background-color: rgba(255, 255, 255, 0.08) !important;
+          color: #ffffff !important;
+        }
+      `}</style>
+      <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '600px', backgroundColor: '#1a1a2e', borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
+        <div className="card-body p-4">
+          <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.3rem', color: '#ffffff' }}>สร้างคำขอเบิกของใหม่</h2>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={labelStyle}>ศูนย์พักพิง:</label>
-          <select style={selectStyle} value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
-            <option value="">-- เลือกศูนย์พักพิง --</option>
-            {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-          </select>
-        </div>
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={labelStyle}>ความเร่งด่วน:</label>
-          <select style={selectStyle} value={urgency} onChange={e => setUrgency(e.target.value)}>
-            <option value="ต่ำ">ต่ำ</option>
-            <option value="กลาง">กลาง</option>
-            <option value="สูง">สูง</option>
-          </select>
-        </div>
-
-        <div style={{ border: '1px solid rgba(0, 212, 255, 0.2)', padding: '16px', borderRadius: '8px', marginBottom: '16px', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
-          <h3 style={{ fontWeight: '600', marginBottom: '12px', color: '#ffffff', fontSize: '1rem' }}>เพิ่มรายการสินค้า</h3>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-            <select style={{ ...selectStyle, flex: 2, marginBottom: 0 }} value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
-              <option value="">-- เลือกสินค้า --</option>
-              {inventory.map(i => (
-                <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
-              ))}
+          <div className="mb-3">
+            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ศูนย์พักพิง:</label>
+            <select className="form-select modal-form-input" value={selectedShelter} onChange={e => setSelectedShelter(e.target.value)}>
+              <option value="">-- เลือกศูนย์พักพิง --</option>
+              {shelters.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
             </select>
-            <input
-              type="number"
-              style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
-              value={itemQuantity}
-              onChange={e => setItemQuantity(Number(e.target.value))}
-              min="1"
-            />
-            <button
-              onClick={handleAddItem}
-              style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
-            >
-              เพิ่ม
-            </button>
           </div>
 
-          {/* Selected Items List */}
-          <ul style={{ marginTop: '12px', listStyle: 'none', padding: 0 }}>
-            {requestItems.map((item, idx) => (
-              <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(0, 212, 255, 0.1)', color: 'rgba(255, 255, 255, 0.8)' }}>
-                <span>{item.name} x {item.quantity}</span>
-                <button onClick={() => handleRemoveItem(idx)} style={{ color: '#ff6b6b', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '500' }}>ลบ</button>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="mb-3">
+            <label className="form-label fw-600 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ความเร่งด่วน:</label>
+            <select className="form-select modal-form-input" value={urgency} onChange={e => setUrgency(e.target.value)}>
+              <option value="ต่ำ">ต่ำ</option>
+              <option value="กลาง">กลาง</option>
+              <option value="สูง">สูง</option>
+            </select>
+          </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-          <button
-            onClick={onClose}
-            style={{ padding: '10px 24px', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
-            ยกเลิก
-          </button>
-          <button
-            onClick={handleSubmit}
-            style={{ padding: '10px 24px', backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
-            ยืนยันการสร้าง
-          </button>
+          <div className="border rounded p-3 mb-3" style={{ borderColor: 'rgba(0, 212, 255, 0.2)', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
+            <h3 className="fw-600 mb-3" style={{ fontSize: '1rem', color: '#ffffff' }}>เพิ่มรายการสินค้า</h3>
+            <div className="d-flex gap-2 mb-3">
+              <select className="form-select modal-form-input flex-grow-1" value={selectedItem} onChange={e => setSelectedItem(e.target.value)}>
+                <option value="">-- เลือกสินค้า --</option>
+                {inventory.map(i => (
+                  <option key={i._id} value={i._id}>{i.itemName} (คงเหลือ: {i.quantity} {i.unit})</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                className="form-control modal-form-input"
+                style={{ maxWidth: '100px' }}
+                value={itemQuantity}
+                onChange={e => setItemQuantity(Number(e.target.value))}
+                min="1"
+              />
+              <button
+                onClick={handleAddItem}
+                className="btn fw-600 text-nowrap"
+                style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' }}
+              >
+                เพิ่ม
+              </button>
+            </div>
+
+            {/* Selected Items List */}
+            <ul className="list-unstyled">
+              {requestItems.map((item, idx) => (
+                <li key={idx} className="d-flex justify-content-between align-items-center py-2 border-bottom" style={{ borderBottomColor: 'rgba(0, 212, 255, 0.1)', color: 'rgba(255, 255, 255, 0.8)' }}>
+                  <span>{item.name} x {item.quantity}</span>
+                  <button onClick={() => handleRemoveItem(idx)} className="btn btn-sm" style={{ color: '#ff6b6b', border: 'none', background: 'none', padding: 0 }}>ลบ</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="d-flex justify-content-end gap-2 mt-4">
+            <button
+              onClick={onClose}
+              className="btn btn-outline-light"
+            >
+              ยกเลิก
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="btn fw-600 text-nowrap"
+              style={{ backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' }}
+            >
+              ยืนยันการสร้าง
+            </button>
+          </div>
         </div>
       </div>
     </div>
