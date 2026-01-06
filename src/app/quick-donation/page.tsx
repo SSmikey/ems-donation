@@ -61,10 +61,10 @@ export default function QuickDonationPage() {
                 
                 // Map ข้อมูลให้ตรงกับ Structure ของเรา (รองรับทั้ง Header ไทยและอังกฤษ)
                 const mappedData = jsonData.map((row: any) => ({
-                    category: row['หมวดหมู่'] || row['Category'] || 'อื่นๆ',
-                    itemName: row['ชื่อรายการ'] || row['ItemName'] || '',
-                    quantity: Number(row['จำนวน'] || row['Quantity'] || 0),
-                    unit: row['หน่วย'] || row['Unit'] || 'ชิ้น'
+                    category: String(row['หมวดหมู่'] || row['Category'] || 'อื่นๆ').trim(),
+                    itemName: String(row['ชื่อรายการ'] || row['ItemName'] || '').trim(),
+                    quantity: Number(row['จำนวน'] || row['Quantity']) || 0,
+                    unit: String(row['หน่วย'] || row['Unit'] || 'ชิ้น').trim()
                 })).filter(item => item.itemName); // กรองแถวที่ไม่มีชื่อออก
 
                 setImportedData(mappedData);
@@ -118,28 +118,54 @@ export default function QuickDonationPage() {
     const handleBulkSubmit = async () => {
         let successCount = 0;
         let failCount = 0;
+        let duplicateCount = 0;
+        let lastErrorMessage = '';
 
         // Loop บันทึกทีละรายการ (หรือจะปรับเป็น Bulk API ทีเดียวก็ได้ถ้า Backend รองรับ)
         for (const item of importedData) {
             try {
+                // 1. ตรวจสอบข้อมูลเบื้องต้นก่อนส่ง (Client-side Validation)
+                if (item.quantity <= 0) {
+                    console.warn('ข้ามรายการเนื่องจากจำนวนไม่ถูกต้อง:', item);
+                    failCount++;
+                    lastErrorMessage = `สินค้า "${item.itemName}" จำนวนต้องมากกว่า 0`;
+                    continue;
+                }
+
                 const res = await fetch('/api/inventory', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(item)
                 });
-                if (res.ok) successCount++;
-                else failCount++;
+
+                if (res.ok) {
+                    successCount++;
+                } else {
+                    // 2. อ่าน Error จาก Server ให้ละเอียดขึ้น
+                    const errorData = await res.json().catch(() => ({ error: 'Unknown Error' }));
+                    const errorMessage = errorData.error || errorData.message || 'ข้อมูลไม่ถูกต้องตามเงื่อนไขของระบบ';
+
+                    if (errorMessage.toLowerCase().includes('duplicate')) {
+                        duplicateCount++;
+                    } else {
+                        console.error('Server rejected:', JSON.stringify(item), 'Reason:', JSON.stringify(errorData));
+                        failCount++;
+                        lastErrorMessage = errorMessage;
+                    }
+                }
             } catch (error) {
+                console.error('Network error:', error);
                 failCount++;
+                lastErrorMessage = 'ไม่สามารถเชื่อมต่อ Server ได้';
             }
         }
 
         setToast({ 
-            message: `บันทึกเสร็จสิ้น: สำเร็จ ${successCount}, ล้มเหลว ${failCount}`, 
+            message: `ผลการนำเข้า: สำเร็จ ${successCount}, ข้าม(ซ้ำ) ${duplicateCount}, ล้มเหลว ${failCount} ${failCount > 0 ? `(ตัวอย่าง: ${lastErrorMessage})` : ''}`, 
             type: failCount === 0 ? 'success' : 'error' 
         });
 
-        if (successCount > 0) {
+        if (failCount === 0) {
             setImportedData([]);
             setIsImporting(false);
         }
