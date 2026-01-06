@@ -48,6 +48,8 @@ export default function FormSelect({
         setIsOpen(false);
     };
 
+    const [isHovered, setIsHovered] = useState(false);
+
     const bgColor = dark ? 'rgba(255, 255, 255, 0.05)' : '#f9fafb';
     const borderColor = dark ? 'rgba(0, 212, 255, 0.3)' : '#e5e7eb';
     const textColor = dark ? '#ffffff' : '#111827';
@@ -55,6 +57,10 @@ export default function FormSelect({
     const activeBorder = dark ? '#00d4ff' : '#2563eb';
     const dropdownBg = dark ? '#1a1a2e' : '#ffffff';
     const itemHover = dark ? 'rgba(0, 212, 255, 0.1)' : '#f3f4f6';
+
+    const triggerBg = disabled
+        ? (dark ? 'rgba(255,255,255,0.02)' : '#f3f4f6')
+        : (isOpen ? bgColor : (isHovered ? (dark ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6') : bgColor));
 
     return (
         <div className={`form-select-container ${className}`} ref={containerRef} style={{ position: 'relative' }}>
@@ -74,13 +80,15 @@ export default function FormSelect({
             <div
                 className={`custom-select-trigger ${isOpen ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
                 onClick={() => !disabled && setIsOpen(!isOpen)}
+                onMouseEnter={() => !disabled && setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '0 16px',
                     height: '44px',
-                    background: disabled ? (dark ? 'rgba(255,255,255,0.02)' : '#f3f4f6') : bgColor,
+                    background: triggerBg,
                     border: isOpen ? `1px solid ${activeBorder}` : `1px solid ${borderColor}`,
                     borderRadius: '10px',
                     cursor: disabled ? 'not-allowed' : 'pointer',
@@ -166,26 +174,6 @@ export default function FormSelect({
                     )}
                 </div>
             )}
-
-            <style jsx>{`
-        .custom-select-trigger:hover:not(.disabled):not(.active) {
-          border-color: ${dark ? 'rgba(0, 212, 255, 0.5)' : '#d1d5db'};
-          background-color: ${dark ? 'rgba(255, 255, 255, 0.08)' : '#f3f4f6'} !important;
-        }
-        .custom-select-options::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-select-options::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-select-options::-webkit-scrollbar-thumb {
-          background: ${dark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'};
-          border-radius: 10px;
-        }
-        .custom-select-options::-webkit-scrollbar-thumb:hover {
-          background: ${dark ? 'rgba(255,255,255,0.2)' : '#d1d5db'};
-        }
-      `}</style>
         </div>
     );
 }

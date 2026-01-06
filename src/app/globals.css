@@ -22,7 +22,12 @@ body {
 }
 
 /* Headers and titles use Prompt font */
-h1, h2, h3, h4, h5, h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 .header,
 .title,
 .heading {
@@ -403,6 +408,7 @@ a {
 
 /* ---- Print Styles ---- */
 @media print {
+
   .sidebar-dark,
   .navbar,
   .btn {
@@ -417,4 +423,30 @@ a {
     box-shadow: none;
     border: 1px solid var(--gray-200);
   }
+}
+
+/* Filter Labels & Controls */
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.filter-control {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  font-size: 14px;
+  padding: 0 16px;
+}
+
+.filter-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  background-color: #ffffff;
 }

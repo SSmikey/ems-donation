@@ -191,17 +191,6 @@ export default function Dashboard() {
 
           {/* Shelter Search Table */}
           <div className="card border-0 shadow-sm mt-4">
-            <style>{`
-              .filter-label {
-                font-size: 12px;
-                font-weight: 600;
-                color: #6b7280;
-                margin-bottom: 6px;
-                display: block;
-                text-transform: uppercase;
-                letter-spacing: 0.025em;
-              }
-            `}</style>
             <div className="card-body p-4">
               <h5 className="fw-bold mb-4" style={{ color: '#111827', fontSize: '18px' }}>ค้นหาศูนย์พักพิง</h5>
 
