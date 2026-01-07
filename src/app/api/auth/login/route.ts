@@ -6,20 +6,14 @@ export async function POST(request: Request) {
     try {
         const { username, password } = await request.json();
 
-        console.log('Login attempt for username:', username);
-
         const client = await clientPromise;
-        // Explicitly use 'ems-donation' database
         const db = client.db('ems-donation');
 
         const user = await db.collection('users').findOne({ username });
 
         if (!user) {
-            console.log('User not found:', username);
             return NextResponse.json({ error: 'ไม่พบชื่อผู้ใช้งานนี้' }, { status: 401 });
         }
-
-        console.log('User found, checking password...');
 
         // Check if password is hashed (starts with $2a$ or $2b$ for bcrypt)
         const isPasswordHashed = user.password.startsWith('$2a$') || user.password.startsWith('$2b$');
@@ -34,16 +28,10 @@ export async function POST(request: Request) {
         }
 
         if (!isPasswordValid) {
-            console.log('Invalid password for user:', username);
             return NextResponse.json({ error: 'รหัสผ่านไม่ถูกต้อง' }, { status: 401 });
         }
 
-        console.log('Login successful for user:', username);
-        console.log('User role:', user.role);
-
         const { password: _, ...userWithoutPassword } = user;
-
-        console.log('Sending user data:', userWithoutPassword);
 
         return NextResponse.json({
             message: 'เข้าสู่ระบบสำเร็จ',

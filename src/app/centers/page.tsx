@@ -30,11 +30,6 @@ export default function CentersPage() {
     const [errorInfo, setErrorInfo] = useState<any>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ shelterName: string; shelterId: string } | null>(null);
 
-    useEffect(() => {
-        console.log('[CentersPage] Current user:', user);
-        console.log('[CentersPage] User role:', user?.role);
-    }, [user]);
-
     const fetchShelters = async () => {
         try {
             setLoading(true);

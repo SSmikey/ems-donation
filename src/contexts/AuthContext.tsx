@@ -31,14 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const parsed = JSON.parse(storedUser);
                 // Validate user structure - must have role field
                 if (parsed && typeof parsed === 'object' && 'role' in parsed && 'username' in parsed) {
-                    console.log('[AuthContext] Loading user from localStorage:', parsed);
                     setUser(parsed);
                 } else {
-                    console.warn('[AuthContext] Invalid user structure in localStorage, clearing...');
                     localStorage.removeItem('user');
                 }
             } catch (error) {
-                console.error('Failed to parse stored user:', error);
                 localStorage.removeItem('user');
             }
         }
@@ -47,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
-            console.log('[AuthContext] Attempting login for:', username);
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -56,10 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('[AuthContext] Login response:', data);
-                console.log('[AuthContext] User from API:', data.user);
-                console.log('[AuthContext] Role from API:', data.user.role);
-
                 const userData = {
                     _id: data.user._id,
                     username: data.user.username,
@@ -67,7 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     firstName: data.user.firstName,
                     lastName: data.user.lastName,
                 };
-                console.log('[AuthContext] Setting user data:', userData);
                 setUser(userData);
                 localStorage.setItem('user', JSON.stringify(userData));
                 return true;

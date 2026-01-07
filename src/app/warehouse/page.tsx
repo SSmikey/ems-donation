@@ -32,11 +32,6 @@ export default function WarehousePage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
-    useEffect(() => {
-        console.log('[WarehousePage] Current user:', user);
-        console.log('[WarehousePage] User role:', user?.role);
-    }, [user]);
-
     const fetchInventory = async (page: number = 1) => {
         try {
             setLoading(true);

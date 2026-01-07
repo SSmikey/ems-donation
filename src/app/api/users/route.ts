@@ -9,7 +9,6 @@ export async function GET() {
         const db = client.db('ems-donation');
         const users = await db.collection('users').find({}, { projection: { password: 0 } }).toArray();
 
-        console.log(`Fetched ${users.length} users from database`);
         return NextResponse.json(users);
     } catch (error) {
         console.error('Fetch Users Error:', error);
@@ -46,8 +45,6 @@ export async function POST(request: Request) {
         const db = client.db('ems-donation');
         const usersCollection = db.collection('users');
 
-        console.log('Connected to database:', db.databaseName);
-
         // Check if username already exists
         const existingUser = await usersCollection.findOne({ username });
         if (existingUser) {
@@ -73,9 +70,7 @@ export async function POST(request: Request) {
             createdAt: new Date().toISOString()
         };
 
-        console.log('Attempting to insert user:', { username, firstName, lastName, role });
         const result = await usersCollection.insertOne(newUser);
-        console.log('Insert result:', result);
 
         // Return user without password
         const userResponse = {

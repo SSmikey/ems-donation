@@ -43,11 +43,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     setActivePath(pathname);
   }, [pathname]);
 
-  useEffect(() => {
-    console.log('[Sidebar] Current user:', user);
-    console.log('[Sidebar] User role:', user?.role);
-  }, [user]);
-
   const isActive = (href: string) => {
     return activePath === href || activePath.startsWith(href + '/');
   };
