@@ -64,9 +64,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       }}
     >
       {/* Logo */}
-      <div className="d-flex align-items-center px-4 mb-5" style={{ cursor: 'pointer' }}>
+      <a href="/dashboard" className="d-flex align-items-center px-4 mb-5 text-decoration-none" style={{ cursor: 'pointer' }}>
         <span className="h4 mb-0 fw-bold" style={{ color: '#111827', letterSpacing: '-0.5px' }}>ems-donation</span>
-      </div>
+      </a>
 
       {/* Navigation */}
       <nav className="d-flex flex-column gap-4">
