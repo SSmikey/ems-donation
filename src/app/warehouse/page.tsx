@@ -18,22 +18,34 @@ interface InventoryItem {
 }
 
 export default function WarehousePage() {
+    const ITEMS_PER_PAGE = 20;
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
-    const fetchInventory = async () => {
+    const fetchInventory = async (page: number = 1) => {
         try {
             setLoading(true);
-            const res = await fetch('/api/inventory');
+            const offset = (page - 1) * ITEMS_PER_PAGE;
+            const params = new URLSearchParams();
+            params.append('limit', ITEMS_PER_PAGE.toString());
+            params.append('offset', offset.toString());
+            if (searchTerm) params.append('search', searchTerm);
+            if (categoryFilter !== 'all') params.append('category', categoryFilter);
+
+            const res = await fetch(`/api/inventory?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
                 setInventory(data.data);
+                setTotalItems(data.total || 0);
+                setCurrentPage(page);
             }
         } catch (error) {
             console.error('Fetch inventory error:', error);
@@ -44,14 +56,15 @@ export default function WarehousePage() {
     };
 
     useEffect(() => {
-        fetchInventory();
+        setCurrentPage(1);
+        fetchInventory(1);
     }, []);
 
-    const filteredItems = inventory.filter(item => {
-        const matchesSearch = item.itemName.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-        return matchesSearch && matchesCategory;
-    });
+    useEffect(() => {
+        fetchInventory(1);
+    }, [searchTerm, categoryFilter]);
+
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
     const getStatusInfo = (available: number) => {
         if (available >= 100) return { label: 'พอเพียง', color: '#4ade80', percent: '100%' };
@@ -252,7 +265,7 @@ export default function WarehousePage() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {filteredItems.map(item => {
+                                                {inventory.map(item => {
                                                     const reserved = item.reservedQuantity || 0;
                                                     const available = item.quantity - reserved;
                                                     const status = getStatusInfo(available);
@@ -313,12 +326,114 @@ export default function WarehousePage() {
                                 </div>
                             </div>
 
-                            {filteredItems.length === 0 && (
+                            {inventory.length === 0 && (
                                 <div className="card shadow-sm border-0 text-center py-5">
                                     <div className="card-body">
                                         <h5 className="fw-bold" style={{ color: '#6c757d', fontSize: '18px' }}>ไม่พบรายการสินค้าที่ต้องการ</h5>
                                         <p style={{ color: '#adb5bd', fontSize: '15px', marginTop: '8px' }}>ลองปรับเงื่อนไขการค้นหาใหม่</p>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Pagination Section */}
+                            {totalItems > 0 && (
+                                <div className="d-flex justify-content-between align-items-center mt-4">
+                                    <div style={{ fontSize: '14px', color: '#6c757d' }}>
+                                        แสดง {((currentPage - 1) * ITEMS_PER_PAGE) + 1} ถึง {Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} จากทั้งหมด {totalItems.toLocaleString()} รายการ
+                                    </div>
+                                    <nav aria-label="Page navigation" style={{ marginBottom: 0 }}>
+                                        <ul className="pagination mb-0" style={{ gap: '4px' }}>
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => fetchInventory(1)}
+                                                    disabled={currentPage === 1}
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #e5e7eb',
+                                                        color: currentPage === 1 ? '#adb5bd' : '#2563eb',
+                                                        padding: '8px 12px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    หน้าแรก
+                                                </button>
+                                            </li>
+                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => fetchInventory(currentPage - 1)}
+                                                    disabled={currentPage === 1}
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #e5e7eb',
+                                                        color: currentPage === 1 ? '#adb5bd' : '#2563eb',
+                                                        padding: '8px 12px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    ก่อนหน้า
+                                                </button>
+                                            </li>
+
+                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                const pageNum = Math.max(1, currentPage - 2) + i;
+                                                if (pageNum > totalPages) return null;
+                                                return (
+                                                    <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
+                                                        <button
+                                                            className={`page-link`}
+                                                            onClick={() => fetchInventory(pageNum)}
+                                                            style={{
+                                                                borderRadius: '6px',
+                                                                border: '1px solid #e5e7eb',
+                                                                backgroundColor: currentPage === pageNum ? '#2563eb' : '#ffffff',
+                                                                color: currentPage === pageNum ? '#ffffff' : '#2563eb',
+                                                                padding: '8px 12px',
+                                                                fontSize: '14px',
+                                                                fontWeight: currentPage === pageNum ? '600' : '400'
+                                                            }}
+                                                        >
+                                                            {pageNum}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+
+                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => fetchInventory(currentPage + 1)}
+                                                    disabled={currentPage === totalPages}
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #e5e7eb',
+                                                        color: currentPage === totalPages ? '#adb5bd' : '#2563eb',
+                                                        padding: '8px 12px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    ถัดไป
+                                                </button>
+                                            </li>
+                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => fetchInventory(totalPages)}
+                                                    disabled={currentPage === totalPages}
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        border: '1px solid #e5e7eb',
+                                                        color: currentPage === totalPages ? '#adb5bd' : '#2563eb',
+                                                        padding: '8px 12px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    หน้าสุดท้าย
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
                                 </div>
                             )}
                         </>
