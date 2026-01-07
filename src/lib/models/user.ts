@@ -5,5 +5,6 @@ export interface User {
     role: 'admin' | 'staff';
     firstName: string;
     lastName: string;
+    status: 'active' | 'inactive';
     createdAt: string; // ISO 8601 format
 }

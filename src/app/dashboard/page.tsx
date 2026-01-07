@@ -9,6 +9,7 @@ import CreateRequestModal from '@/app/distribution/CreateRequestModal';
 import FormSelect from '@/components/FormSelect';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import QuickDonationModal from '@/components/QuickDonationModal';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -42,6 +43,7 @@ export default function Dashboard() {
 
   // Modal & UI State
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showQuickDonationModal, setShowQuickDonationModal] = useState(false);
   const [selectedShelterId, setSelectedShelterId] = useState<string | undefined>(undefined);
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ requestId: string; shelterName: string } | null>(null);
@@ -61,49 +63,50 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        // Fetch stats
-        const statsRes = await fetch('/api/dashboard/stats');
-        const statsData = await statsRes.json();
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      // Fetch stats
+      const statsRes = await fetch('/api/dashboard/stats');
+      const statsData = await statsRes.json();
 
-        if (statsData.success) {
-          const { summary, inventory, distribution } = statsData.data;
-          const byStatus = distribution?.byStatus || {};
+      if (statsData.success) {
+        const { summary, inventory, distribution } = statsData.data;
+        const byStatus = distribution?.byStatus || {};
 
-          setStats(prev => ({
-            ...prev,
-            shelterCount: summary.totalShelters,
-            totalInventoryItems: inventory.totalQuantity,
-            pendingRequests: summary.pendingDistributions,
-            lowStockCount: summary.lowStockAlerts,
-            highUrgencyCount: summary.highUrgencyCount || 0,
-            approvedRequests: byStatus['อนุมัติแล้ว'] || 0,
-            inTransitRequests: byStatus['กำลังจัดส่ง'] || 0,
-            totalDeliveries: byStatus['ส่งมอบแล้ว'] || 0,
-          }));
-          setCategories(inventory.byCategory || {});
-        }
-
-        // Fetch shelters
-        const sheltersRes = await fetch('/api/shelters');
-        const sheltersData = await sheltersRes.json();
-        if (sheltersData.success) {
-          setShelters(sheltersData.data);
-        }
-
-        // Fetch distribution requests
-        await fetchRequests();
-      } catch (error) {
-        console.warn('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
+        setStats(prev => ({
+          ...prev,
+          shelterCount: summary.totalShelters,
+          totalInventoryItems: inventory.totalQuantity,
+          pendingRequests: summary.pendingDistributions,
+          lowStockCount: summary.lowStockAlerts,
+          highUrgencyCount: summary.highUrgencyCount || 0,
+          approvedRequests: byStatus['อนุมัติแล้ว'] || 0,
+          inTransitRequests: byStatus['กำลังจัดส่ง'] || 0,
+          totalDeliveries: byStatus['ส่งมอบแล้ว'] || 0,
+        }));
+        setCategories(inventory.byCategory || {});
       }
+
+      // Fetch shelters
+      const sheltersRes = await fetch('/api/shelters');
+      const sheltersData = await sheltersRes.json();
+      if (sheltersData.success) {
+        setShelters(sheltersData.data);
+      }
+
+      // Fetch distribution requests
+      await fetchRequests();
+    } catch (error) {
+      console.warn('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-    fetchData();
   }, [fetchRequests]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Update filtered requests when filters or source requests change
   useEffect(() => {
@@ -316,17 +319,30 @@ export default function Dashboard() {
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="fw-bold mb-0" style={{ color: '#111827', fontSize: '18px' }}>ค้นหาศูนย์พักพิง</h5>
-                <button
-                  className="btn btn-primary btn-sm px-3 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-sm"
-                  onClick={() => setShowRequestModal(true)}
-                  style={{ backgroundColor: '#2563eb', border: 'none' }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  สร้างคำขอเบิกใหม่
-                </button>
+                <div className="d-flex gap-2">
+                  <button
+                    className="btn btn-success btn-sm px-3 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-sm"
+                    onClick={() => setShowQuickDonationModal(true)}
+                    style={{ backgroundColor: '#10b981', border: 'none' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    บันทึกของเข้าด่วน
+                  </button>
+                  <button
+                    className="btn btn-primary btn-sm px-3 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-sm"
+                    onClick={() => setShowRequestModal(true)}
+                    style={{ backgroundColor: '#2563eb', border: 'none' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    สร้างคำขอเบิกใหม่
+                  </button>
+                </div>
               </div>
 
               {/* Advanced Filters */}
@@ -637,6 +653,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {
+        showQuickDonationModal && (
+          <QuickDonationModal
+            onClose={() => setShowQuickDonationModal(false)}
+            onSuccess={() => {
+              setShowQuickDonationModal(false);
+              fetchData();
+            }}
+          />
+        )
+      }
 
       {
         showRequestModal && (

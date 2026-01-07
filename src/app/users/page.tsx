@@ -69,7 +69,7 @@ export default function UsersPage() {
 
     const handleCreateUser = (newUser: any) => {
         setIsModalOpen(false);
-        setToast({ message: 'เพิ่มผู้ใช้งานสำเร็จ (Mock)', type: 'success' });
+        setToast({ message: 'เพิ่มผู้ใช้งานสำเร็จ', type: 'success' });
         fetchUsers();
     };
 
@@ -77,7 +77,7 @@ export default function UsersPage() {
         <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+                {!isModalOpen && <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />}
 
                 <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-start mb-4">
@@ -97,6 +97,13 @@ export default function UsersPage() {
                     <div>
                         {loading ? (
                             <p className="text-center" style={{ paddingTop: '20px', color: '#868e96' }}>กำลังโหลดข้อมูล...</p>
+                        ) : users.length === 0 ? (
+                            <div className="card shadow-sm border-0 text-center py-5">
+                                <div className="card-body">
+                                    <h5 className="fw-bold" style={{ color: '#6c757d', fontSize: '18px' }}>ไม่มีผู้ใช้งานในระบบ</h5>
+                                    <p style={{ color: '#adb5bd', fontSize: '15px', marginTop: '8px' }}>คลิกปุ่ม "เพิ่มผู้ใช้งาน" เพื่อสร้างผู้ใช้งานใหม่</p>
+                                </div>
+                            </div>
                         ) : (
                             <div className="table-responsive">
                                 <table className="table table-hover align-middle" style={{ backgroundColor: '#ffffff', borderColor: '#dee2e6' }}>

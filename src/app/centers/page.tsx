@@ -8,8 +8,10 @@ import ShelterModal from './ShelterModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import FormSelect from '@/components/FormSelect';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CentersPage() {
+    const { user } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [shelters, setShelters] = useState<Shelter[]>([]);
     const [filteredShelters, setFilteredShelters] = useState<Shelter[]>([]);
@@ -211,72 +213,94 @@ export default function CentersPage() {
                             <h5 className="fw-bold mb-3" style={{ fontSize: '16px', color: '#495057' }}>ค้นหาและกรอง</h5>
                             <div className="row g-3">
                                 <div className="col-12 col-sm-6 col-md-4 col-lg">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>ชื่อศูนย์พักพิง</label>
-                                    <input
-                                        type="text"
-                                        placeholder="ค้นหาชื่อ..."
-                                        className="form-control"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
-                                        value={filterName}
-                                        onChange={(e) => setFilterName(e.target.value)}
+                                    <label className="form-label" style={{
+                                        color: '#6b7280',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.025em',
+                                        marginBottom: '6px',
+                                        display: 'block'
+                                    }}>
+                                        ชื่อศูนย์พักพิง
+                                    </label>
+                                    <div className="position-relative">
+                                        <span className="position-absolute" style={{ left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                                            <i className="bi bi-search"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            placeholder="ค้นหาชื่อ..."
+                                            className="form-control"
+                                            style={{
+                                                background: '#ffffff',
+                                                border: '1px solid #e5e7eb',
+                                                color: '#111827',
+                                                borderRadius: '10px',
+                                                height: '44px',
+                                                padding: '0 16px 0 40px',
+                                                fontSize: '14px',
+                                                transition: 'all 0.25s ease'
+                                            }}
+                                            value={filterName}
+                                            onChange={(e) => setFilterName(e.target.value)}
+                                            onFocus={(e) => {
+                                                e.target.style.borderColor = '#2563eb';
+                                                e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                                            }}
+                                            onBlur={(e) => {
+                                                e.target.style.borderColor = '#e5e7eb';
+                                                e.target.style.boxShadow = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-12 col-sm-6 col-md-4 col-lg">
+                                    <FormSelect
+                                        label="อำเภอ"
+                                        value={filterDistrict}
+                                        onChange={setFilterDistrict}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueDistricts.map(d => ({ value: d, label: d }))
+                                        ]}
                                     />
                                 </div>
                                 <div className="col-12 col-sm-6 col-md-4 col-lg">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>อำเภอ</label>
-                                    <select
-                                        className="form-select"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
-                                        value={filterDistrict}
-                                        onChange={(e) => setFilterDistrict(e.target.value)}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueDistricts.map(district => (
-                                            <option key={district} value={district}>{district}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="col-12 col-sm-6 col-md-4 col-lg">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>ตำบล</label>
-                                    <select
-                                        className="form-select"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
+                                    <FormSelect
+                                        label="ตำบล"
                                         value={filterSubdistrict}
-                                        onChange={(e) => setFilterSubdistrict(e.target.value)}
+                                        onChange={setFilterSubdistrict}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueSubdistricts.map(sd => ({ value: sd, label: sd }))
+                                        ]}
                                         disabled={!filterDistrict}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueSubdistricts.map(subdistrict => (
-                                            <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                                 <div className="col-12 col-sm-6 col-md-4 col-lg">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>ประเภท</label>
-                                    <select
-                                        className="form-select"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
+                                    <FormSelect
+                                        label="ประเภท"
                                         value={filterType}
-                                        onChange={(e) => setFilterType(e.target.value)}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueTypes.map(type => (
-                                            <option key={type} value={type}>{type}</option>
-                                        ))}
-                                    </select>
+                                        onChange={setFilterType}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueTypes.map(t => ({ value: t, label: t }))
+                                        ]}
+                                    />
                                 </div>
                                 <div className="col-12 col-sm-6 col-md-4 col-lg">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>สถานะ</label>
-                                    <select
-                                        className="form-select"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
+                                    <FormSelect
+                                        label="สถานะ"
                                         value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                    >
-                                        <option value="all">ทั้งหมด</option>
-                                        <option value="รองรับได้">รองรับได้</option>
-                                        <option value="ใกล้เต็ม">ใกล้เต็ม</option>
-                                        <option value="เต็มแล้ว">เต็มแล้ว</option>
-                                    </select>
+                                        onChange={setFilterStatus}
+                                        options={[
+                                            { value: 'all', label: 'ทั้งหมด' },
+                                            { value: 'รองรับได้', label: 'รองรับได้' },
+                                            { value: 'ใกล้เต็ม', label: 'ใกล้เต็ม' },
+                                            { value: 'เต็มแล้ว', label: 'เต็มแล้ว' }
+                                        ]}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -323,27 +347,31 @@ export default function CentersPage() {
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '16px' }}>
-                                                            <div className="d-flex gap-2">
-                                                                <button
-                                                                    className="btn btn-sm btn-warning"
-                                                                    style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
-                                                                    title="แก้ไข"
-                                                                    onClick={() => {
-                                                                        setEditingShelter(s);
-                                                                        setIsModalOpen(true);
-                                                                    }}
-                                                                >
-                                                                    แก้ไข
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-sm btn-danger"
-                                                                    style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
-                                                                    title="ลบ"
-                                                                    onClick={() => s._id && handleDelete(s._id, s.name)}
-                                                                >
-                                                                    ลบ
-                                                                </button>
-                                                            </div>
+                                                            {user?.role === 'admin' ? (
+                                                                <div className="d-flex gap-2">
+                                                                    <button
+                                                                        className="btn btn-sm btn-warning"
+                                                                        style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
+                                                                        title="แก้ไข"
+                                                                        onClick={() => {
+                                                                            setEditingShelter(s);
+                                                                            setIsModalOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        แก้ไข
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-sm btn-danger"
+                                                                        style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
+                                                                        title="ลบ"
+                                                                        onClick={() => s._id && handleDelete(s._id, s.name)}
+                                                                    >
+                                                                        ลบ
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <span style={{ color: '#9ca3af', fontSize: '14px' }}>-</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -467,23 +495,6 @@ export default function CentersPage() {
                 />
             )}
 
-            <style>{`
-                select option {
-                    background-color: #ffffff;
-                    color: #212529;
-                    padding: 10px;
-                    font-size: 15px;
-                }
-                select option:hover {
-                    background-color: #f8f9fa;
-                    color: #0d6efd;
-                }
-                select option:checked {
-                    background-color: #e7f1ff;
-                    color: #0d6efd;
-                    font-weight: 600;
-                }
-            `}</style>
         </div>
     );
 }
