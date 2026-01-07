@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import Toast from '@/components/Toast';
 import InventoryModal from './InventoryModal';
+import FormSelect from '@/components/FormSelect';
 
 interface InventoryItem {
     _id: string;
@@ -164,30 +165,61 @@ export default function WarehousePage() {
                             <h5 className="fw-bold mb-3" style={{ fontSize: '16px', color: '#495057' }}>ค้นหาและกรอง</h5>
                             <div className="row g-3">
                                 <div className="col-12 col-md-8">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>ค้นหาสินค้า</label>
-                                    <input
-                                        type="text"
-                                        placeholder="ค้นหาชื่อสินค้า..."
-                                        className="form-control"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                                    <label className="form-label" style={{
+                                        color: '#6b7280',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.025em',
+                                        marginBottom: '6px',
+                                        display: 'block'
+                                    }}>
+                                        ค้นหาสินค้า
+                                    </label>
+                                    <div className="position-relative">
+                                        <span className="position-absolute" style={{ left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                                            <i className="bi bi-search"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            placeholder="ค้นหาชื่อสินค้า..."
+                                            className="form-control"
+                                            style={{
+                                                background: '#ffffff',
+                                                border: '1px solid #e5e7eb',
+                                                color: '#111827',
+                                                borderRadius: '10px',
+                                                height: '44px',
+                                                padding: '0 16px 0 40px',
+                                                fontSize: '14px',
+                                                transition: 'all 0.25s ease'
+                                            }}
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onFocus={(e) => {
+                                                e.target.style.borderColor = '#2563eb';
+                                                e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                                            }}
+                                            onBlur={(e) => {
+                                                e.target.style.borderColor = '#e5e7eb';
+                                                e.target.style.boxShadow = 'none';
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="col-12 col-md-4">
-                                    <label className="form-label fw-semibold" style={{ fontSize: '14px', color: '#495057' }}>หมวดหมู่</label>
-                                    <select
-                                        className="form-select"
-                                        style={{ background: '#ffffff', border: '1px solid #dee2e6', color: '#212529', borderRadius: '8px', fontSize: '15px' }}
+                                    <FormSelect
+                                        label="หมวดหมู่"
                                         value={categoryFilter}
-                                        onChange={(e) => setCategoryFilter(e.target.value)}
-                                    >
-                                        <option value="all">ทั้งหมด</option>
-                                        <option value="อาหาร">อาหาร</option>
-                                        <option value="น้ำดื่ม">น้ำดื่ม</option>
-                                        <option value="ยาและเวชภัณฑ์">ยาและเวชภัณฑ์</option>
-                                        <option value="เครื่องนุ่งห่ม">เครื่องนุ่งห่ม</option>
-                                    </select>
+                                        onChange={setCategoryFilter}
+                                        options={[
+                                            { value: 'all', label: 'ทั้งหมด' },
+                                            { value: 'อาหาร', label: 'อาหาร' },
+                                            { value: 'น้ำดื่ม', label: 'น้ำดื่ม' },
+                                            { value: 'ยาและเวชภัณฑ์', label: 'ยาและเวชภัณฑ์' },
+                                            { value: 'เครื่องนุ่งห่ม', label: 'เครื่องนุ่งห่ม' }
+                                        ]}
+                                    />
                                 </div>
                             </div>
                         </div>

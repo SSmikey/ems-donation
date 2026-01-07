@@ -134,112 +134,94 @@ export default function CreateRequestPage() {
                             </h6>
                             <div className="row g-3">
                                 <div className="col-12 col-lg">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-search me-1"></i>
-                                        ชื่อศูนย์พักพิง
+                                    <label className="form-label" style={{
+                                        color: '#6b7280',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.025em',
+                                        marginBottom: '6px',
+                                        display: 'block'
+                                    }}>
+                                        ค้นหาชื่อศูนย์พักพิง
                                     </label>
-                                    <input
-                                        type="text"
-                                        placeholder="ค้นหาชื่อศูนย์พักพิง..."
-                                        className="form-control form-control-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
-                                        value={filterName}
-                                        onChange={(e) => setFilterName(e.target.value)}
+                                    <div className="position-relative">
+                                        <span className="position-absolute" style={{ left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                                            <i className="bi bi-search"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            placeholder="ระบุชื่อศูนย์พักพิง..."
+                                            className="form-control"
+                                            style={{
+                                                background: '#ffffff',
+                                                border: '1px solid #e5e7eb',
+                                                color: '#111827',
+                                                borderRadius: '10px',
+                                                height: '44px',
+                                                padding: '0 16px 0 40px',
+                                                fontSize: '14px',
+                                                transition: 'all 0.25s ease'
+                                            }}
+                                            value={filterName}
+                                            onChange={(e) => setFilterName(e.target.value)}
+                                            onFocus={(e) => {
+                                                e.target.style.borderColor = '#2563eb';
+                                                e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                                            }}
+                                            onBlur={(e) => {
+                                                e.target.style.borderColor = '#e5e7eb';
+                                                e.target.style.boxShadow = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-12 col-lg">
+                                    <FormSelect
+                                        label="อำเภอ"
+                                        value={filterDistrict}
+                                        onChange={setFilterDistrict}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueDistricts.map(d => ({ value: d, label: d }))
+                                        ]}
                                     />
                                 </div>
                                 <div className="col-12 col-lg">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-geo-alt me-1"></i>
-                                        อำเภอ
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
-                                        value={filterDistrict}
-                                        onChange={(e) => setFilterDistrict(e.target.value)}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueDistricts.map(district => (
-                                            <option key={district} value={district}>{district}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="col-12 col-lg">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-geo me-1"></i>
-                                        ตำบล
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
+                                    <FormSelect
+                                        label="ตำบล"
                                         value={filterSubdistrict}
-                                        onChange={(e) => setFilterSubdistrict(e.target.value)}
+                                        onChange={setFilterSubdistrict}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueSubdistricts.map(sd => ({ value: sd, label: sd }))
+                                        ]}
                                         disabled={!filterDistrict}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueSubdistricts.map(subdistrict => (
-                                            <option key={subdistrict} value={subdistrict}>{subdistrict}</option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                                 <div className="col-12 col-lg">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-tag me-1"></i>
-                                        ประเภทศูนย์
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
+                                    <FormSelect
+                                        label="ประเภทศูนย์"
                                         value={filterType}
-                                        onChange={(e) => setFilterType(e.target.value)}
-                                    >
-                                        <option value="">ทั้งหมด</option>
-                                        {uniqueTypes.map(type => (
-                                            <option key={type} value={type}>{type}</option>
-                                        ))}
-                                    </select>
+                                        onChange={setFilterType}
+                                        options={[
+                                            { value: '', label: 'ทั้งหมด' },
+                                            ...uniqueTypes.map(t => ({ value: t, label: t }))
+                                        ]}
+                                    />
                                 </div>
                                 <div className="col-12 col-lg">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-info-circle me-1"></i>
-                                        สถานะความจุ
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
+                                    <FormSelect
+                                        label="สถานะความจุ"
                                         value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                    >
-                                        <option value="all">ทั้งหมด</option>
-                                        <option value="รองรับได้">รองรับได้</option>
-                                        <option value="ใกล้เต็ม">ใกล้เต็ม</option>
-                                        <option value="เต็มแล้ว">เต็มแล้ว</option>
-                                    </select>
+                                        onChange={setFilterStatus}
+                                        options={[
+                                            { value: 'all', label: 'ทั้งหมด' },
+                                            { value: 'รองรับได้', label: 'รองรับได้' },
+                                            { value: 'ใกล้เต็ม', label: 'ใกล้เต็ม' },
+                                            { value: 'เต็มแล้ว', label: 'เต็มแล้ว' }
+                                        ]}
+                                    />
                                 </div>
                             </div>
                         </div>
