@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
@@ -17,7 +17,7 @@ interface Request {
     createdAt: string;
 }
 
-export default function DistributionPage() {
+function DistributionContent() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [requests, setRequests] = useState<Request[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -589,5 +589,19 @@ export default function DistributionPage() {
                 />
             )}
         </div>
+    );
+}
+
+export default function DistributionPage() {
+    return (
+        <Suspense fallback={
+            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+                <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                    <span className="visually-hidden">กำลังโหลด...</span>
+                </div>
+            </div>
+        }>
+            <DistributionContent />
+        </Suspense>
     );
 }
