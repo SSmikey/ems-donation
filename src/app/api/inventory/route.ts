@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('ems-donation');
-        const collectionName = 'inventory'; // Lowercase for consistency
+        const collectionName = 'inventory';
 
         // Check for duplicate item (same itemName and category)
         const existingItem = await db.collection(collectionName).findOne({
@@ -121,25 +121,48 @@ export async function POST(request: Request) {
         });
 
         if (existingItem) {
+            // Update existing item by incrementing quantity
+            const updatedQuantity = (existingItem.quantity || 0) + body.quantity;
+
+            await db.collection(collectionName).updateOne(
+                { _id: existingItem._id },
+                {
+                    $set: {
+                        quantity: updatedQuantity,
+                        unit: body.unit, // Update unit to latest just in case
+                        lastUpdated: new Date().toISOString()
+                    }
+                }
+            );
+
+            console.log(`Successfully updated inventory item (incremented): ${body.itemName}`);
+
             return NextResponse.json({
-                error: 'Duplicate item',
-                details: `Item "${body.itemName}" in category "${body.category}" already exists. Use PUT to update quantity.`,
-                existingItem: existingItem
-            }, { status: 409 }); // 409 Conflict
+                success: true,
+                message: 'Inventory item updated (quantity incremented)',
+                data: {
+                    _id: existingItem._id,
+                    itemName: body.itemName,
+                    category: body.category,
+                    quantity: updatedQuantity,
+                    unit: body.unit,
+                    lastUpdated: new Date().toISOString()
+                }
+            }, { status: 200 });
         }
 
-        // Prepare inventory item data
+        // Prepare inventory item data for new entry
         const newItem = {
             itemName: body.itemName,
             category: body.category,
             quantity: body.quantity,
             unit: body.unit,
-            lastUpdated: new Date().toISOString() // ISO 8601 format
+            lastUpdated: new Date().toISOString()
         };
 
         const result = await db.collection(collectionName).insertOne(newItem);
 
-        console.log(`Successfully created inventory item with ID: ${result.insertedId}`);
+        console.log(`Successfully created new inventory item: ${body.itemName}`);
 
         return NextResponse.json({
             success: true,

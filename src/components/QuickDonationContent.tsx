@@ -58,6 +58,22 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
         }
     };
 
+    const VALID_SYSTEM_CATEGORIES = ['อาหาร', 'น้ำดื่ม', 'ยาและเวชภัณฑ์', 'เครื่องนุ่งห่ม', 'อื่นๆ'];
+
+    const normalizeCategory = (cat: string) => {
+        const trimmed = String(cat || '').trim();
+        if (!trimmed) return 'อื่นๆ';
+        if (VALID_SYSTEM_CATEGORIES.includes(trimmed)) return trimmed;
+
+        // Fuzzy matching
+        if (trimmed.includes('อาหาร')) return 'อาหาร';
+        if (trimmed.includes('น้ำ')) return 'น้ำดื่ม';
+        if (trimmed.includes('ยา') || trimmed.includes('เวชภัณฑ์')) return 'ยาและเวชภัณฑ์';
+        if (trimmed.includes('เสื้อ') || trimmed.includes('ผ้า') || trimmed.includes('นุ่งห่ม')) return 'เครื่องนุ่งห่ม';
+
+        return 'อื่นๆ';
+    };
+
     const processFile = (file: File) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
@@ -68,12 +84,25 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
                 const worksheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                const mappedData = jsonData.map((row: any) => ({
-                    category: String(row['หมวดหมู่'] || row['Category'] || 'อื่นๆ').trim(),
-                    itemName: String(row['ชื่อรายการ'] || row['ItemName'] || '').trim(),
-                    quantity: Number(row['จำนวน'] || row['Quantity']) || 0,
-                    unit: String(row['หน่วย'] || row['Unit'] || 'ชิ้น').trim()
-                })).filter(item => item.itemName);
+                const mappedData = jsonData.map((row: any) => {
+                    // Try various column name variations
+                    const rawCategory = row['หมวดหมู่'] || row['Category'] || row['หมวด'] || row['category'];
+                    const rawItemName = row['ชื่อรายการ'] || row['ItemName'] || row['ชื่อ'] || row['item'];
+                    const rawQuantity = row['จำนวน'] || row['Quantity'] || row['จำนวน'] || row['qty'] || row['amount'];
+                    const rawUnit = row['หน่วย'] || row['Unit'] || row['หน่วย'] || row['unit'];
+
+                    return {
+                        category: normalizeCategory(rawCategory),
+                        itemName: String(rawItemName || '').trim(),
+                        quantity: Number(rawQuantity) || 0,
+                        unit: String(rawUnit || 'ชิ้น').trim()
+                    };
+                }).filter(item => item.itemName && item.quantity > 0);
+
+                if (mappedData.length === 0) {
+                    setToast({ message: 'ไม่พบข้อมูลที่ถูกต้องในไฟล์ (ตรวจสอบชื่อรายการและจำนวนต้องมากกว่า 0)', type: 'error' });
+                    return;
+                }
 
                 setImportedData(mappedData);
                 setIsImporting(true);
@@ -163,7 +192,7 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
         }
 
         setToast({
-            message: `ผลการนำเข้า: สำเร็จ ${successCount}, ข้าม(ซ้ำ) ${duplicateCount}, ล้มเหลว ${failCount} ${failCount > 0 ? `(ตัวอย่าง: ${lastErrorMessage})` : ''}`,
+            message: `ผลการนำเข้า: บันทึกสำเร็จ ${successCount} รายการ ${failCount > 0 ? `, ล้มเหลว ${failCount} รายการ (ตัวอย่าง: ${lastErrorMessage})` : ''}`,
             type: failCount === 0 ? 'success' : 'error'
         });
 
