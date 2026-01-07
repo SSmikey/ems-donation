@@ -25,13 +25,19 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
         e.preventDefault();
 
         try {
+            const qtyNum = Number(quantity);
+            if (isNaN(qtyNum) || qtyNum <= 0) {
+                setToast({ message: 'กรุณาระบุจำนวนที่มากกว่า 0', type: 'error' });
+                return;
+            }
+
             const res = await fetch('/api/inventory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     itemName,
                     category,
-                    quantity: Number(quantity),
+                    quantity: qtyNum,
                     unit
                 })
             });
@@ -318,12 +324,21 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
 
                             <div className="row g-3 mb-4">
                                 <div className="col-8">
-                                    <label className="form-label" style={{ color: '#6b7280', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.025em', marginBottom: '8px' }}>
+                                    <label className="form-label" style={{
+                                        color: '#6b7280',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.025em',
+                                        marginBottom: '6px',
+                                        display: 'block'
+                                    }}>
                                         จำนวน
                                     </label>
                                     <input
                                         type="number"
                                         placeholder="0"
+                                        min="1"
                                         className="form-control"
                                         style={{
                                             background: '#f9fafb',
@@ -336,7 +351,11 @@ export default function QuickDonationContent({ onSuccess }: QuickDonationContent
                                             transition: 'all 0.2s ease'
                                         }}
                                         value={quantity}
-                                        onChange={(e) => setQuantity(e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val !== '' && Number(val) < 0) return;
+                                            setQuantity(val);
+                                        }}
                                         onFocus={(e) => {
                                             e.target.style.borderColor = '#2563eb';
                                             e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
