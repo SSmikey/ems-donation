@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import CreateRequestModal from './CreateRequestModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import FormSelect from '@/components/FormSelect';
 
 interface Request {
     _id: string;
@@ -273,69 +274,70 @@ export default function DistributionPage() {
                             </h6>
                             <div className="row g-3">
                                 <div className="col-12 col-md-4">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-info-circle me-1"></i>
-                                        สถานะคำขอ
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
+                                    <FormSelect
+                                        label="สถานะคำขอ"
                                         value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                    >
-                                        <option value="all">ทั้งหมด</option>
-                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                        <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                                        <option value="กำลังจัดส่ง">กำลังจัดส่ง</option>
-                                        <option value="ส่งมอบแล้ว">ส่งมอบแล้ว</option>
-                                        <option value="ยกเลิกแล้ว">ยกเลิกแล้ว</option>
-                                    </select>
+                                        onChange={setFilterStatus}
+                                        options={[
+                                            { value: 'all', label: 'ทั้งหมด (สถานะ)' },
+                                            { value: 'รอดำเนินการ', label: 'รอดำเนินการ' },
+                                            { value: 'อนุมัติแล้ว', label: 'อนุมัติแล้ว' },
+                                            { value: 'กำลังจัดส่ง', label: 'กำลังจัดส่ง' },
+                                            { value: 'ส่งมอบแล้ว', label: 'ส่งมอบแล้ว' },
+                                            { value: 'ยกเลิกแล้ว', label: 'ยกเลิกแล้ว' }
+                                        ]}
+                                    />
                                 </div>
 
                                 <div className="col-12 col-md-4">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-exclamation-triangle me-1"></i>
-                                        ความเร่งด่วน
-                                    </label>
-                                    <select
-                                        className="form-select form-select-lg"
-                                        style={{
-                                            background: '#ffffff',
-                                            border: '2px solid #e9ecef',
-                                            borderRadius: '10px',
-                                            fontSize: '15px'
-                                        }}
+                                    <FormSelect
+                                        label="ความเร่งด่วน"
                                         value={filterUrgency}
-                                        onChange={(e) => setFilterUrgency(e.target.value)}
-                                    >
-                                        <option value="all">ทั้งหมด</option>
-                                        <option value="สูง">สูง</option>
-                                        <option value="กลาง">กลาง</option>
-                                        <option value="ต่ำ">ต่ำ</option>
-                                    </select>
+                                        onChange={setFilterUrgency}
+                                        options={[
+                                            { value: 'all', label: 'ทั้งหมด (ความเร่งด่วน)' },
+                                            { value: 'สูง', label: 'สูง' },
+                                            { value: 'กลาง', label: 'กลาง' },
+                                            { value: 'ต่ำ', label: 'ต่ำ' }
+                                        ]}
+                                    />
                                 </div>
 
                                 <div className="col-12 col-md-4">
-                                    <label className="form-label small fw-semibold text-secondary mb-2">
-                                        <i className="bi bi-calendar me-1"></i>
+                                    <label className="form-label" style={{
+                                        color: '#6b7280',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.025em',
+                                        marginBottom: '6px',
+                                        display: 'block'
+                                    }}>
                                         วันที่สร้างคำขอ
                                     </label>
                                     <input
                                         type="date"
-                                        className="form-control form-control-lg"
+                                        className="form-control"
                                         style={{
                                             background: '#ffffff',
-                                            border: '2px solid #e9ecef',
+                                            border: '1px solid #e5e7eb',
+                                            color: '#111827',
                                             borderRadius: '10px',
-                                            fontSize: '15px'
+                                            height: '44px',
+                                            padding: '0 16px',
+                                            fontSize: '14px',
+                                            transition: 'all 0.25s ease'
                                         }}
                                         value={filterDate}
                                         onChange={(e) => setFilterDate(e.target.value)}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = '#2563eb';
+                                            e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = '#e5e7eb';
+                                            e.target.style.boxShadow = 'none';
+                                        }}
                                     />
                                 </div>
                             </div>
