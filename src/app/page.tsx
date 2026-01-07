@@ -208,25 +208,7 @@ export default function LoginPage() {
               />
             </div>
           </div>
-
-          {/* Remember Me */}
-          <div className="mb-4 d-flex justify-content-between align-items-center">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ borderRadius: '6px', cursor: 'pointer' }}
-              />
-              <label className="form-check-label" htmlFor="rememberMe" style={{ color: '#64748b', fontSize: '14px', cursor: 'pointer' }}>
-                จดจำฉัน
-              </label>
-            </div>
-            <a href="#" className="text-decoration-none" style={{ fontSize: '14px', color: '#3b82f6', fontWeight: 500 }}>ลืมรหัสผ่าน?</a>
-          </div>
-
+          
           {/* Login Button */}
           <button
             type="submit"
