@@ -16,20 +16,58 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
         role: 'staff',
         status: 'active'
     });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        // Clear previous errors
+        setError(null);
+
+        // Validation
         if (!formData.fullName || !formData.username || !formData.password) {
-            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            setError('กรุณากรอกข้อมูลให้ครบถ้วน');
             return;
         }
 
-        // Mock ID generation & User Object
-        const newUser = {
-            id: Math.random().toString(36).substr(2, 9),
-            ...formData
-        };
+        if (formData.password.length < 6) {
+            setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+            return;
+        }
 
-        onSuccess(newUser);
+        try {
+            setLoading(true);
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fullName: formData.fullName,
+                    username: formData.username,
+                    password: formData.password,
+                    role: formData.role
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.details && Array.isArray(data.details)) {
+                    setError(data.details.join(', '));
+                } else {
+                    setError(data.error || 'ไม่สามารถสร้างผู้ใช้งานได้');
+                }
+                return;
+            }
+
+            // Success - call the callback
+            onSuccess(data);
+        } catch (err) {
+            setError('เกิดข้อผิดพลาดในการสร้างผู้ใช้งาน');
+            console.error('Create user error:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -109,20 +147,28 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
                         />
                     </div>
 
+                    {error && (
+                        <div className="alert alert-danger mb-4" role="alert" style={{ borderRadius: '10px', border: 'none', backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px 16px', fontSize: '14px' }}>
+                            {error}
+                        </div>
+                    )}
+
                     <div className="d-flex justify-content-end gap-2 mt-4">
                         <button
                             onClick={onClose}
                             className="btn"
-                            style={{ border: '1px solid #e5e7eb', color: '#6b7280', backgroundColor: '#ffffff', padding: '10px 20px', borderRadius: '8px', fontWeight: '600' }}
+                            disabled={loading}
+                            style={{ border: '1px solid #e5e7eb', color: '#6b7280', backgroundColor: '#ffffff', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', opacity: loading ? 0.5 : 1 }}
                         >
                             ยกเลิก
                         </button>
                         <button
                             onClick={handleSubmit}
+                            disabled={loading}
                             className="btn fw-bold text-white"
-                            style={{ backgroundColor: '#2563eb', border: 'none', padding: '10px 20px', borderRadius: '8px' }}
+                            style={{ backgroundColor: '#2563eb', border: 'none', padding: '10px 20px', borderRadius: '8px', opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
                         >
-                            บันทึกข้อมูล
+                            {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
                         </button>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import bcrypt from 'bcryptjs';
 
 export async function GET() {
     try {
@@ -12,6 +13,79 @@ export async function GET() {
     } catch (error) {
         console.error('Fetch Users Error:', error);
         return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    }
+}
+
+export async function POST(request: Request) {
+    try {
+        const body = await request.json();
+        const { fullName, username, password, role } = body;
+
+        // Validation
+        const errors: string[] = [];
+
+        if (!fullName || typeof fullName !== 'string' || fullName.trim() === '') {
+            errors.push('fullName is required');
+        }
+        if (!username || typeof username !== 'string' || username.trim() === '') {
+            errors.push('username is required');
+        }
+        if (!password || typeof password !== 'string' || password.length < 6) {
+            errors.push('password is required and must be at least 6 characters');
+        }
+        if (!role || !['admin', 'staff'].includes(role)) {
+            errors.push('role must be either "admin" or "staff"');
+        }
+
+        if (errors.length > 0) {
+            return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db();
+        const usersCollection = db.collection('users');
+
+        // Check if username already exists
+        const existingUser = await usersCollection.findOne({ username });
+        if (existingUser) {
+            return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
+        }
+
+        // Parse full name into firstName and lastName
+        const nameParts = fullName.trim().split(/\s+/);
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user
+        const newUser = {
+            username,
+            password: hashedPassword,
+            firstName,
+            lastName,
+            role,
+            status: 'active',
+            createdAt: new Date().toISOString()
+        };
+
+        const result = await usersCollection.insertOne(newUser);
+
+        // Return user without password
+        const userResponse = {
+            _id: result.insertedId.toString(),
+            username,
+            firstName,
+            lastName,
+            role,
+            status: 'active'
+        };
+
+        return NextResponse.json(userResponse, { status: 201 });
+    } catch (error) {
+        console.error('Create User Error:', error);
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 }
 
