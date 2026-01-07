@@ -39,8 +39,11 @@ export async function POST(request: Request) {
         }
 
         console.log('Login successful for user:', username);
+        console.log('User role:', user.role);
 
         const { password: _, ...userWithoutPassword } = user;
+
+        console.log('Sending user data:', userWithoutPassword);
 
         return NextResponse.json({
             message: 'เข้าสู่ระบบสำเร็จ',

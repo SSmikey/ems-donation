@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,16 +30,23 @@ const menuItems = [
     items: [
       { href: '/users', label: 'จัดการผู้ใช้งาน' },
     ],
+    adminOnly: true,
   },
 ];
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
   const [activePath, setActivePath] = useState<string>('');
 
   useEffect(() => {
     setActivePath(pathname);
   }, [pathname]);
+
+  useEffect(() => {
+    console.log('[Sidebar] Current user:', user);
+    console.log('[Sidebar] User role:', user?.role);
+  }, [user]);
 
   const isActive = (href: string) => {
     return activePath === href || activePath.startsWith(href + '/');
@@ -67,7 +75,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="d-flex flex-column gap-4">
-        {menuItems.map((section) => (
+        {menuItems.map((section) => {
+          // Hide admin-only sections for staff
+          if (section.adminOnly && user?.role === 'staff') {
+            return null;
+          }
+
+          return (
           <div key={section.section} className="px-2">
             <h6
               className="nav-section-title text-uppercase fw-bold ms-3 mb-3"
@@ -121,7 +135,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               ))}
             </ul>
           </div>
-        ))}
+          );
+        })}
       </nav>
     </aside>
   );

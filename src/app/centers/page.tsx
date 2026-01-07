@@ -8,8 +8,10 @@ import ShelterModal from './ShelterModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import FormSelect from '@/components/FormSelect';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CentersPage() {
+    const { user } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [shelters, setShelters] = useState<Shelter[]>([]);
     const [filteredShelters, setFilteredShelters] = useState<Shelter[]>([]);
@@ -27,6 +29,11 @@ export default function CentersPage() {
 
     const [errorInfo, setErrorInfo] = useState<any>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ shelterName: string; shelterId: string } | null>(null);
+
+    useEffect(() => {
+        console.log('[CentersPage] Current user:', user);
+        console.log('[CentersPage] User role:', user?.role);
+    }, [user]);
 
     const fetchShelters = async () => {
         try {
@@ -345,27 +352,31 @@ export default function CentersPage() {
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '16px' }}>
-                                                            <div className="d-flex gap-2">
-                                                                <button
-                                                                    className="btn btn-sm btn-warning"
-                                                                    style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
-                                                                    title="แก้ไข"
-                                                                    onClick={() => {
-                                                                        setEditingShelter(s);
-                                                                        setIsModalOpen(true);
-                                                                    }}
-                                                                >
-                                                                    แก้ไข
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-sm btn-danger"
-                                                                    style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
-                                                                    title="ลบ"
-                                                                    onClick={() => s._id && handleDelete(s._id, s.name)}
-                                                                >
-                                                                    ลบ
-                                                                </button>
-                                                            </div>
+                                                            {user?.role === 'admin' ? (
+                                                                <div className="d-flex gap-2">
+                                                                    <button
+                                                                        className="btn btn-sm btn-warning"
+                                                                        style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
+                                                                        title="แก้ไข"
+                                                                        onClick={() => {
+                                                                            setEditingShelter(s);
+                                                                            setIsModalOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        แก้ไข
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-sm btn-danger"
+                                                                        style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
+                                                                        title="ลบ"
+                                                                        onClick={() => s._id && handleDelete(s._id, s.name)}
+                                                                    >
+                                                                        ลบ
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <span style={{ color: '#9ca3af', fontSize: '14px' }}>-</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}

@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Toast from '@/components/Toast';
 import InventoryModal from './InventoryModal';
 import FormSelect from '@/components/FormSelect';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface InventoryItem {
     _id: string;
@@ -18,6 +19,7 @@ interface InventoryItem {
 }
 
 export default function WarehousePage() {
+    const { user } = useAuth();
     const ITEMS_PER_PAGE = 20;
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -29,6 +31,11 @@ export default function WarehousePage() {
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+
+    useEffect(() => {
+        console.log('[WarehousePage] Current user:', user);
+        console.log('[WarehousePage] User role:', user?.role);
+    }, [user]);
 
     const fetchInventory = async (page: number = 1) => {
         try {
@@ -307,14 +314,16 @@ export default function WarehousePage() {
                                                                     >
                                                                         แก้ไข
                                                                     </button>
-                                                                    <button
-                                                                        className="btn btn-sm btn-danger"
-                                                                        style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
-                                                                        title="ลบ"
-                                                                        onClick={() => handleDelete(item._id, item.itemName)}
-                                                                    >
-                                                                        ลบ
-                                                                    </button>
+                                                                    {user?.role === 'admin' && (
+                                                                        <button
+                                                                            className="btn btn-sm btn-danger"
+                                                                            style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '6px' }}
+                                                                            title="ลบ"
+                                                                            onClick={() => handleDelete(item._id, item.itemName)}
+                                                                        >
+                                                                            ลบ
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>

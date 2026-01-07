@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Prompt, Sarabun } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
+import ClientLayout from "@/components/ClientLayout";
 
 const prompt = Prompt({
   variable: "--font-prompt",
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${prompt.variable} ${sarabun.variable}`}>
-        {children}
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

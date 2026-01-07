@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -16,20 +20,12 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+      const success = await login(username, password);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // Save user to sessionStorage for basic persistence
-        sessionStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = '/dashboard';
+      if (success) {
+        router.push('/dashboard');
       } else {
-        setError(data.error || 'การเข้าสู่ระบบล้มเหลว');
+        setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
       }
     } catch (err) {
       setError('ไม่สามารถเชื่อมต่อกับระบบได้');
