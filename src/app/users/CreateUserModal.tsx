@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import FormSelect from '@/components/FormSelect';
 
 interface CreateUserModalProps {
     onClose: () => void;
@@ -11,12 +12,13 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
+        password: '',
         role: 'staff',
         status: 'active'
     });
 
     const handleSubmit = () => {
-        if (!formData.fullName || !formData.username) {
+        if (!formData.fullName || !formData.username || !formData.password) {
             alert('กรุณากรอกข้อมูลให้ครบถ้วน');
             return;
         }
@@ -31,36 +33,39 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
     };
 
     return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000 }} onClick={onClose}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000 }} onClick={onClose}>
             <style>{`
-                .user-modal-input,
-                .user-modal-select {
-                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                    background: rgba(255, 255, 255, 0.05) !important;
-                    color: #ffffff !important;
+                .user-modal-input {
+                    border: 1px solid #e5e7eb !important;
+                    background: #ffffff !important;
+                    color: #111827 !important;
+                    border-radius: 10px !important;
+                    height: 44px !important;
+                    padding: 0 16px !important;
+                    font-size: 14px !important;
+                    transition: all 0.25s ease !important;
                 }
-                .user-modal-input:focus,
-                .user-modal-select:focus {
-                    background: rgba(255, 255, 255, 0.1) !important;
-                    border-color: #3b82f6 !important;
-                    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+                .user-modal-input:focus {
+                    background: #ffffff !important;
+                    border-color: #2563eb !important;
+                    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+                    outline: none !important;
                 }
                 .user-modal-input::placeholder {
-                    color: rgba(255, 255, 255, 0.3);
+                    color: #94a3b8;
                 }
-                .user-modal-select option {
-                    background-color: #1e293b;
-                    color: #ffffff;
+                .form-select-container {
+                    margin-bottom: 0;
                 }
             `}</style>
-            <div className="card shadow-lg border-0" style={{ width: '90%', maxWidth: '500px', backgroundColor: 'rgba(30, 41, 59, 0.95)', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }} onClick={e => e.stopPropagation()}>
+            <div className="card shadow-sm border-0" style={{ width: '90%', maxWidth: '500px', backgroundColor: '#ffffff', borderLeft: '4px solid #2563eb' }} onClick={e => e.stopPropagation()}>
                 <div className="card-body p-4">
-                    <h2 className="card-title mb-4 fw-bold border-bottom pb-3" style={{ fontSize: '1.5rem', borderBottomColor: 'rgba(255, 255, 255, 0.1)' }}>
+                    <h2 className="card-title mb-4 fw-bold" style={{ fontSize: '1.5rem', color: '#111827' }}>
                         เพิ่มผู้ใช้งานใหม่
                     </h2>
 
                     <div className="mb-3">
-                        <label className="form-label fw-500 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>ชื่อ-นามสกุล:</label>
+                        <label style={{ color: '#6b7280', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.025em', marginBottom: '6px', display: 'block' }}>ชื่อ-นามสกุล</label>
                         <input
                             type="text"
                             className="form-control user-modal-input"
@@ -71,7 +76,7 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label fw-500 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Username:</label>
+                        <label style={{ color: '#6b7280', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.025em', marginBottom: '6px', display: 'block' }}>Username</label>
                         <input
                             type="text"
                             className="form-control user-modal-input"
@@ -81,29 +86,41 @@ export default function CreateUserModal({ onClose, onSuccess }: CreateUserModalP
                         />
                     </div>
 
+                    <div className="mb-3">
+                        <label style={{ color: '#6b7280', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.025em', marginBottom: '6px', display: 'block' }}>Password</label>
+                        <input
+                            type="password"
+                            className="form-control user-modal-input"
+                            value={formData.password}
+                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="กรอกรหัสผ่าน"
+                        />
+                    </div>
+
                     <div className="mb-4">
-                        <label className="form-label fw-500 mb-2" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>สิทธิ์การใช้งาน (Role):</label>
-                        <select
-                            className="form-select user-modal-select"
+                        <FormSelect
+                            label="สิทธิ์การใช้งาน (Role)"
                             value={formData.role}
-                            onChange={e => setFormData({ ...formData, role: e.target.value })}
-                        >
-                            <option value="staff">Staff (เจ้าหน้าที่ทั่วไป)</option>
-                            <option value="admin">Admin (ผู้ดูแลระบบ)</option>
-                        </select>
+                            onChange={(value) => setFormData({ ...formData, role: value })}
+                            options={[
+                                { value: 'staff', label: 'Staff (เจ้าหน้าที่ทั่วไป)' },
+                                { value: 'admin', label: 'Admin (ผู้ดูแลระบบ)' }
+                            ]}
+                        />
                     </div>
 
                     <div className="d-flex justify-content-end gap-2 mt-4">
                         <button
                             onClick={onClose}
-                            className="btn btn-outline-light"
+                            className="btn"
+                            style={{ border: '1px solid #e5e7eb', color: '#6b7280', backgroundColor: '#ffffff', padding: '10px 20px', borderRadius: '8px', fontWeight: '600' }}
                         >
                             ยกเลิก
                         </button>
                         <button
                             onClick={handleSubmit}
-                            className="btn fw-600 text-white"
-                            style={{ backgroundColor: '#3b82f6', border: 'none' }}
+                            className="btn fw-bold text-white"
+                            style={{ backgroundColor: '#2563eb', border: 'none', padding: '10px 20px', borderRadius: '8px' }}
                         >
                             บันทึกข้อมูล
                         </button>

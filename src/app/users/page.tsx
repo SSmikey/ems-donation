@@ -77,7 +77,7 @@ export default function UsersPage() {
         <div className="d-flex" style={{ minHeight: '100vh', background: '#ffffff', color: '#111827' }}>
             <Sidebar isOpen={sidebarOpen} />
             <div className="flex-grow-1 d-flex flex-column" style={{ overflow: 'hidden' }}>
-                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+                {!isModalOpen && <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />}
 
                 <div className="flex-grow-1 overflow-y-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-between align-items-start mb-4">
