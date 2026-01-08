@@ -22,6 +22,7 @@ const menuItems = [
       { href: '/warehouse', label: 'คลังสินค้าส่วนกลาง' },
       { href: '/create-request', label: 'สร้างคำขอเบิกสิ่งของ' },
       { href: '/distribution', label: 'รายการคำขอเบิกสิ่งของ' },
+      { href: '/analytics', label: 'รายงานและสถิติ' },
       { href: '/quick-donation', label: 'บันทึกของเข้าด่วน' },
     ],
   },
