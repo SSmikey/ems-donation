@@ -230,13 +230,13 @@ export async function POST(request: Request) {
         for (const item of body.items) {
             const invItem = await inventoryColl.findOne({ _id: new ObjectId(item.inventoryId) });
             if (!invItem) {
-                stockErrors.push(`Item "${item.itemName}" not found in inventory`);
+                stockErrors.push(`ไม่พบสินค้า "${item.itemName}" ในคลังสินค้า`);
                 continue;
             }
 
             const available = (invItem.quantity || 0) - (invItem.reservedQuantity || 0);
             if (available < item.quantity) {
-                stockErrors.push(`Insufficient stock for "${item.itemName}". Available: ${available}, Requested: ${item.quantity}`);
+                stockErrors.push(`สินค้า "${item.itemName}" ไม่เพียงพอต่อคำขอเบิก (มีในคลัง: ${available} ${item.unit}, ต้องการ: ${item.quantity} ${item.unit})`);
             }
         }
 

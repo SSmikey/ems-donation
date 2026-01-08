@@ -67,7 +67,7 @@ export async function POST(
         for (const item of distributionRequest.items) {
             // Find inventory item by ID (direct lookup - no regex injection risk)
             if (!item.inventoryId || !ObjectId.isValid(item.inventoryId)) {
-                stockCheckErrors.push(`Invalid inventory ID for item "${item.itemName}"`);
+                stockCheckErrors.push(`รหัสสินค้า "${item.itemName}" ไม่ถูกต้อง`);
                 continue;
             }
 
@@ -76,14 +76,14 @@ export async function POST(
             });
 
             if (!inventoryItem) {
-                stockCheckErrors.push(`Item "${item.itemName}" (ID: ${item.inventoryId}) not found in inventory`);
+                stockCheckErrors.push(`ไม่พบสินค้า "${item.itemName}" ในคลังสินค้า`);
                 continue;
             }
 
             // Check if sufficient stock
             if (inventoryItem.quantity < item.quantity) {
                 stockCheckErrors.push(
-                    `Insufficient stock for "${item.itemName}". Required: ${item.quantity} ${inventoryItem.unit}, Available: ${inventoryItem.quantity} ${inventoryItem.unit}`
+                    `สินค้า "${item.itemName}" ไม่เพียงพอต่อคำขอเบิก (มีในคลัง: ${inventoryItem.quantity} ${inventoryItem.unit}, ต้องการ: ${item.quantity} ${inventoryItem.unit})`
                 );
                 continue;
             }

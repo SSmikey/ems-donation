@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import FormSelect from '@/components/FormSelect';
+import ErrorDialog from '@/components/ErrorDialog';
 
 interface Shelter {
   _id: string;
@@ -35,6 +36,9 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
 
   // Category Selection
   const [activeCategory, setActiveCategory] = useState<string>('ทั้งหมด');
+
+  // Error Dialog State
+  const [errorDialog, setErrorDialog] = useState<{ title: string; message: string; details?: string[] } | null>(null);
 
   useEffect(() => {
     if (initialShelterId) {
@@ -109,7 +113,10 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
 
   const handleSubmit = async () => {
     if (!selectedShelter || requestItems.length === 0) {
-      alert('กรุณาเลือกศูนย์พักพิงและเพิ่มรายการสินค้าอย่างน้อย 1 รายการ');
+      setErrorDialog({
+        title: 'ข้อมูลไม่ครบถ้วน',
+        message: 'กรุณาเลือกศูนย์พักพิงและเพิ่มรายการสินค้าอย่างน้อย 1 รายการ'
+      });
       return;
     }
 
@@ -145,11 +152,18 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         }, 2000);
       } else {
         const errorData = await res.json();
-        alert('เกิดข้อผิดพลาดในการสร้างคำขอ: ' + (errorData.details?.join(', ') || errorData.error));
+        setErrorDialog({
+          title: 'เกิดข้อผิดพลาดในการสร้างคำขอ',
+          message: errorData.error || 'ไม่สามารถสร้างคำขอได้ กรุณาลองใหม่อีกครั้ง',
+          details: errorData.details
+        });
       }
     } catch (error) {
       console.error('Error creating request:', error);
-      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setErrorDialog({
+        title: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+        message: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'
+      });
     }
   };
 
@@ -415,6 +429,15 @@ export default function CreateRequestModal({ onClose, onSuccess, initialShelterI
         }
       `}</style>
       </div>
+
+      {errorDialog && (
+        <ErrorDialog
+          title={errorDialog.title}
+          message={errorDialog.message}
+          details={errorDialog.details}
+          onClose={() => setErrorDialog(null)}
+        />
+      )}
     </div>
   );
 }
