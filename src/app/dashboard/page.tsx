@@ -186,6 +186,7 @@ export default function Dashboard() {
 
       if (res.ok) {
         setToast({ message: 'อนุมัติคำขอสำเร็จ ยอดจองจะถูกตัดออกจากสต็อกจริง', type: 'success' });
+        fetchData();
         fetchRequests();
       } else {
         const errorData = await res.json();
@@ -217,6 +218,7 @@ export default function Dashboard() {
 
       if (res.ok) {
         setToast({ message: 'ยกเลิกคำขอเบิกสิ่งของคืนเรียบร้อยแล้ว', type: 'success' });
+        fetchData();
         fetchRequests();
       } else {
         const errorData = await res.json();
@@ -670,7 +672,11 @@ export default function Dashboard() {
         showRequestModal && (
           <CreateRequestModal
             onClose={() => setShowRequestModal(false)}
-            onSuccess={() => setShowRequestModal(false)}
+            onSuccess={() => {
+              setShowRequestModal(false);
+              fetchData();
+              fetchRequests();
+            }}
             initialShelterId={selectedShelterId}
           />
         )
